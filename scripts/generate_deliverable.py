@@ -2,7 +2,9 @@ import os
 import argparse
 import pandas as pd
 import numpy as np
-from datetime import timedelta, datetime
+from datetime import timedelta, date
+from faker import Faker
+fake = Faker()
 
 def generate_deliverable(num_projects):
     base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -29,7 +31,7 @@ def generate_deliverable(num_projects):
     np.random.seed(42)
 
     for i in range(num_projects):
-        start_date = datetime(2015, 1, 1)
+        start_date = fake.date_between(start_date=date(2015,1,1), end_date=date(2020,12,31))
         deliverable_data = []
         for name, base_duration in deliverable_name.items():
             mean_duration = base_duration
@@ -60,6 +62,5 @@ def main():
     
     generate_deliverable(args.num_projects)
 
-# Entry point of the script
 if __name__ == "__main__":
     main()
