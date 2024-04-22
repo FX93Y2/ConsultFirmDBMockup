@@ -5,10 +5,13 @@ import numpy as np
 from datetime import timedelta, date
 from faker import Faker
 fake = Faker()
-
+'''
+generate deliverable data and save it to a CSV file
+'''
 def generate_deliverable(num_projects):
     base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     data_path = os.path.join(base_path, 'data', 'processed')
+    csv_file_path = os.path.join(data_path, "Deliverable.csv")
     os.makedirs(data_path, exist_ok=True)
 
     deliverable_name = {
@@ -50,9 +53,9 @@ def generate_deliverable(num_projects):
 
         deliverable.extend(deliverable_data)
 
-    deliverable_df = pd.DataFrame(deliverable)
-    csv_file_path = os.path.join(data_path, "deliverable.csv")
-    deliverable_df.to_csv(csv_file_path, index=False)
+    df = pd.DataFrame(deliverable)
+    
+    df.to_csv(csv_file_path, index=False)
     print(f"Generated deliverable data at {csv_file_path}")
 
 def main():
