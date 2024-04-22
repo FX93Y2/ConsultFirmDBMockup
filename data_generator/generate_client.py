@@ -1,5 +1,4 @@
 import os
-import argparse
 import pandas as pd
 import numpy as np
 import requests
@@ -41,13 +40,7 @@ def generate_client(num_clients):
     else:
         print(f"Failed to retrieve data: Status code {response.status_code}")
 
-def main():
-    parser = argparse.ArgumentParser(description="Generate clients")
-    parser.add_argument("num_clients", type=int, help="Number of clients to generate")
-    args = parser.parse_args()
+def main(num_clients):
+    generate_client(num_clients)
 
-    generate_client(args.num_clients)
-
-if __name__ == "__main__":
-    main()
 

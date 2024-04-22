@@ -1,5 +1,4 @@
 import os
-import argparse
 import pandas as pd
 import numpy as np
 from datetime import timedelta, date
@@ -56,14 +55,7 @@ def generate_deliverable_plan(num_projects):
     df = pd.DataFrame(deliverable_plan)
     
     df.to_csv(csv_file_path, index=False)
-    print(f"Generated deliverable data at {csv_file_path}")
+    print(f"Generated deliverable plan data at {csv_file_path}")
 
-def main():
-    parser = argparse.ArgumentParser(description="Generate project plans")
-    parser.add_argument("num_projects", type=int, help="Number of projects to generate")
-    args = parser.parse_args()
-    
-    generate_deliverable_plan(args.num_projects)
-
-if __name__ == "__main__":
-    main()
+def main(num_projects):  
+    generate_deliverable_plan(num_projects)
