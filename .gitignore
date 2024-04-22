@@ -1,1 +1,3 @@
 data_generator/generate_consultant.py
+__pycache__/
+*.pyc
