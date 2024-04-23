@@ -1,6 +1,5 @@
 from data_generator.generate_deliverable_plan import main as generate_deliverable_plan
 from data_generator.generate_consultant import main as generate_consultant
-# Import other functions as needed
 
 def main():
     num_projects = 1000
