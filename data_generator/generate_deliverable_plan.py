@@ -13,6 +13,9 @@ def generate_deliverable_plan(num_projects):
     csv_file_path = os.path.join(data_path, "DeliverablePlan.csv")
     os.makedirs(data_path, exist_ok=True)
 
+    deliverable_plan = []
+    np.random.seed(42)
+
     deliverable_name = {
         "Project Plan": 10,
         "Requirements Specification": 20,
@@ -29,8 +32,7 @@ def generate_deliverable_plan(num_projects):
         "Unit Test": 2,
         "System Test": 10
     }
-    deliverable_plan = []
-    np.random.seed(42)
+
 
     for i in range(num_projects):
         start_date = fake.date_between(start_date=date(2015,1,1), end_date=date(2020,12,31))

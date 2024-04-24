@@ -1,2 +1,8 @@
 __pycache__/
 *.pyc
+data/processed/Client.csv
+data/processed/Consultant_Title_History.csv
+data/processed/Consultant.csv
+data/processed/DeliverablePlan.csv
+data/raw/Consultant_Title_History.csv
+data/raw/Consultant.csv

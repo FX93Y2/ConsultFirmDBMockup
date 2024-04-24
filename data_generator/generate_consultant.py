@@ -22,8 +22,8 @@ def generate_consultant_data(num_consultants):
         'T1': int(0.30 * num_consultants),
         'T2': int(0.20 * num_consultants),
         'T3': int(0.20 * num_consultants),
-        'T4': int(0.10 * num_consultants),
-        'T5': int(0.10 * num_consultants)
+        'T4': int(0.15 * num_consultants),
+        'T5': int(0.15 * num_consultants)
     }
     while sum(current_title_counts.values()) < num_consultants:
         current_title_counts['T1'] += 1
@@ -91,6 +91,9 @@ def generate_consultant_data(num_consultants):
     # Save to CSV
     consultant_df.to_csv(consultant_csv_file_path, index=False)
     title_history_df.to_csv(title_history_csv_file_path, index=False)
+
+    print(f"Generated title history data at {title_history_csv_file_path}")
+    print(f"Generated consultant data at {consultant_csv_file_path}")
 
 def main(num_consultants):
     generate_consultant_data(num_consultants)
