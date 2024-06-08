@@ -5,23 +5,18 @@ from datetime import datetime, timedelta
 
 
 def generate_deliverable(num_deliverables):
-    # Define the base path and the path for the CSV file
     base_path = os.path.dirname(os.path.abspath(__file__))
     data_path = os.path.join(base_path, 'data', 'processed')
     csv_file_path = os.path.join(data_path, "Deliverable.csv")
 
-    # Ensure the data directory exists
     os.makedirs(data_path, exist_ok=True)
 
-    # Predefined status distribution
     statuses = ["Pending", "In Progress", "Completed", "Delayed", "Cancelled"]
     status_weights = [0.20, 0.40, 0.30, 0.05, 0.05]
 
-    # Helper function to generate random dates
     def random_date(start, end):
         return start + timedelta(days=random.randint(0, (end - start).days))
 
-    # Generate mock data for Deliverable
     deliverable_data = []
     for i in range(num_deliverables):
         deliverable_id = i + 1
@@ -56,12 +51,10 @@ def generate_deliverable(num_deliverables):
             submission_date, progress, planned_hours, actual_hours
         ])
 
-    # Convert the list to a DataFrame
     columns = ['DeliverableID', 'ProjectID', 'Name', 'PlannedStartDate', 'ActualStartDate', 'Status',
                'Price', 'DueDate', 'SubmissionDate', 'Progress', 'PlannedHours', 'ActualHours']
     deliverable_df = pd.DataFrame(deliverable_data, columns=columns)
 
-    # Save the DataFrame to a CSV file
     deliverable_df.to_csv(csv_file_path, index=False)
     print(f"Generated {num_deliverables} consultant project hours and saved to {csv_file_path}")
 
@@ -69,7 +62,5 @@ def generate_deliverable(num_deliverables):
 def main(num_deliverables):
     generate_deliverable(num_deliverables)
 
-
-# Example usage
 if __name__ == "__main__":
     main(10)
