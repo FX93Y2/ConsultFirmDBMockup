@@ -12,10 +12,8 @@ def generate_project_data(num_projects):
     project_csv_file_path = os.path.join(data_path, "Project.csv")
     os.makedirs(data_path, exist_ok=True)
 
-    # Initialize Faker
     fake = Faker()
 
-    # Define the distributions
     statuses = ['Not Started', 'In Progress (<50%)', 'In Progress (>50%)', 'Completed', 'On Hold/Cancelled']
     status_probabilities = [0.10, 0.30, 0.30, 0.20, 0.10]
     start_date_delay_probabilities = [0.60, 0.30, 0.10]
@@ -30,11 +28,9 @@ def generate_project_data(num_projects):
     project_data = []
 
     for i in range(num_projects):
-        # Generate random dates
         planned_start_date = fake.date_this_year()
         planned_end_date = planned_start_date + timedelta(days=random.randint(30, 180))
 
-        # Determine the actual start date based on the delay distribution
         start_delay_category = random.choices(
             ['within 1 week', '2-4 weeks', 'more than 4 weeks'],
             weights=start_date_delay_probabilities,
@@ -48,14 +44,11 @@ def generate_project_data(num_projects):
         else:
             actual_start_date = planned_start_date + timedelta(days=random.randint(29, 60))
 
-        # Determine the actual end date
         duration = (planned_end_date - planned_start_date).days
         actual_end_date = actual_start_date + timedelta(days=duration + random.randint(-10, 30))
 
-        # Assign a project status
         status = random.choices(statuses, weights=status_probabilities, k=1)[0]
 
-        # Generate additional fields
         client_id = random.randint(1, 100)
         unit_id = random.randint(1, 10)
         project_name = random.choice(project_names)
@@ -80,7 +73,6 @@ def generate_project_data(num_projects):
             progress
         ])
 
-    # Create DataFrame and save to CSV
     project_df = pd.DataFrame(project_data, columns=[
         'ProjectID', 'ClientID', 'UnitID', 'Name', 'Type', 'Status', 'PlannedStartDate', 'PlannedEndDate', 'ActualStartDate', 'ActualEndDate', 'Price', 'CreditAt', 'Progress'
     ])
@@ -89,6 +81,5 @@ def generate_project_data(num_projects):
 def main(num_projects):
     generate_project_data(num_projects)
 
-# Example usage
 if __name__ == "__main__":
     main(100)
