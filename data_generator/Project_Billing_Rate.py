@@ -2,7 +2,6 @@ import os
 import pandas as pd
 import random
 
-# Define the billing rate ranges for each title and project type
 billing_rate_ranges = {
     1: ('Junior Consultant (Time and Materials)', (100, 150)),
     2: ('Junior Consultant (Fixed Price)', (80, 120)),
@@ -12,7 +11,6 @@ billing_rate_ranges = {
     6: ('Senior Consultant (Fixed Price)', (180, 250))
 }
 
-# Function to randomly select a rate within a given range
 def get_random_rate(title_id):
     title, rate_range = billing_rate_ranges[title_id]
     rate = random.uniform(rate_range[0], rate_range[1])
@@ -24,10 +22,8 @@ def generate_project_billing_rate(num_entries, project_ids):
     data_path = os.path.join(base_path, 'data', 'processed')
     csv_file_path = os.path.join(data_path, "Project_Billing_Rate.csv")
 
-    # Ensure the data directory exists
     os.makedirs(data_path, exist_ok=True)
 
-    # Generate billing rate data
     billing_rate_data = []
 
     for i in range(num_entries):
@@ -43,13 +39,11 @@ def generate_project_billing_rate(num_entries, project_ids):
 
     billing_rate_df = pd.DataFrame(billing_rate_data, columns=['Billing_Rate_ID', 'Project_ID', 'Title_ID', 'Rate'])
 
-    # Save the DataFrame to a CSV file
     billing_rate_df.to_csv(csv_file_path, index=False)
 
 def main(num_entries, project_ids):
     generate_project_billing_rate(num_entries, project_ids)
 
-# Example usage
 if __name__ == "__main__":
     # Define example project IDs for testing purposes
     project_ids = [1, 2, 3, 4, 5]  # Replace with actual project IDs
