@@ -3,15 +3,12 @@ import pandas as pd
 import random
 
 def generate_location(num_locations):
-    # Define the base path and the path for the CSV file
     base_path = os.path.dirname(os.path.abspath(__file__))
     data_path = os.path.join(base_path, 'data', 'processed')
     csv_file_path = os.path.join(data_path, "Location.csv")
 
-    # Ensure the data directory exists
     os.makedirs(data_path, exist_ok=True)
 
-    # Predefined lists of countries, states, and cities
     locations = {
         'US': {
             'Country': 'United States',
@@ -35,7 +32,6 @@ def generate_location(num_locations):
         }
     }
 
-    # Define the distribution for each region
     region_distribution = {
         'US': 0.6,
         'Europe': 0.2,
@@ -43,7 +39,6 @@ def generate_location(num_locations):
         'Other': 0.1
     }
 
-    # Generate random locations based on the distribution
     location_data = []
     for _ in range(num_locations):
         region = random.choices(list(region_distribution.keys()), weights=region_distribution.values(), k=1)[0]
@@ -52,11 +47,9 @@ def generate_location(num_locations):
         city = random.choice(locations[region]['Cities'])
         location_data.append([country, state, city])
 
-    # Create a DataFrame and assign LocationID
     location_df = pd.DataFrame(location_data, columns=['Country', 'State', 'City'])
     location_df['LocationID'] = range(1, 1 + len(location_df))
 
-    # Ensure 'LocationID' column is the first column
     cols = location_df.columns.tolist()
     cols.insert(0, cols.pop(cols.index('LocationID')))
     location_df = location_df[cols]
@@ -68,6 +61,5 @@ def generate_location(num_locations):
 def main(num_locations):
     generate_location(num_locations)
 
-# Example usage
 if __name__ == "__main__":
     main(30)
