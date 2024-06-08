@@ -3,7 +3,6 @@ import pandas as pd
 import random
 from datetime import datetime
 
-# Define the salary for each title
 title_salaries = {
     'Junior Consultant': 60000,
     'Consultant': 80000,
@@ -12,10 +11,8 @@ title_salaries = {
     'Senior Manager': 140000,
 }
 
-# Example states for tax calculation
 states = ['California', 'Texas', 'New York', 'Florida', 'Illinois']
 
-# Function to calculate the amount
 def calculate_amount(title, base_salary, bonus, overtime_hours):
     pay_periods_per_year = 12  # Monthly pay
     overtime_rate = 1.5
@@ -29,7 +26,6 @@ def calculate_amount(title, base_salary, bonus, overtime_hours):
 
     return round(net_pay, 2)
 
-# Function to generate payroll data
 def generate_payroll(num_records):
     # Define the base path and the path for the CSV file
     base_path = os.path.dirname(os.path.abspath(__file__))
@@ -37,7 +33,6 @@ def generate_payroll(num_records):
     payroll_csv_file_path = os.path.join(data_path, "Payroll.csv")
     os.makedirs(data_path, exist_ok=True)
 
-    # Generate random consultants
     consultants = []
     for i in range(1, 101):
         consultants.append({
@@ -47,7 +42,6 @@ def generate_payroll(num_records):
         })
     consultants_df = pd.DataFrame(consultants)
 
-    # Generate random project hours and deliverables
     project_hours = []
     deliverables = []
     for i in range(1, 101):
