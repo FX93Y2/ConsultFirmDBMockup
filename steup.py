@@ -8,5 +8,6 @@ setup(
         "pandas",
         "numpy",
         "faker",
+        "random-address"
     ],
 )
