@@ -1,0 +1,201 @@
+Project_Consultant_Expense_ID,ProjectID,ConsultantID,Consultant_Title/Project_Type,Category,Amount
+1,49,25,Project Type B,Supplies,6889.13
+2,57,93,Manager,Travel,4816.91
+3,42,72,Project Type B,Supplies,7132.32
+4,84,12,Consultant,Travel,1186.82
+5,25,46,Manager,Travel,4045.89
+6,9,28,Consultant,Travel,1057.83
+7,17,23,Project Type B,Equipment,45384.31
+8,33,40,Junior Consultant,Travel,500.59
+9,93,45,Manager,Travel,6771.47
+10,21,4,Project Type A,Supplies,1910.61
+11,78,23,Junior Consultant,Travel,625.9
+12,40,67,Senior Consultant,Travel,2634.88
+13,49,42,Project Type B,Supplies,7768.24
+14,11,93,Project Type A,Supplies,2903.85
+15,78,84,Junior Consultant,Travel,758.93
+16,50,57,Project Type A,Supplies,3958.95
+17,94,59,Project Type A,Equipment,11553.88
+18,66,25,Project Type B,Equipment,10092.6
+19,92,85,Junior Consultant,Travel,1392.11
+20,67,40,Project Type B,Supplies,3011.41
+21,67,36,Senior Consultant,Travel,3660.72
+22,29,78,Project Type A,Equipment,12227.8
+23,54,23,Consultant,Travel,1163.9
+24,88,23,Project Type A,Equipment,5603.75
+25,23,13,Consultant,Travel,1198.77
+26,49,90,Project Type A,Equipment,5106.79
+27,66,3,Project Type B,Equipment,46017.16
+28,66,34,Project Type B,Equipment,41695.7
+29,5,49,Manager,Travel,3284.31
+30,62,86,Consultant,Travel,1670.3
+31,44,85,Junior Consultant,Travel,842.79
+32,85,20,Manager,Travel,4393.43
+33,31,4,Junior Consultant,Travel,1289.86
+34,70,32,Project Type A,Supplies,4018.97
+35,53,78,Project Type A,Equipment,16273.7
+36,31,3,Project Type A,Supplies,4223.45
+37,66,88,Junior Consultant,Travel,611.15
+38,97,16,Project Type A,Equipment,18869.63
+39,75,11,Consultant,Travel,2556.83
+40,27,83,Junior Consultant,Travel,840.79
+41,34,2,Project Type B,Equipment,45843.1
+42,24,93,Senior Consultant,Travel,4203.4
+43,50,62,Project Type A,Supplies,1539.65
+44,60,32,Project Type A,Supplies,3549.97
+45,73,21,Project Type A,Supplies,2751.1
+46,27,99,Junior Consultant,Travel,1224.35
+47,75,75,Consultant,Travel,1263.22
+48,17,5,Project Type B,Supplies,6314.99
+49,57,23,Project Type B,Supplies,6540.44
+50,58,53,Project Type B,Supplies,7337.71
+51,76,86,Senior Consultant,Travel,4807.33
+52,11,27,Project Type B,Equipment,15339.9
+53,4,70,Project Type A,Equipment,5935.77
+54,56,43,Project Type B,Equipment,27199.79
+55,78,58,Project Type B,Supplies,6864.09
+56,55,1,Manager,Travel,3411.68
+57,14,48,Senior Consultant,Travel,4531.51
+58,86,76,Consultant,Travel,1097.25
+59,56,64,Project Type B,Supplies,5338.82
+60,24,67,Project Type A,Supplies,2384.54
+61,12,60,Senior Consultant,Travel,3889.35
+62,92,61,Project Type B,Equipment,48925.12
+63,85,58,Manager,Travel,3296.25
+64,74,25,Project Type B,Supplies,3535.3
+65,10,97,Project Type A,Supplies,3942.98
+66,48,75,Project Type A,Equipment,9098.55
+67,2,17,Project Type A,Supplies,4916.26
+68,40,20,Junior Consultant,Travel,1087.94
+69,8,40,Consultant,Travel,1772.79
+70,41,61,Senior Consultant,Travel,3066.49
+71,12,11,Project Type A,Supplies,2212.3
+72,8,9,Project Type A,Supplies,3384.74
+73,6,79,Project Type B,Equipment,20267.64
+74,84,46,Project Type B,Supplies,3483.43
+75,23,55,Project Type A,Supplies,2182.74
+76,38,68,Project Type B,Equipment,22125.24
+77,14,42,Senior Consultant,Travel,3953.03
+78,47,12,Project Type A,Supplies,3357.61
+79,37,20,Project Type A,Supplies,3838.09
+80,52,21,Project Type A,Supplies,2996.17
+81,85,39,Project Type A,Equipment,15130.18
+82,93,56,Project Type A,Supplies,1847.66
+83,66,12,Project Type B,Supplies,7063.18
+84,90,79,Project Type A,Equipment,18478.96
+85,6,69,Project Type B,Supplies,7351.16
+86,44,31,Consultant,Travel,1592.48
+87,87,83,Project Type B,Equipment,43879.86
+88,70,59,Junior Consultant,Travel,1462.79
+89,85,38,Project Type B,Supplies,5212.13
+90,68,88,Project Type B,Supplies,7055.05
+91,24,38,Junior Consultant,Travel,1149.42
+92,90,21,Project Type A,Equipment,12433.98
+93,89,76,Project Type A,Equipment,8046.77
+94,38,36,Project Type B,Equipment,43943.62
+95,8,65,Project Type B,Supplies,5115.64
+96,25,27,Consultant,Travel,2730.87
+97,53,76,Project Type B,Supplies,7110.02
+98,31,28,Manager,Travel,6793.95
+99,77,26,Project Type A,Equipment,12269.5
+100,50,63,Project Type A,Supplies,2404.87
+101,25,16,Project Type B,Equipment,34800.91
+102,34,12,Project Type B,Equipment,36087.93
+103,90,28,Manager,Travel,5377.74
+104,24,75,Project Type B,Equipment,23064.24
+105,7,23,Project Type B,Equipment,42482.24
+106,67,65,Project Type A,Supplies,2003.81
+107,8,28,Senior Consultant,Travel,4362.71
+108,20,69,Manager,Travel,6009.6
+109,29,60,Project Type B,Supplies,7410.68
+110,53,47,Project Type B,Supplies,5226.75
+111,59,77,Senior Consultant,Travel,4602.4
+112,14,2,Project Type B,Supplies,4585.25
+113,1,37,Senior Consultant,Travel,4287.47
+114,75,29,Manager,Travel,6927.62
+115,88,46,Project Type A,Equipment,17958.48
+116,16,49,Project Type A,Equipment,5352.38
+117,62,10,Project Type B,Equipment,32825.04
+118,2,91,Project Type B,Equipment,19702.91
+119,19,57,Project Type B,Supplies,7147.42
+120,55,6,Project Type B,Equipment,47265.66
+121,37,22,Consultant,Travel,1402.89
+122,13,10,Project Type B,Equipment,28615.58
+123,78,88,Senior Consultant,Travel,2425.41
+124,34,84,Junior Consultant,Travel,1252.4
+125,51,74,Project Type B,Equipment,32089.29
+126,72,32,Project Type B,Supplies,3279.04
+127,95,60,Junior Consultant,Travel,1047.94
+128,41,96,Manager,Travel,4355.13
+129,82,49,Project Type B,Equipment,16782.71
+130,89,79,Project Type B,Equipment,29411.33
+131,25,26,Project Type B,Supplies,6375.62
+132,57,69,Senior Consultant,Travel,4244.03
+133,17,41,Manager,Travel,5029.82
+134,25,51,Manager,Travel,6442.04
+135,64,17,Project Type B,Equipment,42382.69
+136,23,89,Senior Consultant,Travel,3878.4
+137,65,99,Project Type A,Supplies,2641.3
+138,33,65,Junior Consultant,Travel,1485.64
+139,80,8,Project Type B,Supplies,2872.12
+140,15,73,Senior Consultant,Travel,3681.16
+141,39,16,Project Type A,Supplies,4262.99
+142,5,49,Junior Consultant,Travel,1370.71
+143,85,96,Project Type B,Equipment,47054.84
+144,85,61,Junior Consultant,Travel,1492.68
+145,6,89,Project Type B,Supplies,2434.93
+146,82,89,Project Type A,Supplies,3641.06
+147,13,19,Project Type A,Supplies,4617.89
+148,44,95,Project Type B,Equipment,21063.94
+149,9,70,Project Type B,Equipment,18498.58
+150,39,27,Project Type B,Equipment,16567.66
+151,66,46,Project Type B,Supplies,4731.95
+152,72,89,Manager,Travel,4642.95
+153,17,54,Junior Consultant,Travel,929.42
+154,18,40,Project Type A,Equipment,7101.84
+155,69,87,Manager,Travel,4265.13
+156,1,70,Project Type B,Equipment,25348.01
+157,63,39,Senior Consultant,Travel,4602.03
+158,64,25,Junior Consultant,Travel,1339.55
+159,48,50,Project Type B,Supplies,5744.02
+160,16,23,Junior Consultant,Travel,949.91
+161,87,100,Manager,Travel,6299.48
+162,41,87,Project Type A,Supplies,2456.28
+163,27,22,Project Type B,Supplies,6876.29
+164,51,66,Junior Consultant,Travel,880.15
+165,25,21,Project Type A,Equipment,7189.86
+166,54,50,Project Type A,Supplies,2139.13
+167,58,91,Project Type B,Equipment,27308.94
+168,19,97,Manager,Travel,3376.29
+169,43,23,Project Type B,Equipment,33475.12
+170,88,8,Junior Consultant,Travel,1049.88
+171,90,60,Senior Consultant,Travel,4190.61
+172,86,66,Project Type B,Equipment,31857.97
+173,90,90,Project Type B,Supplies,5146.46
+174,76,19,Project Type B,Supplies,3097.12
+175,11,76,Project Type B,Equipment,32053.37
+176,64,25,Project Type B,Equipment,48914.49
+177,74,67,Manager,Travel,4947.0
+178,27,43,Project Type A,Supplies,1131.37
+179,92,41,Project Type B,Supplies,7102.46
+180,95,98,Senior Consultant,Travel,2223.05
+181,90,79,Project Type A,Supplies,4476.25
+182,91,12,Project Type B,Equipment,39361.29
+183,41,31,Project Type B,Equipment,22500.21
+184,92,36,Manager,Travel,5288.24
+185,89,98,Project Type A,Equipment,10991.49
+186,42,59,Senior Consultant,Travel,4227.8
+187,39,80,Senior Consultant,Travel,2024.13
+188,7,60,Project Type B,Equipment,47257.87
+189,61,20,Project Type A,Equipment,19915.82
+190,92,22,Project Type B,Supplies,7210.63
+191,62,59,Project Type A,Equipment,5595.98
+192,2,80,Manager,Travel,5095.24
+193,85,63,Project Type B,Equipment,44012.73
+194,31,90,Junior Consultant,Travel,989.47
+195,54,88,Project Type B,Equipment,30986.31
+196,9,100,Project Type B,Equipment,32177.87
+197,46,74,Junior Consultant,Travel,742.33
+198,34,11,Project Type A,Supplies,1132.7
+199,57,21,Consultant,Travel,1621.47
+200,91,63,Project Type A,Supplies,3483.58
