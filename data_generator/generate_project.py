@@ -52,7 +52,7 @@ def generate_project_data(num_projects):
         client_id = random.randint(1, 100)
         unit_id = random.randint(1, 10)
         project_name = random.choice(project_names)
-        project_type = random.choice(['Type A', 'Type B', 'Type C'])
+        project_type = random.choice(['Fixed-price', 'Time and materials'])
         price = round(random.uniform(10000, 100000), 2)
         credit_at = fake.date_between_dates(date_start=actual_start_date, date_end=actual_end_date)
         progress = random.randint(0, 100) if 'In Progress' in status else (100 if status == 'Completed' else 0)
