@@ -40,5 +40,3 @@ def generate_client_and_location(num_clients):
 
 def main(num_clients):
     generate_client_and_location(num_clients)
-
-
