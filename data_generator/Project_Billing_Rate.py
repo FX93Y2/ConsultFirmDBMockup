@@ -18,7 +18,7 @@ def get_random_rate(title_id):
 
 def generate_project_billing_rate(num_entries, project_ids):
     # Define the base path and the path for the CSV file
-    base_path = os.path.dirname(os.path.abspath(__file__))
+    base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     data_path = os.path.join(base_path, 'data', 'processed')
     csv_file_path = os.path.join(data_path, "Project_Billing_Rate.csv")
 
