@@ -1,101 +1,101 @@
 ProjectID,ClientID,UnitID,Name,Type,Status,PlannedStartDate,PlannedEndDate,ActualStartDate,ActualEndDate,Price,CreditAt,Progress
-1,14,2,Talent Management Program,Time and materials,Completed,2024-05-14,2024-07-03,2024-05-18,2024-07-22,32845.75,2024-06-22,100
-2,4,7,Competitive Benchmarking Study,Fixed-price,Completed,2024-04-04,2024-07-26,2024-04-05,2024-07-26,57172.14,2024-06-19,100
-3,64,6,Customer Experience Improvement,Time and materials,Not Started,2024-05-25,2024-10-22,2024-06-19,2024-12-15,64135.02,2024-12-09,0
-4,97,4,Supply Chain Optimization,Fixed-price,In Progress (>50%),2024-05-23,2024-11-13,2024-05-26,2024-11-25,31918.63,2024-10-23,43
-5,86,9,Digital Transformation Initiative,Fixed-price,In Progress (>50%),2024-03-07,2024-05-11,2024-03-26,2024-05-21,78352.16,2024-03-28,5
-6,36,7,IT System Integration,Fixed-price,Completed,2024-03-14,2024-05-27,2024-03-14,2024-06-16,73194.16,2024-04-15,100
-7,62,4,Supply Chain Optimization,Time and materials,In Progress (<50%),2024-03-03,2024-06-26,2024-03-04,2024-06-18,71378.15,2024-03-11,99
-8,8,5,Competitive Benchmarking Study,Time and materials,On Hold/Cancelled,2024-05-24,2024-11-13,2024-05-30,2024-11-17,52333.36,2024-08-07,0
-9,92,4,Customer Experience Improvement,Time and materials,In Progress (>50%),2024-01-07,2024-06-30,2024-01-13,2024-07-13,92369.68,2024-02-04,49
-10,73,4,Digital Transformation Initiative,Fixed-price,Not Started,2024-04-27,2024-09-13,2024-05-04,2024-10-06,60086.28,2024-07-13,0
-11,35,4,Supply Chain Optimization,Time and materials,Completed,2024-02-22,2024-04-03,2024-03-19,2024-04-23,95174.85,2024-04-10,100
-12,56,5,Change Management Strategy,Time and materials,In Progress (>50%),2024-04-25,2024-08-28,2024-04-29,2024-09-12,28970.24,2024-09-08,11
-13,45,7,Business Process Reengineering,Fixed-price,In Progress (<50%),2024-02-15,2024-03-28,2024-03-11,2024-05-10,66204.89,2024-04-20,98
-14,3,1,Customer Experience Improvement,Time and materials,In Progress (<50%),2024-01-20,2024-06-14,2024-01-21,2024-07-07,76291.12,2024-05-28,44
-15,53,8,Sustainability Plan,Fixed-price,Not Started,2024-02-15,2024-08-01,2024-02-22,2024-08-12,64473.14,2024-05-20,0
-16,15,8,Financial Performance Review,Time and materials,In Progress (<50%),2024-06-06,2024-09-01,2024-06-11,2024-09-15,19843.24,2024-08-18,8
-17,80,9,Organizational Restructuring,Time and materials,In Progress (<50%),2024-03-05,2024-08-03,2024-03-09,2024-08-16,54727.76,2024-03-29,100
-18,37,8,Sustainability Plan,Fixed-price,In Progress (>50%),2024-02-05,2024-07-22,2024-02-05,2024-08-05,44547.56,2024-04-06,63
-19,91,3,Sustainability Plan,Fixed-price,On Hold/Cancelled,2024-02-17,2024-05-15,2024-02-22,2024-05-17,51827.53,2024-03-05,0
-20,40,8,Change Management Strategy,Time and materials,On Hold/Cancelled,2024-01-25,2024-06-25,2024-01-30,2024-07-23,85214.73,2024-04-13,0
-21,15,9,Change Management Strategy,Time and materials,On Hold/Cancelled,2024-03-24,2024-07-29,2024-03-26,2024-07-28,23658.35,2024-05-03,0
-22,46,9,Competitive Benchmarking Study,Time and materials,In Progress (<50%),2024-02-15,2024-06-16,2024-04-06,2024-09-02,12562.16,2024-08-09,39
-23,78,2,Supply Chain Optimization,Time and materials,In Progress (>50%),2024-02-25,2024-05-16,2024-03-10,2024-05-27,82016.36,2024-05-04,40
-24,87,9,Strategy Development Plan,Time and materials,In Progress (>50%),2024-04-08,2024-08-21,2024-05-05,2024-10-04,43171.67,2024-07-31,21
-25,86,1,Organizational Restructuring,Time and materials,In Progress (<50%),2024-02-05,2024-04-12,2024-02-11,2024-05-10,52439.14,2024-03-10,33
-26,28,8,Risk Management Assessment,Fixed-price,In Progress (>50%),2024-05-20,2024-06-27,2024-06-05,2024-07-08,13931.46,2024-06-21,32
-27,60,9,Customer Experience Improvement,Fixed-price,In Progress (<50%),2024-03-13,2024-08-18,2024-04-16,2024-10-14,62605.86,2024-05-15,85
-28,56,4,Supply Chain Optimization,Time and materials,In Progress (<50%),2024-01-19,2024-06-27,2024-02-12,2024-08-18,44252.62,2024-03-15,89
-29,78,10,Customer Experience Improvement,Fixed-price,In Progress (<50%),2024-02-23,2024-08-13,2024-02-28,2024-08-17,45828.0,2024-03-31,44
-30,74,2,Operational Efficiency Project,Time and materials,In Progress (>50%),2024-05-07,2024-07-23,2024-06-23,2024-09-15,11303.77,2024-08-09,83
-31,34,3,Market Analysis Report,Time and materials,In Progress (<50%),2024-03-09,2024-08-14,2024-03-10,2024-09-12,95215.86,2024-04-25,41
-32,88,5,Competitive Benchmarking Study,Time and materials,In Progress (>50%),2024-03-20,2024-05-26,2024-04-08,2024-06-26,81108.86,2024-06-20,1
-33,52,2,Talent Management Program,Fixed-price,In Progress (<50%),2024-03-29,2024-07-27,2024-03-30,2024-07-30,60082.16,2024-07-12,37
-34,67,5,Change Management Strategy,Fixed-price,In Progress (>50%),2024-05-30,2024-08-05,2024-06-22,2024-09-24,70971.67,2024-09-09,65
-35,70,1,Organizational Restructuring,Time and materials,In Progress (<50%),2024-02-26,2024-04-28,2024-02-29,2024-05-10,70696.39,2024-05-02,43
-36,51,9,Market Analysis Report,Fixed-price,In Progress (<50%),2024-01-01,2024-02-27,2024-01-01,2024-03-08,56113.89,2024-01-19,5
-37,65,7,Strategy Development Plan,Time and materials,Not Started,2024-05-28,2024-07-21,2024-06-23,2024-08-16,69527.52,2024-06-24,0
-38,47,9,Organizational Restructuring,Fixed-price,Completed,2024-03-11,2024-06-11,2024-03-15,2024-07-13,59322.57,2024-04-12,100
-39,2,4,Financial Performance Review,Time and materials,In Progress (>50%),2024-06-06,2024-11-02,2024-06-09,2024-11-29,97224.09,2024-06-25,10
-40,89,4,IT System Integration,Time and materials,In Progress (<50%),2024-05-31,2024-11-21,2024-06-02,2024-12-04,75772.69,2024-11-19,94
-41,78,9,Market Analysis Report,Time and materials,On Hold/Cancelled,2024-04-21,2024-05-28,2024-05-06,2024-07-11,21884.19,2024-06-22,0
-42,13,9,Customer Experience Improvement,Fixed-price,Completed,2024-02-25,2024-06-05,2024-02-28,2024-06-19,63177.21,2024-03-03,100
-43,62,4,Business Process Reengineering,Fixed-price,In Progress (>50%),2024-05-19,2024-08-21,2024-06-10,2024-09-22,65715.44,2024-09-03,15
-44,55,6,Sustainability Plan,Fixed-price,On Hold/Cancelled,2024-01-15,2024-02-15,2024-02-05,2024-03-02,87964.57,2024-03-01,0
-45,21,8,Supply Chain Optimization,Fixed-price,Completed,2024-04-16,2024-10-02,2024-04-20,2024-10-05,33401.45,2024-09-23,100
-46,4,7,Digital Transformation Initiative,Fixed-price,In Progress (<50%),2024-02-26,2024-07-21,2024-02-26,2024-08-10,58509.22,2024-05-08,93
-47,78,4,IT System Integration,Fixed-price,In Progress (<50%),2024-05-14,2024-07-11,2024-05-18,2024-07-11,81608.86,2024-05-25,30
-48,81,7,Talent Management Program,Fixed-price,In Progress (>50%),2024-03-20,2024-08-08,2024-03-21,2024-07-31,29239.51,2024-07-18,93
-49,3,3,Competitive Benchmarking Study,Fixed-price,In Progress (>50%),2024-02-15,2024-08-06,2024-02-15,2024-09-04,35167.8,2024-02-22,12
-50,76,9,Supply Chain Optimization,Time and materials,In Progress (>50%),2024-02-08,2024-05-18,2024-02-29,2024-07-04,86873.24,2024-03-25,9
-51,81,10,Sustainability Plan,Fixed-price,In Progress (>50%),2024-03-14,2024-07-15,2024-04-05,2024-08-01,59072.79,2024-07-21,92
-52,27,3,Organizational Restructuring,Time and materials,Completed,2024-03-06,2024-05-28,2024-03-08,2024-06-22,71979.48,2024-06-20,100
-53,64,6,Sustainability Plan,Time and materials,In Progress (<50%),2024-02-29,2024-08-21,2024-03-18,2024-09-12,97692.82,2024-05-28,16
-54,26,4,Competitive Benchmarking Study,Fixed-price,In Progress (<50%),2024-01-10,2024-06-09,2024-01-15,2024-07-12,70428.23,2024-03-21,25
-55,2,4,Organizational Restructuring,Time and materials,On Hold/Cancelled,2024-04-09,2024-07-18,2024-05-01,2024-08-10,24460.58,2024-08-02,0
-56,52,4,Risk Management Assessment,Fixed-price,In Progress (<50%),2024-02-29,2024-04-08,2024-03-16,2024-04-18,70511.93,2024-03-29,98
-57,51,8,Financial Performance Review,Time and materials,In Progress (<50%),2024-03-23,2024-08-05,2024-05-15,2024-09-26,26206.26,2024-08-05,1
-58,34,6,Sustainability Plan,Time and materials,In Progress (<50%),2024-04-04,2024-05-31,2024-04-30,2024-06-25,48489.95,2024-06-04,95
-59,46,3,Strategy Development Plan,Fixed-price,In Progress (<50%),2024-05-14,2024-10-13,2024-05-15,2024-10-11,14098.39,2024-05-23,38
-60,5,10,Customer Experience Improvement,Fixed-price,In Progress (<50%),2024-05-25,2024-11-05,2024-05-29,2024-11-08,14941.21,2024-10-10,18
-61,31,4,Business Process Reengineering,Time and materials,Completed,2024-04-21,2024-09-22,2024-04-24,2024-09-27,51930.58,2024-04-26,100
-62,74,4,Risk Management Assessment,Fixed-price,Completed,2024-04-06,2024-06-26,2024-04-12,2024-07-06,94567.04,2024-05-26,100
-63,52,5,Business Process Reengineering,Time and materials,Not Started,2024-02-13,2024-06-11,2024-02-15,2024-06-26,99043.14,2024-03-30,0
-64,75,2,Supply Chain Optimization,Time and materials,In Progress (>50%),2024-04-29,2024-07-12,2024-05-13,2024-07-21,33404.89,2024-06-03,49
-65,47,7,Operational Efficiency Project,Time and materials,Not Started,2024-03-06,2024-07-18,2024-03-09,2024-08-16,21646.73,2024-05-19,0
-66,33,2,Change Management Strategy,Time and materials,In Progress (<50%),2024-02-14,2024-07-03,2024-02-19,2024-07-24,15032.37,2024-04-30,36
-67,93,6,Risk Management Assessment,Fixed-price,In Progress (<50%),2024-01-10,2024-04-25,2024-01-10,2024-05-20,76556.53,2024-02-09,85
-68,89,2,Digital Transformation Initiative,Time and materials,In Progress (<50%),2024-04-09,2024-06-25,2024-04-15,2024-06-26,21961.86,2024-06-22,82
-69,68,4,Supply Chain Optimization,Fixed-price,In Progress (<50%),2024-05-06,2024-07-27,2024-05-10,2024-08-04,76417.14,2024-06-03,4
-70,93,1,Digital Transformation Initiative,Fixed-price,In Progress (<50%),2024-04-30,2024-07-21,2024-05-03,2024-07-26,92970.33,2024-07-01,42
-71,28,6,Risk Management Assessment,Fixed-price,On Hold/Cancelled,2024-02-22,2024-03-28,2024-03-09,2024-05-07,72311.04,2024-04-03,0
-72,75,8,Digital Transformation Initiative,Time and materials,Completed,2024-02-03,2024-03-30,2024-02-04,2024-04-19,32789.56,2024-03-12,100
-73,24,1,Operational Efficiency Project,Fixed-price,Completed,2024-04-08,2024-07-17,2024-05-05,2024-09-06,23194.47,2024-09-05,100
-74,16,10,Sustainability Plan,Fixed-price,In Progress (<50%),2024-03-09,2024-07-30,2024-03-11,2024-08-24,75924.33,2024-04-26,95
-75,14,1,Business Process Reengineering,Time and materials,Completed,2024-02-03,2024-05-10,2024-02-21,2024-05-23,43256.33,2024-03-14,100
-76,50,9,Talent Management Program,Fixed-price,In Progress (>50%),2024-02-03,2024-06-02,2024-02-06,2024-06-17,14586.6,2024-02-20,38
-77,81,8,Financial Performance Review,Time and materials,In Progress (>50%),2024-04-26,2024-08-13,2024-04-29,2024-09-01,40905.32,2024-06-03,13
-78,36,5,IT System Integration,Fixed-price,Completed,2024-02-19,2024-04-22,2024-02-25,2024-05-05,62783.64,2024-03-18,100
-79,100,4,Competitive Benchmarking Study,Fixed-price,Not Started,2024-01-26,2024-07-20,2024-01-30,2024-08-08,20685.38,2024-03-31,0
-80,86,3,Operational Efficiency Project,Fixed-price,In Progress (<50%),2024-02-06,2024-06-25,2024-02-07,2024-07-18,25323.0,2024-07-01,57
-81,97,8,Risk Management Assessment,Fixed-price,In Progress (>50%),2024-03-08,2024-04-19,2024-03-11,2024-04-25,81154.59,2024-04-16,98
-82,29,4,Competitive Benchmarking Study,Fixed-price,On Hold/Cancelled,2024-01-10,2024-03-08,2024-02-02,2024-03-26,82634.91,2024-02-18,0
-83,39,10,Business Process Reengineering,Time and materials,In Progress (<50%),2024-01-10,2024-06-10,2024-01-17,2024-06-29,29357.48,2024-05-20,33
-84,83,7,Risk Management Assessment,Fixed-price,Completed,2024-05-21,2024-10-16,2024-05-22,2024-11-16,77640.11,2024-11-01,100
-85,36,7,IT System Integration,Time and materials,Not Started,2024-01-10,2024-05-17,2024-01-13,2024-06-06,56406.5,2024-05-22,0
-86,52,10,Supply Chain Optimization,Time and materials,On Hold/Cancelled,2024-06-06,2024-08-16,2024-06-25,2024-09-03,75689.48,2024-08-04,0
-87,97,4,Change Management Strategy,Fixed-price,In Progress (>50%),2024-04-23,2024-05-28,2024-04-30,2024-06-06,98036.34,2024-06-04,40
-88,60,5,Sustainability Plan,Time and materials,In Progress (>50%),2024-03-24,2024-05-21,2024-03-31,2024-06-08,76449.71,2024-05-18,86
-89,9,10,Organizational Restructuring,Time and materials,In Progress (>50%),2024-05-07,2024-10-23,2024-05-12,2024-10-27,20072.67,2024-09-14,72
-90,19,6,Competitive Benchmarking Study,Time and materials,Not Started,2024-01-22,2024-04-19,2024-01-28,2024-04-20,48492.02,2024-03-21,0
-91,51,7,Financial Performance Review,Fixed-price,In Progress (>50%),2024-06-05,2024-08-14,2024-07-02,2024-09-03,36233.26,2024-07-14,49
-92,99,1,Change Management Strategy,Fixed-price,Completed,2024-03-07,2024-05-06,2024-03-10,2024-05-14,77285.43,2024-05-02,100
-93,21,1,Business Process Reengineering,Time and materials,Completed,2024-02-28,2024-05-04,2024-03-03,2024-05-28,52548.45,2024-04-26,100
-94,24,1,Customer Experience Improvement,Fixed-price,In Progress (>50%),2024-03-29,2024-08-21,2024-04-02,2024-08-19,12429.0,2024-04-11,88
-95,58,9,Sustainability Plan,Time and materials,In Progress (>50%),2024-01-05,2024-02-15,2024-01-25,2024-03-05,63129.37,2024-02-16,88
-96,65,8,Digital Transformation Initiative,Fixed-price,In Progress (>50%),2024-03-15,2024-08-06,2024-03-17,2024-08-01,64429.13,2024-06-24,46
-97,95,2,IT System Integration,Fixed-price,In Progress (<50%),2024-03-18,2024-08-31,2024-04-08,2024-10-12,80997.34,2024-08-17,30
-98,46,4,Business Process Reengineering,Time and materials,In Progress (<50%),2024-03-20,2024-06-19,2024-03-25,2024-06-26,46120.73,2024-04-01,78
-99,42,10,Financial Performance Review,Time and materials,In Progress (>50%),2024-01-12,2024-03-19,2024-02-26,2024-05-07,70096.04,2024-05-06,58
-100,49,2,Digital Transformation Initiative,Fixed-price,In Progress (<50%),2024-05-14,2024-11-10,2024-05-15,2024-11-14,60220.35,2024-11-06,16
+1,3,10,Strategy Development Plan,Time and materials,In Progress (<50%),2024-04-16,2024-08-02,2024-04-18,2024-08-23,95227.47,2024-06-16,90
+2,77,10,Financial Performance Review,Fixed-price,In Progress (<50%),2024-02-18,2024-06-24,2024-02-25,2024-07-08,28545.36,2024-06-27,11
+3,3,3,Sustainability Plan,Fixed-price,Not Started,2024-01-28,2024-06-10,2024-01-30,2024-06-24,39790.86,2024-06-04,0
+4,91,8,Sustainability Plan,Time and materials,Completed,2024-02-24,2024-05-18,2024-02-24,2024-06-03,75633.78,2024-05-09,100
+5,29,10,Operational Efficiency Project,Time and materials,In Progress (<50%),2024-04-17,2024-07-06,2024-05-09,2024-08-03,77949.42,2024-05-14,81
+6,34,5,Organizational Restructuring,Time and materials,Not Started,2024-05-18,2024-06-25,2024-05-25,2024-07-08,73844.57,2024-06-07,0
+7,89,5,Talent Management Program,Time and materials,On Hold/Cancelled,2024-05-27,2024-07-30,2024-06-19,2024-09-10,84615.56,2024-08-04,0
+8,16,8,Risk Management Assessment,Time and materials,Not Started,2024-04-23,2024-10-10,2024-05-28,2024-12-11,77392.89,2024-07-28,0
+9,93,2,Operational Efficiency Project,Time and materials,In Progress (<50%),2024-04-01,2024-08-17,2024-05-25,2024-11-08,52678.6,2024-07-04,65
+10,50,8,Financial Performance Review,Fixed-price,In Progress (>50%),2024-05-14,2024-07-25,2024-05-30,2024-09-06,68866.43,2024-08-22,78
+11,97,6,Digital Transformation Initiative,Time and materials,In Progress (<50%),2024-03-14,2024-08-21,2024-03-14,2024-08-30,22090.11,2024-05-10,56
+12,2,3,Business Process Reengineering,Time and materials,In Progress (<50%),2024-04-25,2024-10-22,2024-05-18,2024-12-13,87113.2,2024-12-01,93
+13,82,10,Strategy Development Plan,Time and materials,In Progress (<50%),2024-01-06,2024-06-14,2024-02-03,2024-08-06,32820.24,2024-03-03,85
+14,70,3,Risk Management Assessment,Time and materials,Completed,2024-05-07,2024-06-27,2024-05-09,2024-07-10,67692.28,2024-06-21,100
+15,60,9,Talent Management Program,Time and materials,In Progress (>50%),2024-06-03,2024-08-21,2024-06-08,2024-09-01,82654.84,2024-08-07,84
+16,40,8,Talent Management Program,Fixed-price,Not Started,2024-05-13,2024-08-03,2024-05-14,2024-08-25,64287.21,2024-06-06,0
+17,11,3,Competitive Benchmarking Study,Time and materials,In Progress (<50%),2024-02-26,2024-05-25,2024-03-23,2024-07-03,86881.75,2024-04-27,53
+18,26,7,Strategy Development Plan,Fixed-price,Not Started,2024-05-07,2024-10-09,2024-06-11,2024-11-13,48099.45,2024-07-08,0
+19,7,10,Organizational Restructuring,Time and materials,In Progress (>50%),2024-02-21,2024-04-09,2024-03-15,2024-05-20,75501.82,2024-04-13,51
+20,39,6,Customer Experience Improvement,Fixed-price,In Progress (>50%),2024-05-17,2024-07-16,2024-05-20,2024-08-11,31620.73,2024-05-22,73
+21,65,2,IT System Integration,Time and materials,In Progress (>50%),2024-01-30,2024-05-11,2024-02-02,2024-05-11,26370.27,2024-03-25,42
+22,61,4,Competitive Benchmarking Study,Time and materials,Completed,2024-04-06,2024-05-15,2024-04-13,2024-05-14,88984.66,2024-04-18,100
+23,43,2,Talent Management Program,Fixed-price,Not Started,2024-05-11,2024-07-02,2024-06-07,2024-08-08,54509.2,2024-06-17,0
+24,70,6,Strategy Development Plan,Time and materials,On Hold/Cancelled,2024-03-13,2024-04-27,2024-03-19,2024-05-06,73364.84,2024-04-22,0
+25,32,5,Competitive Benchmarking Study,Time and materials,Not Started,2024-02-02,2024-03-06,2024-02-27,2024-04-06,80761.48,2024-03-20,0
+26,37,8,Organizational Restructuring,Time and materials,In Progress (>50%),2024-06-05,2024-09-20,2024-06-10,2024-10-05,21590.68,2024-08-04,83
+27,90,1,Operational Efficiency Project,Fixed-price,In Progress (>50%),2024-05-15,2024-07-09,2024-05-20,2024-07-17,39154.46,2024-05-23,74
+28,77,2,Customer Experience Improvement,Fixed-price,In Progress (>50%),2024-04-10,2024-07-19,2024-04-25,2024-08-30,32512.3,2024-07-16,33
+29,97,6,Operational Efficiency Project,Time and materials,Completed,2024-01-11,2024-03-03,2024-01-12,2024-02-26,76552.45,2024-01-30,100
+30,87,4,Change Management Strategy,Time and materials,In Progress (<50%),2024-01-20,2024-05-12,2024-01-27,2024-05-22,16451.45,2024-04-04,21
+31,72,6,Financial Performance Review,Time and materials,Completed,2024-02-21,2024-05-29,2024-02-24,2024-05-31,93389.74,2024-05-12,100
+32,43,3,Customer Experience Improvement,Fixed-price,In Progress (<50%),2024-01-27,2024-03-27,2024-02-01,2024-04-27,94812.41,2024-04-08,21
+33,13,7,Risk Management Assessment,Time and materials,Completed,2024-04-25,2024-06-01,2024-04-30,2024-06-14,42749.45,2024-05-13,100
+34,46,2,Business Process Reengineering,Time and materials,In Progress (<50%),2024-03-20,2024-06-25,2024-03-24,2024-07-13,70192.71,2024-05-21,72
+35,51,2,Digital Transformation Initiative,Fixed-price,In Progress (>50%),2024-01-07,2024-05-10,2024-01-12,2024-06-06,31165.74,2024-03-21,98
+36,14,8,Operational Efficiency Project,Time and materials,In Progress (>50%),2024-05-17,2024-07-23,2024-06-12,2024-08-19,25943.9,2024-06-28,34
+37,24,10,Digital Transformation Initiative,Time and materials,In Progress (<50%),2024-01-14,2024-06-18,2024-02-02,2024-07-06,25733.53,2024-05-15,93
+38,38,10,Supply Chain Optimization,Fixed-price,In Progress (<50%),2024-03-09,2024-06-21,2024-03-11,2024-07-14,64419.81,2024-07-08,87
+39,49,8,Operational Efficiency Project,Time and materials,In Progress (<50%),2024-01-28,2024-05-17,2024-02-14,2024-07-02,23877.83,2024-02-19,18
+40,25,4,IT System Integration,Fixed-price,In Progress (<50%),2024-03-20,2024-04-28,2024-04-05,2024-05-31,64475.42,2024-05-29,35
+41,81,5,Talent Management Program,Fixed-price,In Progress (<50%),2024-06-01,2024-11-13,2024-06-03,2024-12-14,14273.11,2024-10-22,33
+42,23,7,Organizational Restructuring,Time and materials,In Progress (<50%),2024-05-30,2024-10-18,2024-05-31,2024-10-23,24192.48,2024-09-12,19
+43,58,3,Digital Transformation Initiative,Time and materials,Completed,2024-01-04,2024-04-18,2024-01-21,2024-05-05,78539.11,2024-02-11,100
+44,60,2,Business Process Reengineering,Fixed-price,In Progress (<50%),2024-03-11,2024-04-29,2024-03-11,2024-04-29,89728.25,2024-04-15,10
+45,28,1,Market Analysis Report,Fixed-price,In Progress (<50%),2024-05-15,2024-09-16,2024-05-22,2024-10-22,58333.6,2024-09-28,34
+46,41,10,Operational Efficiency Project,Time and materials,On Hold/Cancelled,2024-02-20,2024-05-07,2024-02-20,2024-05-22,17131.5,2024-04-26,0
+47,96,8,Change Management Strategy,Time and materials,In Progress (>50%),2024-01-26,2024-05-02,2024-02-15,2024-06-16,12379.82,2024-04-12,39
+48,99,3,Risk Management Assessment,Time and materials,In Progress (<50%),2024-03-27,2024-07-13,2024-04-03,2024-08-13,42933.65,2024-05-06,55
+49,49,4,IT System Integration,Fixed-price,In Progress (<50%),2024-05-18,2024-08-15,2024-05-19,2024-08-23,29270.42,2024-07-24,76
+50,23,3,Customer Experience Improvement,Time and materials,In Progress (<50%),2024-06-06,2024-08-23,2024-06-10,2024-08-18,13908.31,2024-07-03,20
+51,43,3,Strategy Development Plan,Fixed-price,In Progress (<50%),2024-04-29,2024-10-08,2024-05-21,2024-11-03,46954.02,2024-08-05,0
+52,88,9,Operational Efficiency Project,Time and materials,In Progress (<50%),2024-01-27,2024-03-29,2024-02-23,2024-04-24,90425.23,2024-03-07,12
+53,92,4,Financial Performance Review,Time and materials,Completed,2024-01-04,2024-06-24,2024-01-06,2024-06-21,59145.91,2024-06-01,100
+54,69,6,Strategy Development Plan,Time and materials,In Progress (<50%),2024-02-22,2024-07-16,2024-03-18,2024-08-17,71566.01,2024-04-28,36
+55,19,6,Business Process Reengineering,Time and materials,In Progress (<50%),2024-04-03,2024-07-27,2024-05-23,2024-09-25,37066.19,2024-09-16,23
+56,23,7,Risk Management Assessment,Fixed-price,In Progress (>50%),2024-04-06,2024-09-08,2024-04-12,2024-09-14,24047.11,2024-09-03,56
+57,37,2,Operational Efficiency Project,Time and materials,In Progress (<50%),2024-02-06,2024-03-07,2024-02-24,2024-03-15,31271.16,2024-03-10,34
+58,91,9,Financial Performance Review,Time and materials,Not Started,2024-02-09,2024-03-17,2024-03-04,2024-04-01,10740.34,2024-03-13,0
+59,91,10,Customer Experience Improvement,Time and materials,In Progress (>50%),2024-04-01,2024-06-16,2024-04-01,2024-07-05,16953.76,2024-05-19,94
+60,95,2,Digital Transformation Initiative,Time and materials,On Hold/Cancelled,2024-05-15,2024-09-29,2024-05-17,2024-10-30,29573.55,2024-09-07,0
+61,77,4,IT System Integration,Fixed-price,In Progress (<50%),2024-05-03,2024-08-01,2024-06-30,2024-10-04,29903.91,2024-10-03,55
+62,60,3,Organizational Restructuring,Time and materials,In Progress (<50%),2024-04-28,2024-09-07,2024-05-18,2024-09-17,84708.43,2024-08-06,22
+63,77,4,Organizational Restructuring,Fixed-price,In Progress (>50%),2024-02-29,2024-05-25,2024-03-24,2024-06-15,76265.76,2024-06-03,30
+64,40,8,Risk Management Assessment,Fixed-price,In Progress (>50%),2024-06-07,2024-07-08,2024-06-14,2024-08-05,75294.29,2024-07-12,99
+65,75,5,Strategy Development Plan,Time and materials,In Progress (>50%),2024-02-03,2024-06-01,2024-02-07,2024-06-07,52071.48,2024-04-04,73
+66,19,2,Competitive Benchmarking Study,Time and materials,On Hold/Cancelled,2024-01-08,2024-03-08,2024-01-09,2024-03-16,42583.13,2024-02-26,0
+67,75,5,Market Analysis Report,Fixed-price,In Progress (<50%),2024-02-27,2024-05-11,2024-04-12,2024-06-19,76288.7,2024-04-15,11
+68,76,9,Organizational Restructuring,Time and materials,Completed,2024-01-17,2024-03-16,2024-01-21,2024-04-12,87140.38,2024-02-14,100
+69,29,6,Competitive Benchmarking Study,Fixed-price,Not Started,2024-04-19,2024-09-04,2024-04-20,2024-09-23,56865.74,2024-05-22,0
+70,87,2,Organizational Restructuring,Fixed-price,Completed,2024-02-27,2024-07-14,2024-02-28,2024-07-06,12645.26,2024-05-01,100
+71,32,8,Talent Management Program,Time and materials,Completed,2024-05-10,2024-08-08,2024-05-26,2024-09-03,59707.54,2024-07-28,100
+72,89,1,Customer Experience Improvement,Fixed-price,Not Started,2024-01-23,2024-06-30,2024-02-09,2024-08-02,37377.61,2024-05-30,0
+73,38,1,Operational Efficiency Project,Fixed-price,In Progress (>50%),2024-03-16,2024-04-26,2024-05-02,2024-06-03,14937.13,2024-05-29,45
+74,56,10,Market Analysis Report,Fixed-price,In Progress (>50%),2024-03-03,2024-04-30,2024-03-05,2024-04-27,47978.96,2024-03-24,83
+75,79,7,Sustainability Plan,Fixed-price,Not Started,2024-02-18,2024-04-14,2024-02-21,2024-04-30,68986.27,2024-03-30,0
+76,52,2,Digital Transformation Initiative,Fixed-price,In Progress (<50%),2024-02-14,2024-08-05,2024-02-15,2024-08-29,97761.8,2024-02-29,33
+77,78,6,Business Process Reengineering,Fixed-price,In Progress (<50%),2024-02-04,2024-07-11,2024-02-05,2024-07-21,16421.46,2024-04-10,32
+78,70,10,Financial Performance Review,Fixed-price,In Progress (>50%),2024-05-23,2024-09-07,2024-05-29,2024-09-07,36151.98,2024-07-16,64
+79,56,6,Competitive Benchmarking Study,Time and materials,Completed,2024-02-28,2024-07-05,2024-03-19,2024-08-18,53093.71,2024-05-13,100
+80,100,5,Operational Efficiency Project,Fixed-price,In Progress (>50%),2024-04-09,2024-06-11,2024-04-16,2024-07-06,90705.54,2024-04-17,57
+81,10,9,Supply Chain Optimization,Time and materials,In Progress (>50%),2024-05-07,2024-09-04,2024-05-07,2024-09-17,70910.98,2024-08-28,68
+82,74,10,Sustainability Plan,Fixed-price,In Progress (<50%),2024-04-24,2024-08-02,2024-05-10,2024-09-06,64878.97,2024-08-05,57
+83,52,4,Risk Management Assessment,Fixed-price,In Progress (>50%),2024-05-24,2024-08-13,2024-07-07,2024-09-24,33777.34,2024-08-04,45
+84,99,8,Change Management Strategy,Time and materials,Completed,2024-01-02,2024-04-20,2024-01-23,2024-05-08,65919.26,2024-04-20,100
+85,24,8,Financial Performance Review,Time and materials,In Progress (<50%),2024-03-11,2024-06-17,2024-03-13,2024-07-14,51741.2,2024-04-20,74
+86,85,5,Business Process Reengineering,Time and materials,In Progress (<50%),2024-05-26,2024-11-22,2024-05-31,2024-11-17,12549.79,2024-06-21,10
+87,15,3,Change Management Strategy,Time and materials,In Progress (<50%),2024-03-14,2024-06-10,2024-03-28,2024-06-19,63931.71,2024-06-11,64
+88,39,3,IT System Integration,Fixed-price,In Progress (>50%),2024-04-11,2024-05-30,2024-05-20,2024-07-08,27870.04,2024-07-06,6
+89,35,2,Risk Management Assessment,Time and materials,On Hold/Cancelled,2024-03-11,2024-04-23,2024-03-14,2024-05-16,69055.22,2024-03-28,0
+90,13,7,Market Analysis Report,Fixed-price,Not Started,2024-03-15,2024-06-28,2024-03-20,2024-07-24,14413.98,2024-06-29,0
+91,87,10,Change Management Strategy,Time and materials,Completed,2024-02-17,2024-07-10,2024-03-20,2024-08-01,14576.64,2024-05-07,100
+92,54,4,Risk Management Assessment,Fixed-price,Completed,2024-01-22,2024-07-11,2024-02-25,2024-08-28,43791.88,2024-06-03,100
+93,51,1,Customer Experience Improvement,Fixed-price,In Progress (<50%),2024-02-15,2024-07-27,2024-02-18,2024-08-23,78557.37,2024-08-19,71
+94,99,3,Sustainability Plan,Fixed-price,In Progress (>50%),2024-03-21,2024-07-14,2024-03-27,2024-08-02,57371.87,2024-06-08,36
+95,43,10,Financial Performance Review,Fixed-price,In Progress (>50%),2024-04-24,2024-09-14,2024-04-28,2024-09-09,64384.98,2024-05-28,37
+96,9,8,Organizational Restructuring,Fixed-price,Completed,2024-01-06,2024-04-16,2024-01-11,2024-05-19,16848.42,2024-05-18,100
+97,62,2,Risk Management Assessment,Fixed-price,In Progress (>50%),2024-01-12,2024-06-24,2024-01-15,2024-07-22,78089.96,2024-04-03,46
+98,82,7,IT System Integration,Time and materials,In Progress (>50%),2024-03-31,2024-07-07,2024-04-03,2024-07-07,15390.3,2024-06-05,98
+99,62,3,Operational Efficiency Project,Time and materials,In Progress (>50%),2024-03-11,2024-05-08,2024-03-17,2024-06-10,23324.76,2024-04-15,73
+100,57,7,Business Process Reengineering,Time and materials,On Hold/Cancelled,2024-04-20,2024-09-24,2024-05-07,2024-10-30,70352.22,2024-07-26,0
