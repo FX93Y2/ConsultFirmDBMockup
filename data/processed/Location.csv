@@ -1,31 +1,201 @@
-LocationID,Country,State,City
-1,Other,MEX,Johannesburg
-2,Europe,ITA,Rome
-3,United States,IL,New York
-4,United States,FL,Los Angeles
-5,United States,NY,New York
-6,United States,NY,Chicago
-7,United States,NY,Los Angeles
-8,Europe,FRA,Madrid
-9,United States,TX,Chicago
-10,United States,IL,Houston
-11,United States,NY,New York
-12,Europe,ESP,Rome
-13,United States,CA,Chicago
-14,United States,TX,Chicago
-15,United States,TX,Miami
-16,Europe,FRA,Berlin
-17,United States,IL,Houston
-18,Europe,GER,Paris
-19,United States,FL,Los Angeles
-20,United States,FL,New York
-21,United States,NY,Houston
-22,Asia,SGP,Mumbai
-23,United States,CA,Miami
-24,United States,NY,Chicago
-25,United States,NY,Miami
-26,United States,IL,Los Angeles
-27,United States,NY,Chicago
-28,United States,CA,Houston
-29,Asia,KOR,Singapore
-30,Other,BRA,Johannesburg
+LocationID,State,City
+1,FL,Panama City
+2,AK,Anchorage
+3,MA,Woburn
+4,TN,Nashville
+5,AZ,Glendale
+6,MD,Annapolis
+7,GA,Savannah
+8,OK,Edmond
+9,CT,Manchester
+10,KY,Louisville
+11,VT,Washington
+12,FL,Youngstown
+13,CO,Arvada
+14,VT,Townshend
+15,MA,Cambridge
+16,AR,Fayetteville
+17,GA,Tybee Island
+18,CA,Castro Valley
+19,CT,Groton
+20,MA,Boxborough
+21,VT,Burke
+22,CA,Oakland
+23,OK,Oklahoma City
+24,CA,Orange
+25,MA,Brockton
+26,CA,Fresno
+27,MD,Millersville
+28,MD,Linthicum Heights
+29,MD,Glen Burnie
+30,DC,Washington
+31,CA,Berkeley
+32,VT,Essex
+33,CA,Mountain View
+34,CO,Fort Collins
+35,CA,Sacramento
+36,MD,Crownsville
+37,CA,Oroville
+38,MD,Severna Park
+39,GA,Pooler
+40,OK,Norman
+41,MA,Peabody
+42,CA,San Diego
+43,MA,Melrose
+44,CA,Fremont
+45,VT,Hyde Park
+46,CO,Aurora
+47,CA,Sutter Creek
+48,MA,Lawrence
+49,CA,Piedmont
+50,CA,Santa Rosa
+51,OK,Moore
+52,MA,Needham
+53,AL,Montgomery
+54,AZ,Mesa
+55,MD,Hanover
+56,OK,Del City
+57,MA,Fitchburg
+58,CA,Chico
+59,MA,Methuen
+60,MA,Brookline
+61,MA,Lynnfield
+62,CA,Cupertino
+63,MA,New Bedford
+64,MA,Waltham
+65,MD,Jessup
+66,VT,Vergennes
+67,AR,Conway
+68,MD,Crofton
+69,VT,Belvidere
+70,MA,Easthampton
+71,MA,Wilbraham
+72,MA,Watertown
+73,GA,Calhoun
+74,OK,Noble
+75,AZ,Waddell
+76,CA,Alameda
+77,CA,Selma
+78,FL,Southport
+79,CA,Hayward
+80,MA,Merrimac
+81,FL,Panama City Beach
+82,CA,Bakersfield
+83,MA,Easton
+84,MA,Middleborough
+85,OK,Midwest City
+86,VT,Woodbury
+87,MA,Freetown
+88,KY,Lyndon
+89,MA,Newton
+90,AL,Pelham
+91,TN,Brentwood
+92,OK,Bethany
+93,MA,Auburn
+94,CA,Carson
+95,VT,Westford
+96,VT,Rutland
+97,VT,Burlington
+98,VT,Moretown
+99,MA,Holbrook
+100,CA,Carlsbad
+101,CO,Fruita
+102,MD,Severn
+103,MA,Somerville
+104,VT,Springfield
+105,CA,San Leandro
+106,MA,Belchertown
+107,GA,Thunderbolt
+108,VT,Lowell
+109,MA,Yarmouth
+110,MD,Edgewater
+111,GA,Bloomingdale
+112,CA,San Lorenzo
+113,VT,Stowe
+114,CA,West Sacramento
+115,MA,Aquinnah
+116,MA,Saugus
+117,MA,Pittsfield
+118,CA,Linda
+119,VT,Waterbury Center
+120,CO,Greeley
+121,GA,Port Wentworth
+122,OK,Nichols Hills
+123,KY,Prospect
+124,CA,Redlands
+125,CO,Boulder
+126,CA,Oakhurst
+127,VT,Wolcott
+128,CA,Twentynine Palms
+129,VT,Groton
+130,MA,Lowell
+131,CA,Mammoth Lakes
+132,MD,Pasadena
+133,CO,Pueblo West
+134,FL,Mexico Beach
+135,VT,Lunenburg
+136,MA,Randolph
+137,FL,Merritt Island
+138,VT,Castleton
+139,CO,Grand Junction
+140,VT,Westmore
+141,CA,Roseville
+142,VT,Woodford
+143,AK,Soldotna
+144,MD,Gibson Island
+145,VT,Sheffield
+146,MD,Odenton
+147,MD,Brooklyn Park
+148,MD,Baltimore
+149,VT,Colchester
+150,AR,Farmington
+151,CA,Santa Cruz
+152,CA,Woodland
+153,MA,Dracut
+154,VT,Saint Albans City
+155,MA,Hingham
+156,FL,Tampa
+157,VT,Montpelier
+158,MA,Revere
+159,VT,Hartford
+160,MD,Gambrills
+161,VT,Alburgh
+162,OK,Guthrie
+163,OK,Ardmore
+164,VT,Barre
+165,VT,Barnard
+166,CA,Jackson
+167,MA,Medway
+168,CA,El Cerrito
+169,CA,Livermore
+170,MA,Framingham
+171,MA,Charlton
+172,CO,Littleton
+173,MA,Medford
+174,CA,Union City
+175,CA,Capitola
+176,FL,Lynn Haven
+177,CA,Pismo Beach
+178,MA,Chelmsford
+179,VT,Guildhall
+180,AL,Mathews
+181,KY,Jeffersontown
+182,MA,Worcester
+183,CA,Soda Springs
+184,CO,Telluride
+185,CA,Pioneer
+186,MA,Gloucester
+187,MA,Gardner
+188,CA,Redding
+189,CA,Santa Clara
+190,VT,Fairlee
+191,CA,Pleasanton
+192,CA,Vallejo
+193,MA,Marshfield
+194,VT,Shelburne
+195,MA,Quincy
+196,VT,Swanton
+197,VT,Maidstone
+198,VT,Franklin
+199,MD,Arnold
+200,MA,Milford
