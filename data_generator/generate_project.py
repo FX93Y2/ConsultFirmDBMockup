@@ -7,7 +7,7 @@ from datetime import timedelta
 
 def generate_project_data(num_projects):
     # Set up paths
-    base_path = os.path.dirname(os.path.abspath(__file__))  # Changed this line to work correctly in the current context
+    base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # Changed this line to work correctly in the current context
     data_path = os.path.join(base_path, 'data', 'processed')
     project_csv_file_path = os.path.join(data_path, "Project.csv")
     os.makedirs(data_path, exist_ok=True)
