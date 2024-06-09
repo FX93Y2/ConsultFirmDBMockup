@@ -5,9 +5,18 @@ from faker import Faker
 import random
 from datetime import timedelta
 
+# Define billing rate ranges as a global variable
+billing_rate_ranges = {
+    1: ('Junior Consultant (Time and Materials)', (100, 150)),
+    2: ('Junior Consultant (Fixed Price)', (80, 120)),
+    3: ('Consultant (Time and Materials)', (150, 200)),
+    4: ('Consultant (Fixed Price)', (120, 180)),
+    5: ('Senior Consultant (Time and Materials)', (200, 300)),
+    6: ('Senior Consultant (Fixed Price)', (180, 250))
+}
+
 def generate_project_data(num_projects):
-    # Set up paths
-    base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # Changed this line to work correctly in the current context
+    base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     data_path = os.path.join(base_path, 'data', 'processed')
     project_csv_file_path = os.path.join(data_path, "Project.csv")
     os.makedirs(data_path, exist_ok=True)
@@ -77,9 +86,42 @@ def generate_project_data(num_projects):
         'ProjectID', 'ClientID', 'UnitID', 'Name', 'Type', 'Status', 'PlannedStartDate', 'PlannedEndDate', 'ActualStartDate', 'ActualEndDate', 'Price', 'CreditAt', 'Progress'
     ])
     project_df.to_csv(project_csv_file_path, index=False)
+    return project_df['ProjectID'].tolist()
+
+def get_random_rate(title_id):
+    title, rate_range = billing_rate_ranges[title_id]
+    rate = random.uniform(rate_range[0], rate_range[1])
+    return f"{title},{round(rate, 2)}"
+
+def generate_project_billing_rate(project_ids):
+    base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    data_path = os.path.join(base_path, 'data', 'processed')
+    csv_file_path = os.path.join(data_path, "Project_Billing_Rate.csv")
+
+    os.makedirs(data_path, exist_ok=True)
+
+    billing_rate_data = []
+
+    billing_rate_id = 1
+    for project_id in project_ids:
+        for title_id in billing_rate_ranges.keys():
+            rate = get_random_rate(title_id)
+            billing_rate_data.append([
+                billing_rate_id,
+                project_id,
+                title_id,
+                rate
+            ])
+            billing_rate_id += 1
+
+    billing_rate_df = pd.DataFrame(billing_rate_data, columns=['Billing_Rate_ID', 'Project_ID', 'Title_ID', 'Rate'])
+
+    billing_rate_df.to_csv(csv_file_path, index=False)
 
 def main(num_projects):
-    generate_project_data(num_projects)
+    project_ids = generate_project_data(num_projects)
+    generate_project_billing_rate(project_ids)
 
 if __name__ == "__main__":
-    main(100)
+    num_projects = 100
+    main(num_projects)
