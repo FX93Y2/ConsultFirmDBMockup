@@ -1,24 +1,30 @@
-#from data_generator.generate_consultant import main as generate_consultant
-#from data_generator.generate_client import main as generate_client
-#from data_generator.generate_consultant import main as generate_consultant
-from data_generator.generate_client import generate_location, generate_client
-from data_generator.generate_project import main as generate_project
-from data_generator.Project_Billing_Rate import main as project_Billing_Rate
-from data_generator.generate_proj_and_billing_rate import main as generate_proj_and_billing_rate
-
-
+import os
+from data_generator.create_db import main as create_db
+from data_generator.gen_client import main as generate_client
+from data_generator.gen_location import main as generate_location
+"""
+test in test.py, do not change the generation work flow here
+"""
 def main():
-    num_titles = 1000
-    num_years = 10
-    num_clients = 100
-    num_projects = 100
-    #generate_consultant(num_titles, num_years)
-    #generate_client(num_client)
-    #generate_project(num_projects)
-    #project_Billing_Rate(100, [1, 2, 3, 4, 5])
-    location_data = generate_location(num_locations)
-    generate_client(num_clients, location_data)
-    generate_proj_and_billing_rate(num_projects)
+
+    # PATH SETUP
+    base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    db_path = os.path.join(base_path, 'database')
+    db_file_path = os.path.join(db_path, "consulting_firm.db")
+    os.makedirs(os.path.dirname(db_file_path), exist_ok=True)
+
+    # DEFINE ARGS
+    num_locations = 100
+    num_client = 300
+
+#======================================================START GENERATING========================================================================
+    create_db(db_file_path)
+    
+    #LOCATION
+    generate_location(num_locations, db_file_path)
+
+    # CLIENT
+    generate_client(num_client, db_file_path)
 
 if __name__ == "__main__":
     main()

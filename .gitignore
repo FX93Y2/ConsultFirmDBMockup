@@ -1,6 +1,5 @@
 __pycache__/
 *.pyc
-/data
 /myenv
-/notebooks
-/tests
+notebooks/
+tests/
