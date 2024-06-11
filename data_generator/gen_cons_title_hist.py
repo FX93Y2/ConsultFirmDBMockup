@@ -9,8 +9,6 @@ def generate_consultant_data(num_titles, num_years):
     session = Session()
 
     fake = Faker()
-    consultant_data = []
-    title_history_data = []
 
     # Hiring Season Probability
     hiring_season_prob = {
@@ -21,11 +19,11 @@ def generate_consultant_data(num_titles, num_years):
 
     # Attrition Rate per Title
     attrition_rate = {
-        1: 0.1,
-        2: 0.08,
-        3: 0.06,
-        4: 0.04,
-        5: 0.02,
+        1: 0.03,
+        2: 0.02,
+        3: 0.01,
+        4: 0.01,
+        5: 0.01,
         6: 0.01
     }
 
@@ -102,7 +100,7 @@ def generate_consultant_data(num_titles, num_years):
                     performance_rating = consultant.PerformanceRating
                     interval_min, interval_max = promotion_intervals[performance_rating][current_title_id]
                     years_since_last_promotion = (date(year, 1, 1) - last_promotion_date).days // 365
-                    if interval_min <= years_since_last_promotion <= interval_max:
+                    if interval_min <= years_since_last_promotion <= interval_max and current_title_history.EventType != 'Attrition':
                         suitable_consultant = consultant
                         break
 
@@ -114,17 +112,19 @@ def generate_consultant_data(num_titles, num_years):
                     end_date = date(year, 1, 1) + timedelta(days=random.randint(0, 364))
                     title_history = ConsultantTitleHistory(ConsultantID=consultant_id, TitleID=title_id, StartDate=end_date, EndDate=end_date, EventType='Attrition')
                     session.add(title_history)
-                    session.delete(suitable_consultant)
                     continue
 
+                # Add end date to the previous title record
+                current_title_history.EndDate = date(year, 1, 1) + timedelta(days=random.randint(0, 364))
+                session.add(current_title_history)
+
                 # Add promotion entry
-                start_date = date(year, 1, 1) + timedelta(days=random.randint(0, 364))
+                start_date = current_title_history.EndDate + timedelta(days=1)
                 title_history = ConsultantTitleHistory(ConsultantID=consultant_id, TitleID=title_id, StartDate=start_date, EventType='Promotion')
                 session.add(title_history)
             else:
                 # Create a new consultant
                 consultant_id = f"C{consultant_id_counter:04d}"
-                consultant_id_counter += 1
                 name = fake.name()
                 first_name, last_name = name.split(' ', 1)
                 email_format = random.choice(['first_initial', 'full_first_name'])
@@ -136,7 +136,13 @@ def generate_consultant_data(num_titles, num_years):
                 performance_rating = random.choices(list(performance_rating_dist.keys()), weights=performance_rating_dist.values())[0]
 
                 consultant = Consultant(ConsultantID=consultant_id, FirstName=first_name, LastName=last_name, Email=email, Contact=phone, PerformanceRating=performance_rating)
+
+                # Check for attrition before adding the consultant
+                if random.random() < attrition_rate[title_id]:
+                    continue
+
                 session.add(consultant)
+                consultant_id_counter += 1  # Increment the counter only when consultant is added
 
                 # Add hiring entry
                 hiring_season = random.choices(list(hiring_season_prob.keys()), weights=hiring_season_prob.values())[0]
@@ -152,6 +158,7 @@ def generate_consultant_data(num_titles, num_years):
 
     session.commit()
     session.close()
+ 
 
 def main(num_titles, num_years):
     generate_consultant_data(num_titles, num_years)

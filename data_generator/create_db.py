@@ -50,6 +50,7 @@ class ConsultantTitleHistory(Base):
     ConsultantID = Column(String, ForeignKey('Consultant.ConsultantID'))
     TitleID = Column(Integer, ForeignKey('Title.TitleID'))
     StartDate = Column(Date)
+    EndDate = Column(Date)
     EventType = Column(String)
     Consultant = relationship("Consultant", back_populates="TitleHistory")
     Title = relationship("Title")
