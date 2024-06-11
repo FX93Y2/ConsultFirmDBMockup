@@ -1,6 +1,4 @@
 __pycache__/
 *.pyc
 /myenv
-notebooks/
-tests/
-database/consulting.firm.db
+database/consulting_firm.db
