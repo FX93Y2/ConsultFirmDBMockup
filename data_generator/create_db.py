@@ -1,7 +1,7 @@
 import os
-from sqlalchemy import create_engine, Column, Integer, String, Date, ForeignKey
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
+from sqlalchemy import create_engine, Column, Integer, String, Date, ForeignKey # type: ignore
+from sqlalchemy.ext.declarative import declarative_base # type: ignore
+from sqlalchemy.orm import relationship # type: ignore
 from config import db_file_path
 
 """if using sqlite3
@@ -34,14 +34,22 @@ class Title(Base):
     TitleID = Column(Integer, primary_key=True)
     Title = Column(String)
 
+class BusinessUnit(Base):
+    __tablename__ = 'BusinessUnit'
+    BusinessUnitID = Column(Integer, primary_key=True)
+    BusinessUnitName = Column(String)
+    Consultants = relationship("Consultant", back_populates="BusinessUnit")
+
 class Consultant(Base):
     __tablename__ = 'Consultant'
     ConsultantID = Column(String, primary_key=True)
+    BusinessUnitID = Column(Integer, ForeignKey('BusinessUnit.BusinessUnitID'))
     FirstName = Column(String)
     LastName = Column(String)
     Email = Column(String)
     Contact = Column(String)
     PerformanceRating = Column(String)
+    BusinessUnit = relationship("BusinessUnit", back_populates="Consultants")
     TitleHistory = relationship("ConsultantTitleHistory", back_populates="Consultant")
 
 class ConsultantTitleHistory(Base):
@@ -52,6 +60,7 @@ class ConsultantTitleHistory(Base):
     StartDate = Column(Date)
     EndDate = Column(Date)
     EventType = Column(String)
+    Salary = Column(Integer)
     Consultant = relationship("Consultant", back_populates="TitleHistory")
     Title = relationship("Title")
 

@@ -1,23 +1,21 @@
 import random
 from faker import Faker
 from datetime import timedelta, date
-from sqlalchemy.orm import sessionmaker
-from data_generator.create_db import Consultant, Title, ConsultantTitleHistory, engine
+from sqlalchemy.orm import sessionmaker # type: ignore
+from data_generator.create_db import Consultant, Title, BusinessUnit, ConsultantTitleHistory, engine
 
 def generate_consultant_data(num_titles, num_years):
     Session = sessionmaker(bind=engine)
     session = Session()
 
     fake = Faker()
-
-    # Hiring Season Probability
+    # Default values for consultant related data
     hiring_season_prob = {
         'Spring': 0.4,
         'Fall': 0.4,
         'Other': 0.2
     }
 
-    # Attrition Rate per Title
     attrition_rate = {
         1: 0.03,
         2: 0.02,
@@ -27,14 +25,12 @@ def generate_consultant_data(num_titles, num_years):
         6: 0.01
     }
 
-    # Performance Ratings Distribution
     performance_rating_dist = {
         'High': 0.2,
         'Average': 0.75,
         'Low': 0.05
     }
 
-    # Promotion Intervals based on Performance Ratings
     promotion_intervals = {
         'High': {
             1: (1, 2),
@@ -61,7 +57,7 @@ def generate_consultant_data(num_titles, num_years):
             6: (0, 0)
         }
     }
-    # Distribution of titles
+
     title_distribution = {
         1: 0.30,
         2: 0.20,
@@ -69,6 +65,15 @@ def generate_consultant_data(num_titles, num_years):
         4: 0.15,
         5: 0.10,
         6: 0.05
+    }
+
+    salary_range = {
+        1: (60000, 80000),
+        2: (80000, 100000),
+        3: (100000, 120000),
+        4: (120000, 150000),
+        5: (150000, 200000),
+        6: (200000, 250000)
     }
 
     # Generate title slots for each year based on the distribution
@@ -86,7 +91,8 @@ def generate_consultant_data(num_titles, num_years):
     consultant_id_counter = 1
     for year in range(start_year, end_year + 1):
         for title_id in titles_per_year[year]:
-            # Find a suitable consultant for promotion
+
+# Creating Suitable Consultant Pool
             suitable_consultant = None
             for consultant in session.query(Consultant).all():
                 current_title_history = session.query(ConsultantTitleHistory).filter_by(ConsultantID=consultant.ConsultantID).order_by(ConsultantTitleHistory.StartDate.desc()).first()
@@ -106,11 +112,13 @@ def generate_consultant_data(num_titles, num_years):
 
             if suitable_consultant:
                 consultant_id = suitable_consultant.ConsultantID
+                current_title_history = session.query(ConsultantTitleHistory).filter_by(ConsultantID=consultant_id).order_by(ConsultantTitleHistory.StartDate.desc()).first()
+                current_title_id = current_title_history.TitleID
 
-                # Check for attrition
-                if random.random() < attrition_rate[title_id]:
+# Add Attrition Entry
+                if random.random() < attrition_rate[current_title_id]:
                     end_date = date(year, 1, 1) + timedelta(days=random.randint(0, 364))
-                    title_history = ConsultantTitleHistory(ConsultantID=consultant_id, TitleID=title_id, StartDate=end_date, EndDate=end_date, EventType='Attrition')
+                    title_history = ConsultantTitleHistory(ConsultantID=consultant_id, TitleID=current_title_id, StartDate=end_date, EndDate=end_date, EventType='Attrition', Salary=current_title_history.Salary)
                     session.add(title_history)
                     continue
 
@@ -118,20 +126,17 @@ def generate_consultant_data(num_titles, num_years):
                 current_title_history.EndDate = date(year, 1, 1) + timedelta(days=random.randint(0, 364))
                 session.add(current_title_history)
 
-                # Add promotion entry
+# Add Promotion Entry
                 start_date = current_title_history.EndDate + timedelta(days=1)
-                title_history = ConsultantTitleHistory(ConsultantID=consultant_id, TitleID=title_id, StartDate=start_date, EventType='Promotion')
+                salary = random.randint(salary_range[title_id][0], salary_range[title_id][1])
+                title_history = ConsultantTitleHistory(ConsultantID=consultant_id, TitleID=title_id, StartDate=start_date, EventType='Promotion', Salary=salary)
                 session.add(title_history)
             else:
                 # Create a new consultant
                 consultant_id = f"C{consultant_id_counter:04d}"
                 name = fake.name()
                 first_name, last_name = name.split(' ', 1)
-                email_format = random.choice(['first_initial', 'full_first_name'])
-                if email_format == 'first_initial':
-                    email = f"{first_name[0].lower()}{last_name.lower()}{random.randint(100, 999)}@ise558.com"
-                else:
-                    email = f"{first_name.lower()}{last_name.lower()}{random.randint(100, 999)}@ise558.com"
+                email = f"{first_name[0].lower()}{last_name.lower()}{random.randint(100, 999)}@ise558.com"
                 phone = fake.phone_number()
                 performance_rating = random.choices(list(performance_rating_dist.keys()), weights=performance_rating_dist.values())[0]
 
@@ -144,7 +149,7 @@ def generate_consultant_data(num_titles, num_years):
                 session.add(consultant)
                 consultant_id_counter += 1  # Increment the counter only when consultant is added
 
-                # Add hiring entry
+# Add Hiring Entry
                 hiring_season = random.choices(list(hiring_season_prob.keys()), weights=hiring_season_prob.values())[0]
                 if hiring_season == 'Spring':
                     start_date = date(year, random.randint(3, 5), random.randint(1, 30))
@@ -153,12 +158,34 @@ def generate_consultant_data(num_titles, num_years):
                 else:
                     start_date = date(year, 1, 1) + timedelta(days=random.randint(0, 364))
 
-                title_history = ConsultantTitleHistory(ConsultantID=consultant_id, TitleID=title_id, StartDate=start_date, EventType='Hire')
+                salary = random.randint(salary_range[title_id][0], salary_range[title_id][1])
+                title_history = ConsultantTitleHistory(ConsultantID=consultant_id, TitleID=title_id, StartDate=start_date, EventType='Hire', Salary=salary)
                 session.add(title_history)
 
     session.commit()
     session.close()
- 
+
+def assign_business_units_to_consultants():
+    Session = sessionmaker(bind=engine)
+    session = Session()
+
+    business_units = session.query(BusinessUnit).all()
+    
+    business_unit_distribution = {
+        "North America": 0.6,
+        "Central and South America": 0.1,
+        "EMEA": 0.2,
+        "Asia Pacific": 0.1
+    }
+
+    for consultant in session.query(Consultant).all():
+        business_unit_name = random.choices(list(business_unit_distribution.keys()), weights=list(business_unit_distribution.values()))[0]
+        business_unit = session.query(BusinessUnit).filter(BusinessUnit.BusinessUnitName == business_unit_name).first()
+        consultant.BusinessUnitID = business_unit.BusinessUnitID
+
+    session.commit()
+    session.close()
 
 def main(num_titles, num_years):
     generate_consultant_data(num_titles, num_years)
+    assign_business_units_to_consultants()
