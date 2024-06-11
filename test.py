@@ -4,6 +4,8 @@ from data_generator.gen_client import main as client
 from data_generator.gen_location import main as location
 from data_generator.gen_title import main as title
 from data_generator.gen_cons_title_hist import main as consult_title
+from data_generator.gen_project import main as project
+
 def main():
     #INITIALIZE DB
     create_db()
@@ -19,6 +21,9 @@ def main():
 
     #CONSULTANT AND TITLE HISTORY
     consult_title(1000, 10)
+
+    # PROJECT
+    project(100)
 
 
 if __name__ == "__main__":
