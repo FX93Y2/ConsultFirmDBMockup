@@ -1,28 +1,59 @@
-from random_address import real_random_address
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker # type: ignore
 from data_generator.create_db import Location, engine
 
-def generate_location(num_locations):
+def generate_location():
     Session = sessionmaker(bind=engine)
     session = Session()
 
-    location_data = {}
+    locations = [
+        ('California', 'Los Angeles'),
+        ('New York', 'New York City'),
+        ('Illinois', 'Chicago'),
+        ('Texas', 'Houston'),
+        ('Pennsylvania', 'Philadelphia'),
+        ('Arizona', 'Phoenix'),
+        ('Texas', 'San Antonio'),
+        ('California', 'San Diego'),
+        ('Texas', 'Dallas'),
+        ('California', 'San Jose'),
+        ('England', 'London'),
+        ('France', 'Paris'),
+        ('Germany', 'Berlin'),
+        ('Spain', 'Madrid'),
+        ('Italy', 'Rome'),
+        ('Netherlands', 'Amsterdam'),
+        ('Russia', 'Moscow'),
+        ('Sweden', 'Stockholm'),
+        ('Poland', 'Warsaw'),
+        ('Austria', 'Vienna'),
+        ('Brazil', 'São Paulo'),
+        ('Mexico', 'Mexico City'),
+        ('Argentina', 'Buenos Aires'),
+        ('Colombia', 'Bogotá'),
+        ('Peru', 'Lima'),
+        ('Venezuela', 'Caracas'),
+        ('Chile', 'Santiago'),
+        ('Ecuador', 'Quito'),
+        ('Guatemala', 'Guatemala City'),
+        ('Cuba', 'Havana'),
+        ('China', 'Shanghai'),
+        ('Japan', 'Tokyo'),
+        ('India', 'Mumbai'),
+        ('South Korea', 'Seoul'),
+        ('Australia', 'Sydney'),
+        ('Indonesia', 'Jakarta'),
+        ('Philippines', 'Manila'),
+        ('Thailand', 'Bangkok'),
+        ('Malaysia', 'Kuala Lumpur'),
+        ('Vietnam', 'Ho Chi Minh City')
+    ]
 
-    while len(location_data) < num_locations:
-        address = real_random_address()
-        state = address.get('state', '')
-        city = address.get('city', '')
-
-        if city:
-            location_key = (state, city)
-            if location_key not in location_data:
-                location = Location(State=state, City=city)
-                session.add(location)
-                location_data[location_key] = location
+    for state, city in locations:
+        location = Location(State=state, City=city)
+        session.add(location)
 
     session.commit()
     session.close()
 
-def main(num_locations):
-    generate_location(num_locations)
-
+def main():
+    generate_location()

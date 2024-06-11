@@ -1,4 +1,4 @@
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker # type: ignore
 from data_generator.create_db import Title, engine
 
 def generate_titles():

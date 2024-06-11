@@ -1,30 +1,31 @@
 import os
 from data_generator.create_db import main as create_db
-from data_generator.gen_client import main as generate_client
-from data_generator.gen_location import main as generate_location
-"""
-test in test.py, do not change the generation work flow here
-"""
+from data_generator.gen_client import main as client
+from data_generator.gen_location import main as location
+from data_generator.gen_title import main as title
+from data_generator.gen_busi_unit import main as busi_unit
+from data_generator.gen_cons_title_hist import main as consult_title
 def main():
+    #INITIALIZE DB
+    create_db()
 
-    # PATH SETUP
-    base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    db_path = os.path.join(base_path, 'database')
-    db_file_path = os.path.join(db_path, "consulting_firm.db")
-    os.makedirs(os.path.dirname(db_file_path), exist_ok=True)
-
-    # DEFINE ARGS
-    num_locations = 100
-    num_client = 300
-
-#======================================================START GENERATING========================================================================
-    create_db(db_file_path)
-    
     #LOCATION
-    generate_location(num_locations, db_file_path)
+    location(100)
+
+    #BUSINESS UNIT
+    busi_unit()
 
     # CLIENT
-    generate_client(num_client, db_file_path)
+    client(500)
+
+    #TITLE
+    title()
+
+    #CONSULTANT AND TITLE HISTORY
+    consult_title(1000, 10)
+
+
+
 
 if __name__ == "__main__":
     main()
