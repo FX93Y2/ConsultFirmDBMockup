@@ -1,7 +1,7 @@
 import os
-from sqlalchemy import create_engine, Column, Integer, String, Date, ForeignKey # type: ignore
-from sqlalchemy.ext.declarative import declarative_base # type: ignore
-from sqlalchemy.orm import relationship # type: ignore
+from sqlalchemy import create_engine, Column, Integer, String, Date, ForeignKey, Float
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship
 from config import db_file_path
 
 """if using sqlite3
@@ -58,7 +58,7 @@ class ConsultantTitleHistory(Base):
     ConsultantID = Column(String, ForeignKey('Consultant.ConsultantID'))
     TitleID = Column(Integer, ForeignKey('Title.TitleID'))
     StartDate = Column(Date)
-    EndDate = Column(Date)
+    EndDate = Column(Date, nullable=True)
     EventType = Column(String)
     Salary = Column(Integer)
     Consultant = relationship("Consultant", back_populates="TitleHistory")
@@ -78,6 +78,23 @@ class Client(Base):
     PhoneNumber = Column(String)
     Email = Column(String)
     Location = relationship("Location")
+
+class Project(Base):
+    __tablename__ = 'Project'
+    ProjectID = Column(Integer, primary_key=True)
+    ClientID = Column(Integer)
+    UnitID = Column(Integer)
+    Name = Column(String)
+    Type = Column(String)
+    Status = Column(String)
+    PlannedStartDate = Column(Date)
+    PlannedEndDate = Column(Date)
+    ActualStartDate = Column(Date)
+    ActualEndDate = Column(Date, nullable=True)
+    Price = Column(Float, nullable=True)
+    CreditAt = Column(Date)
+    Progress = Column(Integer)
+    #Client = relationship("Client")
 
 engine = create_engine(f'sqlite:///{db_file_path}')
 
