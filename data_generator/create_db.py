@@ -122,6 +122,18 @@ class Deliverable(Base):
     ActualHours = Column(Integer)
     Project = relationship("Project")
 
+class ProjectExpense(Base):
+    __tablename__ = 'ProjectExpense'
+    ProjectExpenseID = Column(Integer, primary_key=True)
+    ProjectID = Column(Integer, ForeignKey('Project.ProjectID'))
+    DeliverableID = Column(Integer, ForeignKey('Deliverable.DeliverableID'))
+    Date = Column(Date)
+    Amount = Column(Float)
+    Description = Column(String)
+    Category = Column(String)
+    Project = relationship("Project")
+    Deliverable = relationship("Deliverable")
+
 engine = create_engine(f'sqlite:///{db_file_path}')
 
 def create_database():

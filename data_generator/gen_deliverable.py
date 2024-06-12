@@ -37,7 +37,7 @@ def generate_deliverable():
             actual_start_date = random_date_within(planned_start_date, project_actual_end)
             due_date = random_date_within(planned_start_date, project_planned_end)
             status = random.choices(statuses, status_weights)[0]
-            submission_date = random_date_within(project_actual_start, project_actual_end) if status == "Completed" else None
+            submission_date = random_date_within(actual_start_date, project_actual_end) if status == "Completed" else None
 
             price = None
             if project_type == 'Fixed-price':
