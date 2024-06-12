@@ -106,6 +106,22 @@ class ProjectBillingRate(Base):
     Project = relationship("Project")
     Title = relationship("Title")
 
+class Deliverable(Base):
+    __tablename__ = 'Deliverable'
+    DeliverableID = Column(Integer, primary_key=True)
+    ProjectID = Column(Integer, ForeignKey('Project.ProjectID'))
+    Name = Column(String)
+    PlannedStartDate = Column(Date)
+    ActualStartDate = Column(Date)
+    Status = Column(String)
+    Price = Column(Float, nullable=True)
+    DueDate = Column(Date)
+    SubmissionDate = Column(Date, nullable=True)
+    Progress = Column(Integer)
+    PlannedHours = Column(Integer)
+    ActualHours = Column(Integer)
+    Project = relationship("Project")
+
 engine = create_engine(f'sqlite:///{db_file_path}')
 
 def create_database():

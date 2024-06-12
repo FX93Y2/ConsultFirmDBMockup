@@ -56,7 +56,7 @@ def generate_project_data(num_projects):
         project_type = random.choice(['Fixed-price', 'Time and materials'])
         
         price = round(random.uniform(10000, 100000), 2) if project_type == 'Fixed-price' else None
-        credit_at = fake.date_between_dates(date_start=actual_start_date, date_end=planned_end_date)
+        credit_at = fake.date_between_dates(date_start=planned_start_date, date_end=planned_end_date)
         actual_end_date = actual_start_date + timedelta(days=(planned_end_date - planned_start_date).days + random.randint(-10, 30)) if status == 'Completed' else None
         progress = random.randint(0, 100) if 'In Progress' in status else (100 if status == 'Completed' else 0)
 
