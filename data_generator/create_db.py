@@ -82,8 +82,8 @@ class Client(Base):
 class Project(Base):
     __tablename__ = 'Project'
     ProjectID = Column(Integer, primary_key=True)
-    ClientID = Column(Integer)
-    UnitID = Column(Integer)
+    ClientID = Column(Integer, ForeignKey('Client.ClientID'))
+    UnitID = Column(Integer, ForeignKey('BusinessUnit.BusinessUnitID'))
     Name = Column(String)
     Type = Column(String)
     Status = Column(String)
@@ -94,7 +94,45 @@ class Project(Base):
     Price = Column(Float, nullable=True)
     CreditAt = Column(Date)
     Progress = Column(Integer)
-    #Client = relationship("Client")
+    Client = relationship("Client")
+    BusinessUnit = relationship("BusinessUnit")
+
+class ProjectBillingRate(Base):
+    __tablename__ = 'ProjectBillingRate'
+    BillingRateID = Column(Integer, primary_key=True)
+    ProjectID = Column(Integer, ForeignKey('Project.ProjectID'))
+    TitleID = Column(Integer, ForeignKey('Title.TitleID'))
+    Rate = Column(Float)
+    Project = relationship("Project")
+    Title = relationship("Title")
+
+class Deliverable(Base):
+    __tablename__ = 'Deliverable'
+    DeliverableID = Column(Integer, primary_key=True)
+    ProjectID = Column(Integer, ForeignKey('Project.ProjectID'))
+    Name = Column(String)
+    PlannedStartDate = Column(Date)
+    ActualStartDate = Column(Date)
+    Status = Column(String)
+    Price = Column(Float, nullable=True)
+    DueDate = Column(Date)
+    SubmissionDate = Column(Date, nullable=True)
+    Progress = Column(Integer)
+    PlannedHours = Column(Integer)
+    ActualHours = Column(Integer)
+    Project = relationship("Project")
+
+class ProjectExpense(Base):
+    __tablename__ = 'ProjectExpense'
+    ProjectExpenseID = Column(Integer, primary_key=True)
+    ProjectID = Column(Integer, ForeignKey('Project.ProjectID'))
+    DeliverableID = Column(Integer, ForeignKey('Deliverable.DeliverableID'))
+    Date = Column(Date)
+    Amount = Column(Float)
+    Description = Column(String)
+    Category = Column(String)
+    Project = relationship("Project")
+    Deliverable = relationship("Deliverable")
 
 engine = create_engine(f'sqlite:///{db_file_path}')
 

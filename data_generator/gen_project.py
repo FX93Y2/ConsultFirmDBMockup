@@ -3,7 +3,7 @@ import random
 from datetime import timedelta
 from faker import Faker
 from sqlalchemy.orm import sessionmaker
-from data_generator.create_db import Project, Client, engine
+from data_generator.create_db import Project, Client, BusinessUnit, engine
 
 def generate_project_data(num_projects):
     Session = sessionmaker(bind=engine)
@@ -28,6 +28,9 @@ def generate_project_data(num_projects):
     client_ids = session.query(Client.ClientID).all()
     client_ids = [client_id[0] for client_id in client_ids]  # Extracting client ID from tuple
 
+    unit_ides = session.query(BusinessUnit.BusinessUnitID).all()
+    unit_ides = [unit_id[0] for unit_id in unit_ides]  # Extracting unit ID from tuple
+
     for i in range(num_projects):
         planned_start_date = fake.date_this_year()
         planned_end_date = planned_start_date + timedelta(days=random.randint(30, 180))
@@ -48,12 +51,12 @@ def generate_project_data(num_projects):
         status = random.choices(statuses, weights=status_probabilities, k=1)[0]
 
         client_id = random.choice(client_ids)  # Use a randomly selected existing ClientID
-        unit_id = random.randint(1, 10)  # This should ideally come from an existing Unit table
+        unit_id = random.choice(unit_ides)  # This should ideally come from an existing Unit table
         project_name = random.choice(project_names)
         project_type = random.choice(['Fixed-price', 'Time and materials'])
         
         price = round(random.uniform(10000, 100000), 2) if project_type == 'Fixed-price' else None
-        credit_at = fake.date_between_dates(date_start=actual_start_date, date_end=planned_end_date)
+        credit_at = fake.date_between_dates(date_start=planned_start_date, date_end=planned_end_date)
         actual_end_date = actual_start_date + timedelta(days=(planned_end_date - planned_start_date).days + random.randint(-10, 30)) if status == 'Completed' else None
         progress = random.randint(0, 100) if 'In Progress' in status else (100 if status == 'Completed' else 0)
 
