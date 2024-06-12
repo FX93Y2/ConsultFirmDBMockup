@@ -97,6 +97,15 @@ class Project(Base):
     Client = relationship("Client")
     BusinessUnit = relationship("BusinessUnit")
 
+class ProjectBillingRate(Base):
+    __tablename__ = 'ProjectBillingRate'
+    BillingRateID = Column(Integer, primary_key=True)
+    ProjectID = Column(Integer, ForeignKey('Project.ProjectID'))
+    TitleID = Column(Integer, ForeignKey('Title.TitleID'))
+    Rate = Column(Float)
+    Project = relationship("Project")
+    Title = relationship("Title")
+
 engine = create_engine(f'sqlite:///{db_file_path}')
 
 def create_database():
