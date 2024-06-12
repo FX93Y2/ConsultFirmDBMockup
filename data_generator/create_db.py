@@ -82,8 +82,8 @@ class Client(Base):
 class Project(Base):
     __tablename__ = 'Project'
     ProjectID = Column(Integer, primary_key=True)
-    ClientID = Column(Integer)
-    UnitID = Column(Integer)
+    ClientID = Column(Integer, ForeignKey('Client.ClientID'))
+    UnitID = Column(Integer, ForeignKey('BusinessUnit.BusinessUnitID'))
     Name = Column(String)
     Type = Column(String)
     Status = Column(String)
@@ -94,7 +94,8 @@ class Project(Base):
     Price = Column(Float, nullable=True)
     CreditAt = Column(Date)
     Progress = Column(Integer)
-    #Client = relationship("Client")
+    Client = relationship("Client")
+    BusinessUnit = relationship("BusinessUnit")
 
 engine = create_engine(f'sqlite:///{db_file_path}')
 
