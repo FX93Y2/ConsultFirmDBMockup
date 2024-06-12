@@ -6,7 +6,7 @@ from data_generator.gen_title import main as title
 from data_generator.gen_busi_unit import main as busi_unit
 from data_generator.gen_cons_title_hist import main as consult_title
 from data_generator.gen_project import main as project
-from data_generator.gen_billing_rate import main as proj_billing_rate
+from data_generator.gen_proj_billing_rate import main as proj_billing_rate
 
 def main():
     #INITIALIZE DB
