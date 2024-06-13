@@ -1,17 +1,28 @@
 import random
-from datetime import timedelta
+from datetime import timedelta, datetime
 from faker import Faker
 from sqlalchemy.orm import sessionmaker
 from data_generator.create_db import Project, Client, BusinessUnit, engine
 
-def generate_project_data(num_projects):
+def adjust_probabilities(base_probabilities, year_diff):
+    adjustment_factor = 0.15 * year_diff
+    adjusted_probabilities = base_probabilities.copy()
+    adjusted_probabilities[0] = max(base_probabilities[0] - adjustment_factor, 0)  # 'Not Started'
+    adjusted_probabilities[1] = max(base_probabilities[1] - adjustment_factor, 0)  # 'In Progress (<50%)'
+    adjusted_probabilities[2] = max(base_probabilities[2] - adjustment_factor*0.5, 0)  # 'In Progress (>50%)'
+    adjusted_probabilities[3] = min(base_probabilities[3] + adjustment_factor*1.5, 1)  # 'Completed'
+    adjusted_probabilities[4] = min(base_probabilities[4] + adjustment_factor*0.2, 1)  # 'On Hold/Cancelled'
+
+    total = sum(adjusted_probabilities)
+    return [p / total for p in adjusted_probabilities]  # Normalize to ensure they sum to 1
+
+def generate_project_data(num_projects, start_year, end_year):
     Session = sessionmaker(bind=engine)
     session = Session()
 
     fake = Faker()
 
-    statuses = ['Not Started', 'In Progress (<50%)', 'In Progress (>50%)', 'Completed', 'On Hold/Cancelled']
-    status_probabilities = [0.10, 0.30, 0.30, 0.20, 0.10]
+    base_status_probabilities = [0.10, 0.30, 0.30, 0.20, 0.10]  # Probabilities for the most recent year
     start_date_delay_probabilities = [0.60, 0.30, 0.10]
     project_names = [
         "Strategy Development Plan", "Market Analysis Report", "Operational Efficiency Project",
@@ -27,12 +38,18 @@ def generate_project_data(num_projects):
     client_ids = session.query(Client.ClientID).all()
     client_ids = [client_id[0] for client_id in client_ids]  # Extracting client ID from tuple
 
-    unit_ides = session.query(BusinessUnit.BusinessUnitID).all()
-    unit_ides = [unit_id[0] for unit_id in unit_ides]  # Extracting unit ID from tuple
+    unit_ids = session.query(BusinessUnit.BusinessUnitID).all()
+    unit_ids = [unit_id[0] for unit_id in unit_ids]  # Extracting unit ID from tuple
+
+    start_date = datetime(start_year, 1, 1).date()
+    end_date = datetime(end_year, 12, 31).date()
 
     for i in range(num_projects):
-        planned_start_date = fake.date_this_year()
+        planned_start_date = fake.date_between_dates(date_start=start_date, date_end=end_date)
         planned_end_date = planned_start_date + timedelta(days=random.randint(30, 180))
+
+        year_diff = end_year - planned_start_date.year
+        status_probabilities = adjust_probabilities(base_status_probabilities, year_diff)
 
         start_delay_category = random.choices(
             ['within 1 week', '2-4 weeks', 'more than 4 weeks'],
@@ -47,14 +64,15 @@ def generate_project_data(num_projects):
         else:
             actual_start_date = planned_start_date + timedelta(days=random.randint(29, 60))
 
-        status = random.choices(statuses, weights=status_probabilities, k=1)[0]
+        status = random.choices(['Not Started', 'In Progress (<50%)', 'In Progress (>50%)', 'Completed', 'On Hold/Cancelled'], 
+                                weights=status_probabilities, k=1)[0]
 
         client_id = random.choice(client_ids)  # Use a randomly selected existing ClientID
-        unit_id = random.choice(unit_ides)  # This should ideally come from an existing Unit table
+        unit_id = random.choice(unit_ids)  # This should ideally come from an existing Unit table
         project_name = random.choice(project_names)
         project_type = random.choice(['Fixed-price', 'Time and materials'])
         
-        price = round(random.uniform(10000, 100000), 2) if project_type == 'Fixed-price' else None
+        price = round(random.uniform(10000, 150000), 2) if project_type == 'Fixed-price' else None
         credit_at = fake.date_between_dates(date_start=planned_start_date, date_end=planned_end_date)
         actual_end_date = actual_start_date + timedelta(days=(planned_end_date - planned_start_date).days + random.randint(-10, 30)) if status == 'Completed' else None
         progress = random.randint(0, 100) if 'In Progress' in status else (100 if status == 'Completed' else 0)
@@ -70,7 +88,7 @@ def generate_project_data(num_projects):
             ActualStartDate=actual_start_date,
             ActualEndDate=actual_end_date,
             Price=price,
-            CreditAt=credit_at,
+            CreatedAt=credit_at,
             Progress=progress
         )
 
@@ -80,5 +98,5 @@ def generate_project_data(num_projects):
     session.commit()
     session.close()
 
-def main(num_projects):
-    generate_project_data(num_projects)
+def main(num_projects, start_year, end_year):
+    generate_project_data(num_projects, start_year, end_year)

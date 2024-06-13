@@ -99,7 +99,7 @@ class Project(Base):
     ActualStartDate = Column(Date)
     ActualEndDate = Column(Date, nullable=True)
     Price = Column(Float, nullable=True)
-    CreditAt = Column(Date)
+    CreatedAt = Column(Date)
     Progress = Column(Integer)
     Client = relationship("Client")
     BusinessUnit = relationship("BusinessUnit")
