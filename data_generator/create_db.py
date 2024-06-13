@@ -63,6 +63,14 @@ class ConsultantTitleHistory(Base):
     Consultant = relationship("Consultant", back_populates="TitleHistory")
     Title = relationship("Title")
 
+class Payroll(Base):
+    __tablename__ = 'Payroll'
+    PayRollID = Column(Integer, primary_key=True)
+    ConsultantID = Column(String, ForeignKey('Consultant.ConsultantID'))
+    Amount = Column(Float)
+    EffectiveDate = Column(Date)
+    Consultant = relationship("Consultant")
+
 class Location(Base):
     __tablename__ = 'Location'
     LocationID = Column(Integer, primary_key=True)

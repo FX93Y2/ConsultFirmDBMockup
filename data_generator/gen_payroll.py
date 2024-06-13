@@ -1,97 +1,53 @@
-import os
-import pandas as pd
-import random
-from datetime import datetime
+from datetime import date, timedelta
+from sqlalchemy.orm import sessionmaker
+from data_generator.create_db import Consultant, ConsultantTitleHistory, Payroll, engine
 
-title_salaries = {
-    'Junior Consultant': 60000,
-    'Consultant': 80000,
-    'Senior Consultant': 100000,
-    'Manager': 120000,
-    'Senior Manager': 140000,
-}
+def generate_payroll():
+    Session = sessionmaker(bind=engine)
+    session = Session()
 
-states = ['California', 'Texas', 'New York', 'Florida', 'Illinois']
+    # Retrieve all consultants
+    consultants = session.query(Consultant).all()
 
-def calculate_amount(title, base_salary, bonus, overtime_hours):
-    pay_periods_per_year = 12  # Monthly pay
-    overtime_rate = 1.5
-    tax_rate = 0.25  # Example tax rate
+    for consultant in consultants:
+        # Retrieve the consultant's title history
+        title_history = session.query(ConsultantTitleHistory).filter_by(ConsultantID=consultant.ConsultantID).order_by(ConsultantTitleHistory.StartDate).all()
 
-    monthly_salary = base_salary / pay_periods_per_year
-    overtime_pay = overtime_hours * (base_salary / (40 * 4)) * overtime_rate
-    gross_pay = monthly_salary + bonus + overtime_pay
-    tax_deductions = gross_pay * tax_rate
-    net_pay = gross_pay - tax_deductions
+        for i in range(len(title_history)):
+            start_date = title_history[i].StartDate
+            end_date = title_history[i].EndDate if title_history[i].EndDate else date.today()
 
-    return round(net_pay, 2)
+            # Calculate the number of months between start and end dates
+            num_months = (end_date.year - start_date.year) * 12 + (end_date.month - start_date.month)
 
-def generate_payroll(num_records):
-    # Define the base path and the path for the CSV file
-    base_path = os.path.dirname(os.path.abspath(__file__))
-    data_path = os.path.join(base_path, 'data', 'processed')
-    payroll_csv_file_path = os.path.join(data_path, "Payroll.csv")
-    os.makedirs(data_path, exist_ok=True)
+            # Calculate the payroll amount for each month
+            for j in range(num_months):
+                payroll_date = start_date + timedelta(days=j * 30)
+                payroll_amount = title_history[i].Salary / 12  # Assuming monthly payroll
 
-    consultants = []
-    for i in range(1, 101):
-        consultants.append({
-            'ConsultantID': i,
-            'Title': random.choice(list(title_salaries.keys())),
-            'State': random.choice(states)
-        })
-    consultants_df = pd.DataFrame(consultants)
+                # Apply bonus based on consultant's performance rating and title
+                if consultant.PerformanceRating == 'High':
+                    bonus_percentage = 0.1
+                elif consultant.PerformanceRating == 'Average':
+                    bonus_percentage = 0.05
+                else:
+                    bonus_percentage = 0
+                payroll_amount += payroll_amount * bonus_percentage
 
-    project_hours = []
-    deliverables = []
-    for i in range(1, 101):
-        project_hours.append({
-            'ConsultantID': i,
-            'OvertimeHours': random.uniform(0, 20)
-        })
-        deliverables.append({
-            'ConsultantID': i,
-            'OvertimeHours': random.uniform(0, 20)
-        })
-    project_hours_df = pd.DataFrame(project_hours)
-    deliverables_df = pd.DataFrame(deliverables)
+                # Apply tax deductions based on consultant's location and salary
+                # Need tax calculation logic
+                tax_rate = 0.2  # Assuming a flat tax rate of 20%
+                payroll_amount -= payroll_amount * tax_rate
 
-    payroll_data = []
+                # Create a Payroll record
+                payroll = Payroll(ConsultantID=consultant.ConsultantID, Amount=payroll_amount, EffectiveDate=payroll_date)
+                session.add(payroll)
 
-    for _ in range(num_records):
-        consultant = consultants_df.sample().iloc[0]
-        consultant_id = consultant['ConsultantID']
-        title = consultant['Title']
-        base_salary = title_salaries.get(title, 80000)  # Default salary if title not found
+    session.commit()
+    session.close()
 
-        # Calculate bonus randomly based on title and performance rating
-        bonus = random.choice([0, 500, 1000, 1500, 2000])
-
-        # Calculate overtime hours from project hours and deliverables
-        overtime_hours = project_hours_df[project_hours_df['ConsultantID'] == consultant_id]['OvertimeHours'].sum()
-        overtime_hours += deliverables_df[deliverables_df['ConsultantID'] == consultant_id]['OvertimeHours'].sum()
-
-        amount = calculate_amount(title, base_salary, bonus, overtime_hours)
-
-        payroll_data.append([
-            len(payroll_data) + 1,
-            consultant_id,
-            datetime.now().strftime("%Y-%m-%d"),
-            amount
-        ])
-
-    payroll_df = pd.DataFrame(payroll_data, columns=['Payroll_ID', 'Consultant_ID', 'EffectiveDate', 'Amount'])
-
-    if os.path.exists(payroll_csv_file_path):
-        payroll_df_existing = pd.read_csv(payroll_csv_file_path)
-        payroll_df_combined = pd.concat([payroll_df_existing, payroll_df], ignore_index=True)
-    else:
-        payroll_df_combined = payroll_df
-
-    payroll_df_combined.to_csv(payroll_csv_file_path, index=False)
-
-def main(num_records):
-    generate_payroll(num_records)
+def main():
+    generate_payroll()
 
 if __name__ == "__main__":
-    main(10)
+    main()
