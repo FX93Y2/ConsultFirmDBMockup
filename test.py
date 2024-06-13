@@ -1,4 +1,3 @@
-import os
 from data_generator.create_db import main as create_db
 from data_generator.gen_client import main as client
 from data_generator.gen_location import main as location

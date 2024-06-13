@@ -29,7 +29,6 @@ def generate_project_expense():
             date = fake.date_this_year()
 
         amount = round(fake.random_number(digits=4, fix_len=True) / 100, 2)  # Generate a realistic expense amount
-        description = fake.sentence(nb_words=6)
         category = random.choices(categories, weights=probabilities)[0]
 
         expense = ProjectExpense(
@@ -37,7 +36,6 @@ def generate_project_expense():
             DeliverableID=deliverable_id,
             Date=date,
             Amount=amount,
-            Description=description,
             Category=category
         )
 

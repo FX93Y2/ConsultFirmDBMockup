@@ -1,4 +1,3 @@
-import os
 import random
 from datetime import timedelta
 from faker import Faker

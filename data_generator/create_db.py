@@ -1,4 +1,3 @@
-import os
 from sqlalchemy import create_engine, Column, Integer, String, Date, ForeignKey, Float
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
@@ -121,6 +120,16 @@ class Deliverable(Base):
     PlannedHours = Column(Integer)
     ActualHours = Column(Integer)
     Project = relationship("Project")
+
+class ConsultantDeliverable(Base):
+    __tablename__ = 'Consultant_Deliverable'
+    ID = Column(Integer, primary_key=True)
+    ConsultantID = Column(String, ForeignKey('Consultant.ConsultantID'))
+    DeliverableID = Column(Integer, ForeignKey('Deliverable.DeliverableID'))
+    Date = Column(Date)
+    Hours = Column(Integer)
+    Consultant = relationship("Consultant")
+    Deliverable = relationship("Deliverable")
 
 class ProjectExpense(Base):
     __tablename__ = 'ProjectExpense'
