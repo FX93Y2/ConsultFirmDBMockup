@@ -1,4 +1,6 @@
-from datetime import date, timedelta
+import random
+from datetime import date
+from dateutil.relativedelta import relativedelta
 from sqlalchemy.orm import sessionmaker
 from data_generator.create_db import Consultant, ConsultantTitleHistory, Payroll, engine
 
@@ -6,42 +8,45 @@ def generate_payroll():
     Session = sessionmaker(bind=engine)
     session = Session()
 
-    # Retrieve all consultants
     consultants = session.query(Consultant).all()
 
     for consultant in consultants:
-        # Retrieve the consultant's title history
         title_history = session.query(ConsultantTitleHistory).filter_by(ConsultantID=consultant.ConsultantID).order_by(ConsultantTitleHistory.StartDate).all()
 
         for i in range(len(title_history)):
             start_date = title_history[i].StartDate
             end_date = title_history[i].EndDate if title_history[i].EndDate else date.today()
 
-            # Calculate the number of months between start and end dates
-            num_months = (end_date.year - start_date.year) * 12 + (end_date.month - start_date.month)
+            base_salary = title_history[i].Salary
+            payroll_amount = base_salary / 12  # Assuming monthly payroll
 
-            # Calculate the payroll amount for each month
-            for j in range(num_months):
-                payroll_date = start_date + timedelta(days=j * 30)
-                payroll_amount = title_history[i].Salary / 12  # Assuming monthly payroll
+            # Add some randomness
+            variation_percentage = random.uniform(-0.05, 0.05)
+            payroll_amount += payroll_amount * variation_percentage
 
-                # Apply bonus based on consultant's performance rating and title
-                if consultant.PerformanceRating == 'High':
-                    bonus_percentage = 0.1
-                elif consultant.PerformanceRating == 'Average':
-                    bonus_percentage = 0.05
-                else:
-                    bonus_percentage = 0
-                payroll_amount += payroll_amount * bonus_percentage
+            # Apply bonus based on performance rating
+            if consultant.PerformanceRating == 'High':
+                bonus_percentage = random.uniform(0.08, 0.12)
+            elif consultant.PerformanceRating == 'Average':
+                bonus_percentage = random.uniform(0.03, 0.07)
+                bonus_percentage = 0
+            payroll_amount += payroll_amount * bonus_percentage
+            payroll_amount = round(payroll_amount, 2)
 
-                # Apply tax deductions based on consultant's location and salary
-                # Need tax calculation logic
-                tax_rate = 0.2  # Assuming a flat tax rate of 20%
-                payroll_amount -= payroll_amount * tax_rate
+            # Create a Payroll record for the start date of the title
+            payroll = Payroll(ConsultantID=consultant.ConsultantID, Amount=payroll_amount, EffectiveDate=start_date)
+            session.add(payroll)
 
-                # Create a Payroll record
-                payroll = Payroll(ConsultantID=consultant.ConsultantID, Amount=payroll_amount, EffectiveDate=payroll_date)
-                session.add(payroll)
+            # Create Payroll records for subsequent months until the end date of the title
+            current_date = start_date
+            while current_date < end_date:
+                current_date += relativedelta(months=1)
+                if current_date <= end_date:
+                    monthly_variation_percentage = random.uniform(-0.02, 0.02)
+                    monthly_payroll_amount = payroll_amount + payroll_amount * monthly_variation_percentage
+                    monthly_payroll_amount = round(monthly_payroll_amount, 2)
+                    payroll = Payroll(ConsultantID=consultant.ConsultantID, Amount=monthly_payroll_amount, EffectiveDate=current_date)
+                    session.add(payroll)
 
     session.commit()
     session.close()

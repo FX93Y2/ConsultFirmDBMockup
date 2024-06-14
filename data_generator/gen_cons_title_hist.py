@@ -4,7 +4,7 @@ from datetime import timedelta, date
 from sqlalchemy.orm import sessionmaker # type: ignore
 from data_generator.create_db import Consultant, Title, BusinessUnit, ConsultantTitleHistory, engine
 
-def generate_consultant_data(num_titles, num_years):
+def generate_consultant_data(num_titles, start_year, end_year):
     Session = sessionmaker(bind=engine)
     session = Session()
 
@@ -77,8 +77,7 @@ def generate_consultant_data(num_titles, num_years):
     }
 
     # Generate title slots for each year based on the distribution
-    start_year = 2010
-    end_year = start_year + num_years
+    num_years = end_year - start_year + 1
     titles_per_year = {year: [] for year in range(start_year, end_year + 1)}
 
     for title, percentage in title_distribution.items():
@@ -165,27 +164,25 @@ def generate_consultant_data(num_titles, num_years):
     session.commit()
     session.close()
 
-def assign_business_units_to_consultants():
+def assign_business_units_to_consultants(business_unit_distribution):
     Session = sessionmaker(bind=engine)
     session = Session()
 
     business_units = session.query(BusinessUnit).all()
-    
-    business_unit_distribution = {
-        "North America": 0.6,
-        "Central and South America": 0.1,
-        "EMEA": 0.2,
-        "Asia Pacific": 0.1
-    }
+    business_unit_names = [unit.BusinessUnitName for unit in business_units]
+
+    # Check if the provided business unit names in the distribution match the existing business units
+    if set(business_unit_distribution.keys()) != set(business_unit_names):
+        raise ValueError("The business unit names in the distribution do not match the existing business units.")
+
+    # Normalize the distribution values to ensure they sum up to 1
+    total_distribution = sum(business_unit_distribution.values())
+    normalized_distribution = {unit: value / total_distribution for unit, value in business_unit_distribution.items()}
 
     for consultant in session.query(Consultant).all():
-        business_unit_name = random.choices(list(business_unit_distribution.keys()), weights=list(business_unit_distribution.values()))[0]
+        business_unit_name = random.choices(business_unit_names, weights=[normalized_distribution[unit] for unit in business_unit_names])[0]
         business_unit = session.query(BusinessUnit).filter(BusinessUnit.BusinessUnitName == business_unit_name).first()
         consultant.BusinessUnitID = business_unit.BusinessUnitID
 
     session.commit()
     session.close()
-
-def main(num_titles, num_years):
-    generate_consultant_data(num_titles, num_years)
-    assign_business_units_to_consultants()
