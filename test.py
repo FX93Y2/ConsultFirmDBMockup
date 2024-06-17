@@ -19,6 +19,9 @@ business_unit_distribution = {
     "Asia Pacific": 0.1
 }
 
+startYear = 2015
+endYear = 2024
+
 def main():
     #INITIALIZE DB
     create_db()
@@ -36,23 +39,15 @@ def main():
     title()
 
     #CONSULTANT AND TITLE HISTORY AND ASSIGNING BUSINESS UNIT
-    consult_title(num_titles=1000, start_year=2019, end_year=2024)
+    consult_title(num_titles=1000, start_year=startYear, end_year=endYear)
     consult_busi_unit(business_unit_distribution)
 
     #CONSULTANT PAYROLL
     payroll()
 
     # PROJECT
-    project(num_projects=1000, start_year=2019, end_year=2024)
+    project(num_projects=100, start_year=startYear, end_year=endYear)
 
-    #PROJECT BILLING RATE
-    proj_billing_rate()
-
-    #DELIVERABLE
-    deliverable()
-
-    #PROJECT EXPENSE
-    proj_expense()
 
 
 

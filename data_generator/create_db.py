@@ -98,7 +98,8 @@ class Project(Base):
     PlannedEndDate = Column(Date)
     ActualStartDate = Column(Date)
     ActualEndDate = Column(Date, nullable=True)
-    Price = Column(Float, nullable=True)
+    Price = Column(Float, nullable=True) # For fixed contract
+    PlannedHours = Column(Integer, nullable=True) # For Time and Material contract
     CreatedAt = Column(Date)
     Progress = Column(Integer)
     Client = relationship("Client")
