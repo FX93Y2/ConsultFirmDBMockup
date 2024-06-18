@@ -20,7 +20,7 @@ business_unit_distribution = {
 }
 
 startYear = 2015
-endYear = 2024
+endYear = 2022
 
 def main():
     #INITIALIZE DB
@@ -46,7 +46,13 @@ def main():
     payroll()
 
     # PROJECT
-    project(num_projects=100, start_year=startYear, end_year=endYear)
+    project(num_projects=300, start_year=startYear, end_year=endYear)
+
+    # PROJECT BILLING RATE
+    proj_billing_rate()
+
+    # ASSIGN DELIVERABLES
+    deliverable()
 
 
 

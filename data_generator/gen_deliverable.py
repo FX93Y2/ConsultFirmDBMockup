@@ -1,7 +1,8 @@
 import random
 from datetime import timedelta
 from sqlalchemy.orm import sessionmaker
-from data_generator.create_db import Project, Deliverable, Consultant, ConsultantTitleHistory, ConsultantDeliverable, engine
+from sqlalchemy import func, or_
+from data_generator.create_db import Project, Deliverable, Consultant, ConsultantTitleHistory, ConsultantDeliverable, ProjectBillingRate, engine
 
 def random_date_within(start, end):
     if start >= end:
@@ -24,7 +25,6 @@ def generate_deliverable():
     for project in projects:
         project_id = project.ProjectID
         num_deliverables = random.randint(1, 10)  # Number of deliverables per project
-        project_type = project.Type
 
         project_planned_start = project.PlannedStartDate
         project_planned_end = project.PlannedEndDate
@@ -38,10 +38,6 @@ def generate_deliverable():
             due_date = random_date_within(planned_start_date, project_planned_end)
             status = random.choices(statuses, status_weights)[0]
             submission_date = random_date_within(actual_start_date, project_actual_end) if status == "Completed" else None
-
-            price = None
-            if project_type == 'Fixed-price':
-                price = round(random.uniform(1000, 20000), 2)  # Deliverable price range
 
             if status == "Pending":
                 planned_hours = random.randint(10, 100)
@@ -67,7 +63,6 @@ def generate_deliverable():
                 PlannedStartDate=planned_start_date,
                 ActualStartDate=actual_start_date,
                 Status=status,
-                Price=price,
                 DueDate=due_date,
                 SubmissionDate=submission_date,
                 Progress=progress,
@@ -106,11 +101,21 @@ def assign_consultants_to_deliverables():
         # Assign consultants to the deliverable based on the project requirements and consultant availability
         num_consultants = random.randint(1, 5)  # Number of consultants assigned to each deliverable
         assigned_consultants = []
+
+        # Ensure at least one higher level consultant (senior consultant) is assigned to each project
+        senior_consultant_titles = [4, 5, 6]  # Title IDs 4, 5 and 6 must be in projects
+        senior_consultants = [consultant for consultant in available_consultants if consultant[1] in senior_consultant_titles]
+        if senior_consultants:
+            senior_consultant = random.choice(senior_consultants)
+            assigned_consultants.append(senior_consultant)
+            available_consultants.remove(senior_consultant)
+            num_consultants -= 1
+
         for _ in range(num_consultants):
             if available_consultants:
-                consultant, title_id = random.choice(available_consultants)
-                assigned_consultants.append((consultant, title_id))
-                available_consultants.remove((consultant, title_id))
+                consultant = random.choice(available_consultants)
+                assigned_consultants.append(consultant)
+                available_consultants.remove(consultant)
 
         planned_duration = (project.PlannedEndDate - project.PlannedStartDate).days
         total_hours = planned_duration * 8  # Assume 8 hours per day
@@ -139,6 +144,22 @@ def assign_consultants_to_deliverables():
 
                         consultant_hours -= daily_hours
                         current_date += timedelta(days=1)
+
+        # Calculate the aggregated hour * billing rate and fake a profit margin
+        aggregated_cost = sum(consultant_deliverable.Hours * session.query(ProjectBillingRate).filter(
+            ProjectBillingRate.ProjectID == project.ProjectID,
+            ProjectBillingRate.TitleID == consultant[1]
+        ).first().Rate for consultant in assigned_consultants for consultant_deliverable in session.query(ConsultantDeliverable).filter(
+            ConsultantDeliverable.ConsultantID == consultant[0].ConsultantID,
+            ConsultantDeliverable.DeliverableID == deliverable.DeliverableID
+        ).all())
+
+        profit_margin = random.uniform(0.1, 0.5)  # Fake a profit margin between 10% and 50%
+        if project.Type == 'Time-and-Materials':
+            project.PlannedHours = int(aggregated_cost / (1 + profit_margin))
+        else:  # Fixed-price
+            additional_expense = random.uniform(0.05, 0.2) * aggregated_cost  # Fake additional expense between 5% and 20%
+            project.Price = aggregated_cost * (1 + profit_margin) + additional_expense
 
     session.commit()
     session.close()

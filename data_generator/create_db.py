@@ -3,30 +3,10 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from config import db_file_path
 
-"""if using sqlite3
-def create_database(db_file_path):
-    conn = sqlite3.connect(db_file_path)
-    cursor = conn.cursor()
-
-    # Location table 
-    cursor.execute('''CREATE TABLE IF NOT EXISTS Location
-                      (LocationID INTEGER PRIMARY KEY,
-                       State TEXT,
-                       City TEXT)''')
-    # Client table
-    cursor.execute('''CREATE TABLE IF NOT EXISTS Client
-                      (ClientID INTEGER PRIMARY KEY,
-                       ClientName TEXT,
-                       LocationID INTEGER,
-                       PhoneNumber TEXT,
-                       Email TEXT,
-                       FOREIGN KEY (LocationID) REFERENCES Location (LocationID))''')
-
-    conn.commit()
-    conn.close()
-"""
 # Using SQL Alchemy
 Base = declarative_base()
+
+engine = create_engine(f'sqlite:///{db_file_path}')
 
 class Title(Base):
     __tablename__ = 'Title'
@@ -100,7 +80,6 @@ class Project(Base):
     ActualEndDate = Column(Date, nullable=True)
     Price = Column(Float, nullable=True) # For fixed contract
     PlannedHours = Column(Integer, nullable=True) # For Time and Material contract
-    CreatedAt = Column(Date)
     Progress = Column(Integer)
     Client = relationship("Client")
     BusinessUnit = relationship("BusinessUnit")
@@ -151,8 +130,6 @@ class ProjectExpense(Base):
     Category = Column(String)
     Project = relationship("Project")
     Deliverable = relationship("Deliverable")
-
-engine = create_engine(f'sqlite:///{db_file_path}')
 
 def create_database():
     Base.metadata.drop_all(engine)
