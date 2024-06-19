@@ -1,8 +1,8 @@
 import random
 from datetime import timedelta
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy import func, or_
-from data_generator.create_db import Project, Deliverable, Consultant, ConsultantTitleHistory, ConsultantDeliverable, ProjectBillingRate, engine
+from sqlalchemy import func, or_, extract
+from data_generator.create_db import Project, Deliverable, Consultant, ConsultantTitleHistory, ConsultantDeliverable, ProjectBillingRate, Payroll, engine
 
 def random_date_within(start, end):
     if start >= end:
@@ -146,24 +146,52 @@ def assign_consultants_to_deliverables():
                         current_date += timedelta(days=1)
 
         # Calculate the aggregated hour * billing rate and fake a profit margin
-        aggregated_cost = sum(consultant_deliverable.Hours * session.query(ProjectBillingRate).filter(
-            ProjectBillingRate.ProjectID == project.ProjectID,
-            ProjectBillingRate.TitleID == consultant[1]
-        ).first().Rate for consultant in assigned_consultants for consultant_deliverable in session.query(ConsultantDeliverable).filter(
-            ConsultantDeliverable.ConsultantID == consultant[0].ConsultantID,
-            ConsultantDeliverable.DeliverableID == deliverable.DeliverableID
-        ).all())
+        aggregated_cost = 0
+        if project.Type == 'Time-and-Materials':
+            for consultant in assigned_consultants:
+                billing_rate = session.query(ProjectBillingRate).filter(
+                    ProjectBillingRate.ProjectID == project.ProjectID,
+                    ProjectBillingRate.TitleID == consultant[1]
+                ).first()
+                if billing_rate:
+                    consultant_aggregated_cost = sum(
+                        consultant_deliverable.Hours * billing_rate.Rate for consultant_deliverable in session.query(ConsultantDeliverable).filter(
+                            ConsultantDeliverable.ConsultantID == consultant[0].ConsultantID,
+                            ConsultantDeliverable.DeliverableID == deliverable.DeliverableID
+                        ).all()
+                    )
+                    aggregated_cost += consultant_aggregated_cost
+
+        # Calculate aggregated cost from Payroll table for fixed-price projects
+        if project.Type == 'Fixed-price':
+            payroll_cost = 0
+            for consultant in assigned_consultants:
+                monthly_payrolls = session.query(func.avg(Payroll.Amount)).filter(
+                    Payroll.ConsultantID == consultant[0].ConsultantID,
+                    extract('year', Payroll.EffectiveDate) == project_year
+                ).group_by(extract('month', Payroll.EffectiveDate)).all()
+                
+                average_monthly_payroll = sum([mp[0] for mp in monthly_payrolls]) / len(monthly_payrolls) if monthly_payrolls else 0
+                payroll_cost += average_monthly_payroll
+
+            aggregated_cost_fixed = aggregated_cost + payroll_cost
+            deliverable.Price = aggregated_cost_fixed * (1 + random.uniform(0.1, 0.5))  # Adding profit margin
 
         profit_margin = random.uniform(0.1, 0.5)  # Fake a profit margin between 10% and 50%
         if project.Type == 'Time-and-Materials':
             project.PlannedHours = int(aggregated_cost / (1 + profit_margin))
         else:  # Fixed-price
             additional_expense = random.uniform(0.05, 0.2) * aggregated_cost  # Fake additional expense between 5% and 20%
-            project.Price = aggregated_cost * (1 + profit_margin) + additional_expense
+            deliverable_prices = [d.Price for d in session.query(Deliverable.Price).filter(Deliverable.ProjectID == project.ProjectID).all() if d.Price is not None]
+            project.Price = sum(deliverable_prices) + additional_expense
 
     session.commit()
     session.close()
 
+
 def main():
     generate_deliverable()
     assign_consultants_to_deliverables()
+
+if __name__ == "__main__":
+    main()
