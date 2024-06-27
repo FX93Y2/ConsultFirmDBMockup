@@ -22,4 +22,6 @@ def generate_business_units():
 
 
 def main():
+    print("Generating Business Units...")
     generate_business_units()
+    print("Complete")

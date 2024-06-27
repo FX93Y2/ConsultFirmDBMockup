@@ -56,4 +56,6 @@ def generate_location():
     session.close()
 
 def main():
+    print("Generating Location Data...")
     generate_location()
+    print("Complete")

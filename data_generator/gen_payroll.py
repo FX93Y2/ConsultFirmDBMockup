@@ -18,41 +18,38 @@ def generate_payroll():
             end_date = title_history[i].EndDate if title_history[i].EndDate else date.today()
 
             base_salary = title_history[i].Salary
-            payroll_amount = base_salary / 12  # Assuming monthly payroll
+            monthly_base = base_salary / 12  # Monthly base salary
 
-            # Add some randomness
-            variation_percentage = random.uniform(-0.05, 0.05)
-            payroll_amount += payroll_amount * variation_percentage
-
-            # Apply bonus based on performance rating
-            if consultant.PerformanceRating == 'High':
-                bonus_percentage = random.uniform(0.08, 0.12)
-            elif consultant.PerformanceRating == 'Average':
-                bonus_percentage = random.uniform(0.03, 0.07)
-                bonus_percentage = 0
-            payroll_amount += payroll_amount * bonus_percentage
-            payroll_amount = round(payroll_amount, 2)
-
-            # Create a Payroll record for the start date of the title
-            payroll = Payroll(ConsultantID=consultant.ConsultantID, Amount=payroll_amount, EffectiveDate=start_date)
-            session.add(payroll)
-
-            # Create Payroll records for subsequent months until the end date of the title
             current_date = start_date
-            while current_date < end_date:
+            while current_date <= end_date:
+                # Calculate monthly payroll amount
+                payroll_amount = monthly_base
+
+                # Add some randomness (up to 5% variation)
+                variation_percentage = random.uniform(-0.05, 0.05)
+                payroll_amount += payroll_amount * variation_percentage
+
+                # Round to two decimal places
+                payroll_amount = round(payroll_amount, 2)
+
+                # Create Payroll record for the month
+                payroll = Payroll(ConsultantID=consultant.ConsultantID, Amount=payroll_amount, EffectiveDate=current_date)
+                session.add(payroll)
+
+                # Move to the next month
                 current_date += relativedelta(months=1)
-                if current_date <= end_date:
-                    monthly_variation_percentage = random.uniform(-0.02, 0.02)
-                    monthly_payroll_amount = payroll_amount + payroll_amount * monthly_variation_percentage
-                    monthly_payroll_amount = round(monthly_payroll_amount, 2)
-                    payroll = Payroll(ConsultantID=consultant.ConsultantID, Amount=monthly_payroll_amount, EffectiveDate=current_date)
-                    session.add(payroll)
+                
+                # If we've moved past the end_date, break the loop
+                if current_date > end_date:
+                    break
 
     session.commit()
     session.close()
 
 def main():
+    print("Generating Payroll Data...")
     generate_payroll()
+    print("Complete")
 
 if __name__ == "__main__":
     main()

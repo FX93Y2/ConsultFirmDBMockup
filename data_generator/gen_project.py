@@ -1,113 +1,129 @@
 import random
 from datetime import timedelta, date
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy import func, or_
-from data_generator.create_db import Project, Client, ConsultantTitleHistory, BusinessUnit, engine
+from sqlalchemy import func
+from data_generator.create_db import Project, Client, BusinessUnit, engine
 
 def generate_project_data(num_projects, start_year, end_year):
     Session = sessionmaker(bind=engine)
     session = Session()
 
-    # Initializing distributions
-    project_distribution = {
-        2019: 0.8,  # Pre-COVID, normal project volume
-        2020: 0.6,  # COVID outbreak
-        2021: 0.7, 
-        2022: 1.0,  # Back to normal project volume
-        2023: 1.1,  # Thriving period, increased project volume
-        2024: 1.2
-    }
-
-    # Adjust the project distribution based on the specified start and end years
-    project_distribution = {year: project_distribution.get(year, 1.0) for year in range(start_year, end_year + 1)}
-    
-    # Calculate projects per year based on the distribution
-    projects_per_year = {}
-    total_projects = 0
-    for year in range(start_year, end_year + 1):
-        projects_per_year[year] = int(num_projects * project_distribution[year])
-        total_projects += projects_per_year[year]
-
-    # Adjust the number of projects per year to match the total num_projects
-    for year in projects_per_year:
-        projects_per_year[year] = int(projects_per_year[year] * num_projects / total_projects)
-
-    base_status_probabilities = [0.10, 0.30, 0.30, 0.20, 0.10]
-    start_date_delay_probabilities = [0.60, 0.30, 0.10]
-    project_names = [
-        "Strategy Development Plan", "Market Analysis Report", "Operational Efficiency Project",
-        "Digital Transformation Initiative", "Customer Experience Improvement", "Financial Performance Review",
-        "Organizational Restructuring", "Supply Chain Optimization", "IT System Integration",
-        "Talent Management Program", "Risk Management Assessment", "Competitive Benchmarking Study",
-        "Change Management Strategy", "Sustainability Plan", "Business Process Reengineering"
-    ]
-
-    # Generation rules
-    project_data = []
-
-    # Query all client IDs and unit IDs
+    # Pre-fetch all client IDs and business unit IDs
     client_ids = [client_id[0] for client_id in session.query(Client.ClientID).all()]
     unit_ids = [unit_id[0] for unit_id in session.query(BusinessUnit.BusinessUnitID).all()]
 
-    # Generate projects for each year
+    # Project distribution
+    project_distribution = {
+        2016: 0.7, 2017: 0.8, 2018: 0.9, 2019: 1.0, 2020: 0.6, 2021: 0.7, 2022: 1.0, 2023: 1.1, 2024: 1.2
+    }
+
+    # Project type probabilities
+    project_type_prob = {'Fixed-price': 0.6, 'Time-and-Materials': 0.4}
+
+    # Status probabilities (adjust based on current year and project end date)
+    base_status_prob = {
+        'Not Started': 0.1, 'In Progress (<50%)': 0.25, 
+        'In Progress (>50%)': 0.25, 'Completed': 0.2, 'On Hold/Cancelled': 0.05
+    }
+
+    project_names = [
+        "Strategy Development", "Market Analysis", "Operational Efficiency",
+        "Digital Transformation", "Customer Experience", "Financial Performance Review",
+        "Organizational Restructuring", "Supply Chain Optimization", "IT System Integration",
+        "Talent Management", "Risk Assessment", "Competitive Benchmarking",
+        "Change Management", "Sustainability Plan", "Business Process Reengineering"
+    ]
+
+    projects = []
     for year in range(start_year, end_year + 1):
-        num_projects_year = projects_per_year.get(year, 0)
+        num_projects_year = int(num_projects * project_distribution.get(year, 1.0) / len(range(start_year, end_year + 1)))
+        
         for _ in range(num_projects_year):
-            planned_start_date = date(year, 1, 1) + timedelta(days=random.randint(0, 364))
-            planned_end_date = planned_start_date + timedelta(days=random.randint(30, 180))
+            project_type = random.choices(list(project_type_prob.keys()), 
+                                          weights=list(project_type_prob.values()))[0]
+            
+            planned_start_date = date(year, random.randint(1, 12), random.randint(1, 28))
+            planned_duration = random.randint(30, 365)  # projects from 1 month to 1 year
+            planned_end_date = planned_start_date + timedelta(days=planned_duration)
 
-            start_delay_category = random.choices(
-                ['within 1 week', '2-4 weeks', 'more than 4 weeks'],
-                weights=start_date_delay_probabilities,
-                k=1
-            )[0]
+# Adjust status probabilities based on current date
+            current_date = date(end_year, 12, 31)  # Use the end of the simulation period as current date
+            time_since_start = (current_date - planned_start_date).days
+            completion_factor = min(1, time_since_start / planned_duration)
+            
+            adjusted_status_prob = base_status_prob.copy()
+            if completion_factor >= 1:
+                adjusted_status_prob['Completed'] += (adjusted_status_prob['Not Started'] + 
+                                                      adjusted_status_prob['In Progress (<50%)'] + 
+                                                      adjusted_status_prob['In Progress (>50%)'])
+                adjusted_status_prob['Not Started'] = adjusted_status_prob['In Progress (<50%)'] = adjusted_status_prob['In Progress (>50%)'] = 0
+            elif completion_factor > 0.5:
+                adjusted_status_prob['In Progress (>50%)'] += adjusted_status_prob['Not Started']
+                adjusted_status_prob['Not Started'] = 0
 
-            if start_delay_category == 'within 1 week':
-                actual_start_date = planned_start_date + timedelta(days=random.randint(0, 7))
-            elif start_delay_category == '2-4 weeks':
-                actual_start_date = planned_start_date + timedelta(days=random.randint(14, 28))
+            status = random.choices(list(adjusted_status_prob.keys()), 
+                                    weights=list(adjusted_status_prob.values()))[0]
+
+            actual_start_date = planned_start_date + timedelta(days=random.randint(-7, 30))
+            actual_end_date = None
+
+# Handle "On Hold" projects
+            if status == 'On Hold/Cancelled':
+                hold_duration = random.choices(
+                    [30, 90, 180, 365, 730, 1460],  # 1 month, 3 months, 6 months, 1 year, 2 years, 4 years
+                    weights=[0.4, 0.3, 0.15, 0.1, 0.04, 0.01],  # Adjust these weights as needed
+                    k=1
+                )[0]
+                
+                if hold_duration > 365:  # For long holds, adjust the project
+                    planned_end_date = current_date + timedelta(days=random.randint(30, 180))
+                    status = 'In Progress (<50%)'  # Assume it's been restarted
+                    progress = random.randint(1, 30)  # Low progress due to restart
+                else:
+                    progress = 0  # No progress for shorter holds
+                
+                actual_end_date = None  # On hold projects don't have an actual end date
+            elif status == 'Completed':
+                actual_end_date = min(current_date, planned_end_date + timedelta(days=random.randint(-30, 60)))
+                progress = 100
             else:
-                actual_start_date = planned_start_date + timedelta(days=random.randint(29, 60))
+                progress = {
+                    'Not Started': 0,
+                    'In Progress (<50%)': random.randint(1, 49),
+                    'In Progress (>50%)': random.randint(50, 99),
+                }[status]
 
-            current_year = end_year
-            years_since_planned_end = current_year - planned_end_date.year
+# Price and PlannedHour
 
-            if years_since_planned_end > 0:
-                completion_probability = min(0.95, years_since_planned_end * 0.2)
-                cancellation_probability = 0.05
-                status_probabilities = [0.0, 0.0, 0.0, completion_probability, cancellation_probability]
+            # Generate Price for Fixed-price projects
+            if project_type == 'Fixed-price':
+                base_price = random.uniform(500000, 10000000)  # Increased base price range
+                price = base_price * (1 + (planned_duration / 365) * 0.5)  # 50% increase for year-long projects
+                price = round(price, -3)  # Round to nearest thousand
             else:
-                status_probabilities = base_status_probabilities
+                price = None
 
-            status = random.choices(
-                ['Not Started', 'In Progress (<50%)', 'In Progress (>50%)', 'Completed', 'On Hold/Cancelled'],
-                weights=status_probabilities,
-                k=1
-            )[0]
-
-            client_id = random.choice(client_ids)
-            unit_id = random.choice(unit_ids)
-            project_name = random.choice(project_names)
-            project_type = random.choice(['Fixed-price', 'Time-and-Materials'])
-
-            actual_end_date = actual_start_date + timedelta(days=(planned_end_date - planned_start_date).days + random.randint(-10, 30)) if status == 'Completed' else None
-            progress = random.randint(0, 100) if 'In Progress' in status else (100 if status == 'Completed' else 0)
+            # Generate PlannedHours
+            base_hours = random.randint(100, 10000)  # Increased max hours
+            planned_hours = int(base_hours * (1 + (planned_duration / 365) * 0.5))  # 50% increase for year-long projects
 
             project = Project(
-                ClientID=client_id,
-                UnitID=unit_id,
-                Name=project_name,
+                ClientID=random.choice(client_ids),
+                UnitID=random.choice(unit_ids),
+                Name=f"{random.choice(project_names)} Project",
                 Type=project_type,
                 Status=status,
                 PlannedStartDate=planned_start_date,
                 PlannedEndDate=planned_end_date,
                 ActualStartDate=actual_start_date,
                 ActualEndDate=actual_end_date,
-                Progress=progress
+                Progress=progress,
+                Price=price,
+                PlannedHours=planned_hours
             )
-            project_data.append(project)
+            projects.append(project)
 
-    session.add_all(project_data)
+    session.add_all(projects)
     session.commit()
     session.close()
 

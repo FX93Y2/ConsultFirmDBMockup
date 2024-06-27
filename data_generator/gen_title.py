@@ -19,4 +19,6 @@ def generate_titles():
     session.close()
 
 def main():
+    print("Generating Titles...")
     generate_titles()
+    print("Complete")

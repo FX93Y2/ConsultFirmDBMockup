@@ -27,7 +27,8 @@ class Consultant(Base):
     LastName = Column(String)
     Email = Column(String)
     Contact = Column(String)
-    PerformanceRating = Column(String)
+    Region = Column(String(50))
+    HireYear = Column(Integer)
     BusinessUnit = relationship("BusinessUnit", back_populates="Consultants")
     TitleHistory = relationship("ConsultantTitleHistory", back_populates="Consultant")
 
@@ -136,7 +137,9 @@ def create_database():
     Base.metadata.create_all(engine)
 
 def main():
+    print("Creating Database...")
     create_database()
+    print("Complete")
 
 if __name__ == "__main__":
     main()

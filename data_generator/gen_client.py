@@ -43,4 +43,6 @@ def generate_client(num_clients):
     session.close()
 
 def main(num_clients):
+    print("Gnerating Client Data...")
     generate_client(num_clients)
+    print("Complete")
