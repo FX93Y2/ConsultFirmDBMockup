@@ -6,9 +6,8 @@ from data_generator.gen_busi_unit import main as busi_unit
 from data_generator.gen_cons_title_hist import main as consult_title
 from data_generator.gen_project import main as project
 from data_generator.gen_deliverable import main as deliverable
-from data_generator.gen_payroll import generate_payroll as payroll
+from data_generator.gen_payroll import main as payroll
 from data_generator.assign_proj import main as assign_proj
-from data_generator.assign_timesheet import main as assign_timesheet
 
 startYear = 2015
 endYear = 2024

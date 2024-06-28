@@ -2,6 +2,7 @@ import random
 from datetime import date
 from dateutil.relativedelta import relativedelta
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy import func
 from data_generator.create_db import Consultant, ConsultantTitleHistory, Payroll, engine
 
 def generate_payroll():
@@ -9,6 +10,7 @@ def generate_payroll():
     session = Session()
 
     consultants = session.query(Consultant).all()
+    all_payroll_records = []
 
     for consultant in consultants:
         title_history = session.query(ConsultantTitleHistory).filter_by(ConsultantID=consultant.ConsultantID).order_by(ConsultantTitleHistory.StartDate).all()
@@ -22,26 +24,25 @@ def generate_payroll():
 
             current_date = start_date
             while current_date <= end_date:
-                # Calculate monthly payroll amount
                 payroll_amount = monthly_base
 
-                # Add some randomness (up to 5% variation)
                 variation_percentage = random.uniform(-0.05, 0.05)
                 payroll_amount += payroll_amount * variation_percentage
-
-                # Round to two decimal places
                 payroll_amount = round(payroll_amount, 2)
 
-                # Create Payroll record for the month
                 payroll = Payroll(ConsultantID=consultant.ConsultantID, Amount=payroll_amount, EffectiveDate=current_date)
-                session.add(payroll)
+                all_payroll_records.append(payroll)
 
-                # Move to the next month
                 current_date += relativedelta(months=1)
-                
-                # If we've moved past the end_date, break the loop
                 if current_date > end_date:
                     break
+
+    # Sort all payroll records by date
+    all_payroll_records.sort(key=lambda x: x.EffectiveDate)
+
+    # Add sorted records to the session
+    for record in all_payroll_records:
+        session.add(record)
 
     session.commit()
     session.close()

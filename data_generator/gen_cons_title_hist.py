@@ -1,4 +1,6 @@
 import random
+import unicodedata
+import re
 from faker import Faker
 from unidecode import unidecode
 from datetime import timedelta, date
@@ -57,10 +59,22 @@ def get_faker_for_region(region):
     else:
         return faker_instances["en_US"]
 
-def transliterate_name(name, locale):
-    if locale in ['zh_CN', 'ja_JP', 'ko_KR']:
-        return unidecode(name)
-    return name
+def is_latin(text):
+    # Remove diacritical marks
+    text = ''.join(c for c in unicodedata.normalize('NFD', text) if unicodedata.category(c) != 'Mn')
+    return bool(re.match(r'^[a-zA-Z\s]+$', text))
+
+def get_hire_date(year):
+    season = random.choices(list(HIRING_SEASON_PROB.keys()), weights=list(HIRING_SEASON_PROB.values()))[0]
+    if season == 'Spring':
+        month = random.randint(3, 5)  # March to May
+    elif season == 'Fall':
+        month = random.randint(9, 11)  # September to November
+    else:
+        month = random.choice([1, 2, 6, 7, 8, 12])  # Other months
+    
+    day = random.randint(1, 28)  # Assuming all months have 28 days for simplicity
+    return date(year, month, day)
 
 def calculate_target_consultants(year, initial_num, start_year):
     current_num = initial_num
@@ -178,21 +192,25 @@ def generate_consultant_data(initial_num_titles, start_year, end_year):
         faker = get_faker_for_region(region)
         consultant_id = f"C{consultant_id_counter:04d}"
         
-        if faker.locale in ['zh_CN', 'ja_JP', 'ko_KR']:
-            first_name = unidecode(faker.first_name())
-            last_name = unidecode(faker.last_name())
-        else:
-            first_name = faker.first_name()
-            last_name = faker.last_name()
+        first_name = faker.first_name()
+        last_name = faker.last_name()
         
-        email = f"{first_name[0].lower()}{last_name.lower()}{random.randint(100, 999)}@ise558.com"
-        phone = faker.phone_number()
+        if not is_latin(first_name):
+            first_name = unidecode(first_name)
+        if not is_latin(last_name):
+            last_name = unidecode(last_name)
+        
+        first_name_initial = ''.join([name[0].lower() for name in first_name.split()])       
+        last_name_email = last_name.replace(" ", "").lower()
+        email_suffix = consultant_id[-4:]
+        email = f"{first_name_initial}{last_name_email}{email_suffix}@ise558.com"
 
+        phone = faker.phone_number()
         consultant = Consultant(ConsultantID=consultant_id, FirstName=first_name, LastName=last_name, 
                                 Email=email, Contact=phone, Region=region, HireYear=year)
         consultant_id_counter += 1
 
-        start_date = date(year, random.randint(1, 12), random.randint(1, 28))
+        start_date = get_hire_date(year)
         salary = get_new_salary(title_id)
         title_history = ConsultantTitleHistory(
             ConsultantID=consultant_id, TitleID=title_id, 
@@ -200,7 +218,6 @@ def generate_consultant_data(initial_num_titles, start_year, end_year):
         )
 
         return consultant, title_history
-
     # Initialize consultants for the start year
     title_slots = generate_title_slots(initial_num_titles)
     for title_id in sorted(title_slots.keys(), reverse=True):
