@@ -82,7 +82,6 @@ class Project(Base):
     Price = Column(Float, nullable=True)  # For fixed contract
     PlannedHours = Column(Integer, nullable=True)  # For TM contract
     Progress = Column(Integer)
-    Year = Column(Integer)
     ActualCost = Column(Float, nullable=True)
     TotalExpenses = Column(Float, nullable=True)
     Client = relationship("Client")

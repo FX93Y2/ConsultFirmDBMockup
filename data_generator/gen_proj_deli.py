@@ -12,15 +12,14 @@ fake = Faker()
 def get_project_type():
     return random.choices(['Time and Material', 'Fixed'], weights=[0.6, 0.4])[0]
 
-def generate_basic_project(session, year):
+def generate_basic_project(session, current_year):
     project = Project(
         ClientID=random.choice(session.query(Client.ClientID).all())[0],
         UnitID=random.choice(session.query(BusinessUnit.BusinessUnitID).all())[0],
-        Name=f"Project_{year}_{random.randint(1000, 9999)}",
+        Name=f"Project_{current_year}_{random.randint(1000, 9999)}",
         Type=get_project_type(),
-        Status='In Progress',
-        Progress=random.randint(0, 100),
-        Year=year
+        Status='Not Started',
+        Progress=0
     )
     return project
 
@@ -40,9 +39,9 @@ def find_available_consultants(session, year):
     return available_consultants
 
 def determine_project_count(available_consultants, growth_rate):
-    base_count = len(available_consultants) * 2
-    adj_count = int(base_count * (1 + growth_rate))
-    return adj_count
+    base_count = len(available_consultants) // random.randint(3, 5)
+    adjusted_count = int(base_count * (1 + growth_rate))
+    return max(5, adjusted_count)
 
 def assign_consultants_to_project(project, available_consultants, session):
     consultants_by_title = defaultdict(list)
@@ -56,7 +55,8 @@ def assign_consultants_to_project(project, available_consultants, session):
 
     assigned_consultants = []
 
-    higher_level_titles = [4, 6]
+    # Ensure at least one high-level consultant (Project Manager or above)
+    higher_level_titles = [5, 6]  # 5: Project Manager, 6: Vice President
     for title_id in higher_level_titles:
         if consultants_by_title[title_id]:
             higher_level_consultant = random.choice(consultants_by_title[title_id])
@@ -65,7 +65,7 @@ def assign_consultants_to_project(project, available_consultants, session):
             break
 
     # Assign a mix of other consultants
-    num_additional_consultants = random.randint(2, 5)
+    num_additional_consultants = random.randint(4, 8)  # Increase team size for larger projects
     all_consultants = [c for consultants in consultants_by_title.values() for c in consultants]
     
     for _ in range(num_additional_consultants):
@@ -104,9 +104,9 @@ def calculate_project_costs(project, assigned_consultants, session):
     
     return total_cost
 
-def set_project_dates(project, assigned_consultants, session):
+def set_project_dates(project, assigned_consultants, session, current_year):
     # Base duration factors
-    BASE_DURATION = 60
+    BASE_DURATION = 90  # 3 month base duration
     CONSULTANT_FACTOR = 1.1
     SENIORITY_FACTOR = 1.2
 
@@ -124,18 +124,38 @@ def set_project_dates(project, assigned_consultants, session):
 
     # Add some randomness to the duration
     duration = int(duration * random.uniform(0.8, 1.2))
-    duration = max(30, min(365, duration))  # Ensure duration is between 30 and 365 days
+    duration = max(90, min(540, duration))  # Ensure duration is between 3 months and 1.5 years
 
     # Set the project dates
-    project.PlannedStartDate = date(project.Year, random.randint(1, 12), random.randint(1, 28))
+    project.PlannedStartDate = date(current_year, random.randint(1, 12), random.randint(1, 28))
     project.PlannedEndDate = project.PlannedStartDate + timedelta(days=duration)
     project.ActualStartDate = project.PlannedStartDate
-    
-    # Ensure PlannedEndDate is not beyond the current year
-    if project.PlannedEndDate.year > project.Year:
-        project.PlannedEndDate = date(project.Year, 12, 31)
-    
+
     return duration
+
+def determine_project_completion(project, current_date):
+    # Projects have a higher chance of completion if they're past their planned end date
+    days_overdue = (current_date - project.PlannedEndDate).days
+    base_completion_chance = 0.5  # 50% chance for projects on or before the planned end date
+    
+    if days_overdue > 0:
+        # Increase chance of completion for overdue projects
+        completion_chance = min(base_completion_chance + (days_overdue / 365), 0.95)
+    else:
+        total_planned_duration = (project.PlannedEndDate - project.PlannedStartDate).days
+        if total_planned_duration > 0:
+            elapsed_duration = (current_date - project.PlannedStartDate).days
+            completion_chance = base_completion_chance * (elapsed_duration / total_planned_duration)
+        else:
+            completion_chance = 0  # Project hasn't started yet
+
+    # Adjust based on progress
+    if project.Progress > 0:
+        completion_chance *= (project.Progress / 100)
+    else:
+        completion_chance = 0  # No progress made yet
+
+    return random.random() < completion_chance
 
 def set_project_financials(project, total_cost):
 
@@ -220,10 +240,11 @@ def generate_project_billing_rates(session, project, assigned_consultants):
     return billing_rates
 
 def generate_deliverables(project):
-    num_deliverables = random.randint(3, 7)  # Each project has 3 to 7 deliverables
+    num_deliverables = random.randint(3, 7)
     deliverables = []
-    total_project_hours = max(project.PlannedHours, num_deliverables * 10)  # Ensure at least 10 hours per deliverable
+    total_project_hours = max(project.PlannedHours, num_deliverables * 10)
     remaining_hours = total_project_hours
+    project_duration = max(1, (project.PlannedEndDate - project.PlannedStartDate).days)
 
     for i in range(num_deliverables):
         is_last_deliverable = (i == num_deliverables - 1)
@@ -236,14 +257,8 @@ def generate_deliverables(project):
             planned_hours = random.randint(min_hours, max_hours) if max_hours > min_hours else min_hours
             remaining_hours -= planned_hours
 
-        # Calculate start and due dates
-        if i == 0:
-            start_date = project.PlannedStartDate
-        else:
-            start_date = deliverables[-1].DueDate + timedelta(days=1)
-        
-        # Due date is based on the proportion of total hours this deliverable represents
-        due_date = start_date + timedelta(days=max(1, int((planned_hours / total_project_hours) * (project.PlannedEndDate - project.PlannedStartDate).days)))
+        start_date = project.PlannedStartDate if i == 0 else deliverables[-1].DueDate + timedelta(days=1)
+        due_date = start_date + timedelta(days=max(1, int((planned_hours / total_project_hours) * project_duration)))
         
         if is_last_deliverable:
             due_date = project.PlannedEndDate
@@ -256,7 +271,7 @@ def generate_deliverables(project):
             Status='Not Started',
             DueDate=due_date,
             PlannedHours=planned_hours,
-            ActualHours=0,  # Will be updated as work is logged
+            ActualHours=0,
             Progress=0
         )
         deliverables.append(deliverable)
@@ -267,25 +282,46 @@ def generate_consultant_deliverables(deliverables, assigned_consultants):
     consultant_deliverables = []
 
     for deliverable in deliverables:
-        remaining_hours = deliverable.PlannedHours
-        consultants_for_deliverable = random.sample(assigned_consultants, min(len(assigned_consultants), 3))
+        # Determine how many consultants will work on this deliverable
+        num_consultants = min(len(assigned_consultants), random.randint(1, 3))
+        selected_consultants = random.sample(assigned_consultants, num_consultants)
         
-        while remaining_hours > 0:
-            for consultant in consultants_for_deliverable:
-                if remaining_hours <= 0:
-                    break
-                
-                hours = min(random.randint(1, 40), remaining_hours)
-                work_date = deliverable.PlannedStartDate + timedelta(days=random.randint(0, max(0, (deliverable.DueDate - deliverable.PlannedStartDate).days)))
-                
+        # Distribute hours among consultants
+        total_hours = deliverable.PlannedHours
+        consultant_hours = [random.randint(1, max(1, total_hours // num_consultants)) for _ in range(num_consultants)]
+        
+        # Adjust to ensure total hours match
+        total_generated = sum(consultant_hours)
+        if total_generated < total_hours:
+            consultant_hours[-1] += total_hours - total_generated
+        elif total_generated > total_hours:
+            consultant_hours[-1] = max(1, consultant_hours[-1] - (total_generated - total_hours))
+        
+        for consultant, hours in zip(selected_consultants, consultant_hours):
+            # Ensure the date range is always positive
+            date_range = max(0, (deliverable.DueDate - deliverable.PlannedStartDate).days)
+            
+            # Generate random work dates
+            work_dates = [
+                deliverable.PlannedStartDate + timedelta(days=random.randint(0, date_range))
+                for _ in range(min(hours, 10))
+            ]
+            work_dates.sort()
+            
+            # Distribute hours across work dates
+            for work_date in work_dates:
+                hours_for_date = min(8, hours)  # Max 8 hours per day
                 consultant_deliverable = ConsultantDeliverable(
                     ConsultantID=consultant.ConsultantID,
                     DeliverableID=deliverable.DeliverableID,
                     Date=work_date,
-                    Hours=hours
+                    Hours=hours_for_date
                 )
                 consultant_deliverables.append(consultant_deliverable)
-                remaining_hours -= hours
+                hours -= hours_for_date
+                
+                if hours <= 0:
+                    break
 
     return consultant_deliverables
 
@@ -334,46 +370,84 @@ def generate_projects(start_year, end_year):
     session = Session()
 
     try:
-        for year in range(start_year, end_year + 1):
-            growth_rate = get_growth_rate(year)
-            available_consultants = find_available_consultants(session, year)
+        for current_year in range(start_year, end_year + 1):
+            growth_rate = get_growth_rate(current_year)
+            available_consultants = find_available_consultants(session, current_year)
             num_projects = determine_project_count(available_consultants, growth_rate)
 
+            projects = []
+            all_deliverables = []
+            all_consultant_deliverables = []
+            all_project_expenses = []
+            all_billing_rates = []
+
             for _ in range(num_projects):
-                project = generate_basic_project(session, year)
-                project.Year = year  # Set the Year attribute
+                project = generate_basic_project(session, current_year)
+                session.add(project)
+                session.flush()  # This will populate the ProjectID
+
                 assigned_consultants = assign_consultants_to_project(project, available_consultants, session)
                 
-                # Set project dates before calculating costs
-                set_project_dates(project, assigned_consultants, session)
+                set_project_dates(project, assigned_consultants, session, current_year)
                 
                 total_cost = calculate_project_costs(project, assigned_consultants, session)
                 project = set_project_financials(project, total_cost)
                 project = adjust_for_profit_loss(project, growth_rate)
 
-                session.add(project)
-                session.flush()
-
-                if project.Type == 'Time and Material':
-                    billing_rates = generate_project_billing_rates(session, project, assigned_consultants)
-                    session.add_all(billing_rates)
-
                 deliverables = generate_deliverables(project)
                 session.add_all(deliverables)
-                session.flush()
+                session.flush()  # This will populate the DeliverableID for each deliverable
 
                 consultant_deliverables = generate_consultant_deliverables(deliverables, assigned_consultants)
-                session.add_all(consultant_deliverables)
+                all_consultant_deliverables.extend(consultant_deliverables)
 
                 project_expenses = generate_project_expenses(project, deliverables)
-                session.add_all(project_expenses)
+                all_project_expenses.extend(project_expenses)
 
                 project.TotalExpenses = sum(expense.Amount for expense in project_expenses)
 
-                # Filter out consultants who are already on 3 projects
-                available_consultants = [c for c in available_consultants if getattr(c, 'project_count', 0) < 3]
+                if project.Type == 'Time and Material':
+                    billing_rates = generate_project_billing_rates(session, project, assigned_consultants)
+                    all_billing_rates.extend(billing_rates)
 
-            print(f"Year {year}: Generated {num_projects} projects")
+                # Calculate initial progress
+                current_date = date(current_year, 12, 31)
+                if current_date >= project.PlannedStartDate:
+                    project_duration = (project.PlannedEndDate - project.PlannedStartDate).days
+                    elapsed_duration = (current_date - project.PlannedStartDate).days
+                    project.Progress = min(int((elapsed_duration / project_duration) * 100), 99)
+                else:
+                    project.Progress = 0
+
+                # Determine if the project should be completed
+                if determine_project_completion(project, current_date):
+                    project.Status = 'Completed'
+                    project.ActualEndDate = min(current_date, project.PlannedEndDate)
+                    project.Progress = 100
+                else:
+                    project.Status = 'In Progress' if current_date >= project.PlannedStartDate else 'Not Started'
+                    project.ActualEndDate = None
+                    if project.Status == 'In Progress':
+                        # Add some randomness to progress for ongoing projects
+                        project.Progress = min(99, max(0, int(project.Progress * random.uniform(0.8, 1.2))))
+
+                projects.append(project)
+
+                # Update consultant availability
+                for consultant in assigned_consultants:
+                    consultant.project_count = getattr(consultant, 'project_count', 0) + 1
+                
+                # Filter out consultants who are already on 2 projects
+                available_consultants = [c for c in available_consultants if getattr(c, 'project_count', 0) < 2]
+
+            # Bulk insert all generated data
+            session.add_all(projects)
+            session.add_all(all_deliverables)
+            session.add_all(all_consultant_deliverables)
+            session.add_all(all_project_expenses)
+            session.add_all(all_billing_rates)
+
+            print(f"Year {current_year}: Generated {num_projects} projects")
 
         session.commit()
     except Exception as e:
