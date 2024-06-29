@@ -65,14 +65,10 @@ def assign_consultants_to_project(project, available_consultants, session):
             break
 
     # Assign a mix of other consultants
-    num_additional_consultants = random.randint(4, 8)  # Increase team size for larger projects
     all_consultants = [c for consultants in consultants_by_title.values() for c in consultants]
+    num_additional_consultants = min(len(all_consultants), random.randint(2, 5))
     
-    for _ in range(num_additional_consultants):
-        if all_consultants:
-            consultant = random.choice(all_consultants)
-            assigned_consultants.append(consultant)
-            all_consultants.remove(consultant)
+    assigned_consultants.extend(random.sample(all_consultants, num_additional_consultants))
 
     project.AssignedConsultants = assigned_consultants
     return assigned_consultants
@@ -282,6 +278,9 @@ def generate_consultant_deliverables(deliverables, assigned_consultants):
     consultant_deliverables = []
 
     for deliverable in deliverables:
+        if not assigned_consultants:
+            continue  # Skip this deliverable if there are no assigned consultants
+
         # Determine how many consultants will work on this deliverable
         num_consultants = min(len(assigned_consultants), random.randint(1, 3))
         selected_consultants = random.sample(assigned_consultants, num_consultants)
@@ -302,10 +301,14 @@ def generate_consultant_deliverables(deliverables, assigned_consultants):
             date_range = max(0, (deliverable.DueDate - deliverable.PlannedStartDate).days)
             
             # Generate random work dates
-            work_dates = [
-                deliverable.PlannedStartDate + timedelta(days=random.randint(0, date_range))
-                for _ in range(min(hours, 10))
-            ]
+            num_work_dates = min(hours, 10)
+            if date_range == 0:
+                work_dates = [deliverable.PlannedStartDate] * num_work_dates
+            else:
+                work_dates = [
+                    deliverable.PlannedStartDate + timedelta(days=random.randint(0, date_range))
+                    for _ in range(num_work_dates)
+                ]
             work_dates.sort()
             
             # Distribute hours across work dates
@@ -328,6 +331,9 @@ def generate_consultant_deliverables(deliverables, assigned_consultants):
 def generate_project_expenses(project, deliverables):
     expenses = []
     
+    if not deliverables:
+        return expenses  # Return empty list if there are no deliverables
+
     expense_categories = {
         'Travel': 0.8, 'Equipment': 0.6, 'Software Licenses': 0.7,
         'Training': 0.5, 'Miscellaneous': 0.3
@@ -349,7 +355,11 @@ def generate_project_expenses(project, deliverables):
             amount = random.uniform(50, 1000)
         amount = round(amount, 2)
         
-        expense_date = project.PlannedStartDate + timedelta(days=random.randint(0, (project.PlannedEndDate - project.PlannedStartDate).days))
+        date_range = max(0, (project.PlannedEndDate - project.PlannedStartDate).days)
+        if date_range == 0:
+            expense_date = project.PlannedStartDate
+        else:
+            expense_date = project.PlannedStartDate + timedelta(days=random.randint(0, date_range))
         
         expense = ProjectExpense(
             ProjectID=project.ProjectID,
@@ -373,6 +383,12 @@ def generate_projects(start_year, end_year):
         for current_year in range(start_year, end_year + 1):
             growth_rate = get_growth_rate(current_year)
             available_consultants = find_available_consultants(session, current_year)
+
+            if not available_consultants:
+                print(f"No available consultants for year {current_year}.")
+                continue
+
+            num_projects = determine_project_count(available_consultants, growth_rate)
             num_projects = determine_project_count(available_consultants, growth_rate)
 
             projects = []
