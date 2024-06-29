@@ -56,7 +56,7 @@ def assign_consultants_to_project(project, available_consultants, session):
     assigned_consultants = []
 
     # Ensure at least one high-level consultant (Project Manager or above)
-    higher_level_titles = [5, 6]  # 5: Project Manager, 6: Vice President
+    higher_level_titles = [5, 6]
     for title_id in higher_level_titles:
         if consultants_by_title[title_id]:
             higher_level_consultant = random.choice(consultants_by_title[title_id])
@@ -74,7 +74,7 @@ def assign_consultants_to_project(project, available_consultants, session):
     return assigned_consultants
 
 def calculate_project_costs(project, assigned_consultants, session):
-    # Get the project duration in days
+    # Get the project duration
     project_duration = (project.PlannedEndDate - project.PlannedStartDate).days
     
     total_cost = 0
@@ -120,7 +120,7 @@ def set_project_dates(project, assigned_consultants, session, current_year):
 
     # Add some randomness to the duration
     duration = int(duration * random.uniform(0.8, 1.2))
-    duration = max(90, min(540, duration))  # Ensure duration is between 3 months and 1.5 years
+    duration = max(90, min(540, duration))
 
     # Set the project dates
     project.PlannedStartDate = date(current_year, random.randint(1, 12), random.randint(1, 28))
@@ -132,10 +132,9 @@ def set_project_dates(project, assigned_consultants, session, current_year):
 def determine_project_completion(project, current_date):
     # Projects have a higher chance of completion if they're past their planned end date
     days_overdue = (current_date - project.PlannedEndDate).days
-    base_completion_chance = 0.5  # 50% chance for projects on or before the planned end date
+    base_completion_chance = 0.5 
     
-    if days_overdue > 0:
-        # Increase chance of completion for overdue projects
+    if days_overdue > 0: # Increase chance for overdue project
         completion_chance = min(base_completion_chance + (days_overdue / 365), 0.95)
     else:
         total_planned_duration = (project.PlannedEndDate - project.PlannedStartDate).days
@@ -149,7 +148,7 @@ def determine_project_completion(project, current_date):
     if project.Progress > 0:
         completion_chance *= (project.Progress / 100)
     else:
-        completion_chance = 0  # No progress made yet
+        completion_chance = 0
 
     return random.random() < completion_chance
 
@@ -279,7 +278,7 @@ def generate_consultant_deliverables(deliverables, assigned_consultants):
 
     for deliverable in deliverables:
         if not assigned_consultants:
-            continue  # Skip this deliverable if there are no assigned consultants
+            continue
 
         # Determine how many consultants will work on this deliverable
         num_consultants = min(len(assigned_consultants), random.randint(1, 3))
@@ -297,10 +296,8 @@ def generate_consultant_deliverables(deliverables, assigned_consultants):
             consultant_hours[-1] = max(1, consultant_hours[-1] - (total_generated - total_hours))
         
         for consultant, hours in zip(selected_consultants, consultant_hours):
-            # Ensure the date range is always positive
             date_range = max(0, (deliverable.DueDate - deliverable.PlannedStartDate).days)
             
-            # Generate random work dates
             num_work_dates = min(hours, 10)
             if date_range == 0:
                 work_dates = [deliverable.PlannedStartDate] * num_work_dates
@@ -332,7 +329,7 @@ def generate_project_expenses(project, deliverables):
     expenses = []
     
     if not deliverables:
-        return expenses  # Return empty list if there are no deliverables
+        return expenses
 
     expense_categories = {
         'Travel': 0.8, 'Equipment': 0.6, 'Software Licenses': 0.7,
@@ -456,7 +453,6 @@ def generate_projects(start_year, end_year):
                 # Filter out consultants who are already on 2 projects
                 available_consultants = [c for c in available_consultants if getattr(c, 'project_count', 0) < 2]
 
-            # Bulk insert all generated data
             session.add_all(projects)
             session.add_all(all_deliverables)
             session.add_all(all_consultant_deliverables)
