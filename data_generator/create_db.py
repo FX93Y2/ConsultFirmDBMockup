@@ -1,9 +1,8 @@
-from sqlalchemy import create_engine, Column, Integer, String, Date, ForeignKey, Float
+from sqlalchemy import create_engine, Column, Integer, String, Date, ForeignKey, Float, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from config import db_file_path
 
-# Using SQL Alchemy
 Base = declarative_base()
 
 engine = create_engine(f'sqlite:///{db_file_path}')
@@ -31,6 +30,7 @@ class Consultant(Base):
     HireYear = Column(Integer)
     BusinessUnit = relationship("BusinessUnit", back_populates="Consultants")
     TitleHistory = relationship("ConsultantTitleHistory", back_populates="Consultant")
+    project_count = 0  # This won't be stored in the database
 
 class ConsultantTitleHistory(Base):
     __tablename__ = 'Consultant_Title_History'
@@ -79,20 +79,15 @@ class Project(Base):
     PlannedEndDate = Column(Date)
     ActualStartDate = Column(Date)
     ActualEndDate = Column(Date, nullable=True)
-    Price = Column(Float, nullable=True) # For fixed contract
-    PlannedHours = Column(Integer, nullable=True) # For Time and Material contract
+    Price = Column(Float, nullable=True)  # For fixed contract
+    PlannedHours = Column(Integer, nullable=True)  # For TM contract
     Progress = Column(Integer)
+    Year = Column(Integer)
+    ActualCost = Column(Float, nullable=True)
+    TotalExpenses = Column(Float, nullable=True)
     Client = relationship("Client")
     BusinessUnit = relationship("BusinessUnit")
-
-class ProjectBillingRate(Base):
-    __tablename__ = 'ProjectBillingRate'
-    BillingRateID = Column(Integer, primary_key=True)
-    ProjectID = Column(Integer, ForeignKey('Project.ProjectID'))
-    TitleID = Column(Integer, ForeignKey('Title.TitleID'))
-    Rate = Column(Float)
-    Project = relationship("Project")
-    Title = relationship("Title")
+    Deliverables = relationship("Deliverable", back_populates="Project")
 
 class Deliverable(Base):
     __tablename__ = 'Deliverable'
@@ -108,7 +103,17 @@ class Deliverable(Base):
     Progress = Column(Integer)
     PlannedHours = Column(Integer)
     ActualHours = Column(Integer)
+    Project = relationship("Project", back_populates="Deliverables")
+    ConsultantDeliverables = relationship("ConsultantDeliverable", back_populates="Deliverable")
+
+class ProjectBillingRate(Base):
+    __tablename__ = 'ProjectBillingRate'
+    BillingRateID = Column(Integer, primary_key=True)
+    ProjectID = Column(Integer, ForeignKey('Project.ProjectID'))
+    TitleID = Column(Integer, ForeignKey('Title.TitleID'))
+    Rate = Column(Float)
     Project = relationship("Project")
+    Title = relationship("Title")
 
 class ConsultantDeliverable(Base):
     __tablename__ = 'Consultant_Deliverable'
@@ -129,6 +134,7 @@ class ProjectExpense(Base):
     Amount = Column(Float)
     Description = Column(String)
     Category = Column(String)
+    IsBillable = Column(Boolean)
     Project = relationship("Project")
     Deliverable = relationship("Deliverable")
 

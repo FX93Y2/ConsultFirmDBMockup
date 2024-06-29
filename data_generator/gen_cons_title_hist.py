@@ -67,13 +67,12 @@ def is_latin(text):
 def get_hire_date(year):
     season = random.choices(list(HIRING_SEASON_PROB.keys()), weights=list(HIRING_SEASON_PROB.values()))[0]
     if season == 'Spring':
-        month = random.randint(3, 5)  # March to May
+        month = random.randint(3, 5)
     elif season == 'Fall':
-        month = random.randint(9, 11)  # September to November
+        month = random.randint(9, 11)
     else:
-        month = random.choice([1, 2, 6, 7, 8, 12])  # Other months
-    
-    day = random.randint(1, 28)  # Assuming all months have 28 days for simplicity
+        month = random.choice([1, 2, 6, 7, 8, 12])
+    day = random.randint(1, 28)
     return date(year, month, day)
 
 def calculate_target_consultants(year, initial_num, start_year):
@@ -216,8 +215,8 @@ def generate_consultant_data(initial_num_titles, start_year, end_year):
             ConsultantID=consultant_id, TitleID=title_id, 
             StartDate=start_date, EventType='Hire', Salary=salary
         )
-
         return consultant, title_history
+    
     # Initialize consultants for the start year
     title_slots = generate_title_slots(initial_num_titles)
     for title_id in sorted(title_slots.keys(), reverse=True):
@@ -339,10 +338,6 @@ def assign_business_units(consultant_data, session):
         print(f"Warning: The following regions did not match any business unit: {unmatched_regions}")
         print("These consultants will be assigned to North America")
 
-    print("\nBusiness Unit Assignment Summary:")
-    for bu_name, count in assigned_count.items():
-        print(f"{bu_name}: {count} consultants")
-
     return consultant_data
 
 def simulate_global_expansion(consultant_data, start_year, end_year):
@@ -352,14 +347,12 @@ def simulate_global_expansion(consultant_data, start_year, end_year):
     for year in range(start_year, end_year + 1):
         total_consultants = len([c for c in consultant_data if c.HireYear <= year])
         
-        # Check if we need to expand to a new region
         for threshold, new_region in EXPANSION_THRESHOLDS.items():
             if total_consultants >= threshold and new_region not in active_regions:
                 active_regions.append(new_region)
                 print(f"Year {year}: Expanded to {new_region}")
                 break
         
-        # Update regions for consultants hired this year
         new_consultants = [c for c in consultant_data if c.HireYear == year]
         for consultant in new_consultants:
             consultant.Region = random.choices(

@@ -7,7 +7,7 @@ from data_generator.gen_cons_title_hist import main as consult_title
 from data_generator.gen_project import main as project
 from data_generator.gen_proj_billing_rate import main as proj_billing_rate
 from data_generator.gen_deliverable import main as deliverable
-from data_generator.gen_proj_expense import main as proj_expense
+from data_generator.gen_billable_expense import main as proj_expense
 
 def main():
     #INITIALIZE DB
