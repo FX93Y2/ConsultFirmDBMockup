@@ -27,10 +27,9 @@ class Consultant(Base):
     Email = Column(String)
     Contact = Column(String)
     Region = Column(String(50))
-    HireYear = Column(Integer)
     BusinessUnit = relationship("BusinessUnit", back_populates="Consultants")
     TitleHistory = relationship("ConsultantTitleHistory", back_populates="Consultant")
-    project_count = 0  # This won't be stored in the database
+    HireYear = 0
 
 class ConsultantTitleHistory(Base):
     __tablename__ = 'Consultant_Title_History'
@@ -82,8 +81,6 @@ class Project(Base):
     Price = Column(Float, nullable=True)  # For fixed contract
     PlannedHours = Column(Integer, nullable=True)  # For TM contract
     Progress = Column(Integer)
-    ActualCost = Column(Float, nullable=True)
-    TotalExpenses = Column(Float, nullable=True)
     Client = relationship("Client")
     BusinessUnit = relationship("BusinessUnit")
     Deliverables = relationship("Deliverable", back_populates="Project")
