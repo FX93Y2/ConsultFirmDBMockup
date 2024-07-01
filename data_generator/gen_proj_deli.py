@@ -7,6 +7,10 @@ from .create_db import (Project, Consultant, BusinessUnit, Client, ProjectBillin
                        ProjectExpense, Deliverable, ConsultantDeliverable, ConsultantTitleHistory, 
                        Payroll, engine)
 
+MIN_DAILY_HOURS = Decimal('1.0') 
+MAX_DAILY_HOURS = Decimal('8.0')
+WORK_PROBABILITY = 0.9  # 90% chance of working on any given day
+
 def get_available_consultants(session, year):
     start_date = date(year, 1, 1)
     end_date = date(year, 12, 31)
@@ -213,59 +217,67 @@ def generate_consultant_deliverables(deliverables, assigned_consultants, project
     consultant_deliverables = []
     simulation_end_date = date(end_year, 12, 31)
 
-    # Adjust project hours and end date
     project.ActualHours = adjust_hours(project.PlannedHours)
     project.ActualEndDate = adjust_end_date(project.ActualStartDate, project.PlannedEndDate, project.PlannedHours, project.ActualHours)
-    project.ActualEndDate = min(project.ActualEndDate, simulation_end_date)
+
+    project_extends_beyond_simulation = project.PlannedEndDate > simulation_end_date
 
     hour_adjustment_factor = project.ActualHours / Decimal(project.PlannedHours) if project.PlannedHours > 0 else Decimal('1')
 
+    total_actual_hours = Decimal('0')
     for deliverable in deliverables:
-        # Adjust deliverable hours based on the project adjustment
         deliverable.ActualHours = (Decimal(deliverable.PlannedHours) * hour_adjustment_factor).quantize(Decimal('0.1'), rounding=ROUND_HALF_UP)
         remaining_hours = deliverable.ActualHours
         
         start_date = max(deliverable.PlannedStartDate, project.ActualStartDate)
         planned_end_date = min(deliverable.DueDate, project.PlannedEndDate)
         end_date = adjust_end_date(start_date, planned_end_date, deliverable.PlannedHours, deliverable.ActualHours)
-        end_date = min(end_date, project.ActualEndDate, simulation_end_date)
+        
+        if not project_extends_beyond_simulation:
+            end_date = min(end_date, project.ActualEndDate, simulation_end_date)
         
         current_date = start_date
         
-        while remaining_hours > Decimal('0') and current_date <= end_date:
-            for consultant in assigned_consultants:
-                if remaining_hours <= Decimal('0') or current_date > end_date:
+        while remaining_hours > Decimal('0') and current_date <= min(end_date, simulation_end_date):
+            consultants_working_today = [c for c in assigned_consultants if random.random() < WORK_PROBABILITY]
+            
+            if not consultants_working_today:
+                current_date += timedelta(days=1)
+                continue
+            
+            daily_hours_left = Decimal(len(consultants_working_today)) * MAX_DAILY_HOURS
+            
+            for consultant in consultants_working_today:
+                if remaining_hours <= Decimal('0') or daily_hours_left <= Decimal('0'):
                     break
                 
-                consultant_factor = Decimal(random.uniform(0.5, 1.0))
-                max_daily_hours = min(Decimal('8') * consultant_factor, remaining_hours)
-                hours = Decimal(random.uniform(0.1, float(max_daily_hours))).quantize(Decimal('0.1'), rounding=ROUND_HALF_UP)
+                max_consultant_hours = min(MAX_DAILY_HOURS, daily_hours_left, remaining_hours)
+                consultant_hours = Decimal(random.uniform(float(MIN_DAILY_HOURS), float(max_consultant_hours))).quantize(Decimal('0.1'), rounding=ROUND_HALF_UP)
                 
-                if hours > Decimal('0'):
+                if consultant_hours > Decimal('0'):
                     consultant_deliverable = ConsultantDeliverable(
                         ConsultantID=consultant.ConsultantID,
                         DeliverableID=deliverable.DeliverableID,
                         Date=current_date,
-                        Hours=float(hours)  # Convert back to float for database storage
+                        Hours=float(consultant_hours)
                     )
                     consultant_deliverables.append(consultant_deliverable)
-                    remaining_hours -= hours
+                    remaining_hours -= consultant_hours
+                    daily_hours_left -= consultant_hours
+                    total_actual_hours += consultant_hours
             
             current_date += timedelta(days=1)
         
-        deliverable.ActualHours = float(deliverable.ActualHours - remaining_hours)  # Convert back to float
-        deliverable.SubmissionDate = end_date
+        deliverable.ActualHours = float(deliverable.ActualHours - remaining_hours)
+        deliverable.SubmissionDate = min(end_date, simulation_end_date)
         
-        # Calculate progress
         if deliverable.PlannedHours > 0:
             deliverable.Progress = min(100, int((deliverable.ActualHours / deliverable.PlannedHours) * 100))
         else:
             deliverable.Progress = 100 if deliverable.ActualHours > 0 else 0
         
-        # Set status
         if current_date > simulation_end_date:
-            deliverable.Status = 'Not Started'
-            deliverable.Progress = 0
+            deliverable.Status = 'In Progress'
         elif deliverable.Progress == 100:
             deliverable.Status = 'Completed'
         else:
@@ -274,20 +286,20 @@ def generate_consultant_deliverables(deliverables, assigned_consultants, project
         if remaining_hours > Decimal('0.1'):
             print(f"Warning: Deliverable {deliverable.DeliverableID} has {float(remaining_hours):.1f} unallocated hours")
 
-    # Update project status and progress
     completed_deliverables = sum(1 for d in deliverables if d.Status == 'Completed')
     total_deliverables = len(deliverables)
     project.Progress = int((completed_deliverables / total_deliverables) * 100) if total_deliverables > 0 else 0
     
-    if project.ActualEndDate <= simulation_end_date:
-        project.Status = 'Completed' if project.Progress == 100 else 'In Progress'
-    else:
+    if project_extends_beyond_simulation:
         project.Status = 'In Progress'
+        project.ActualEndDate = None
+    else:
+        project.Status = 'Completed' if project.Progress == 100 else 'In Progress'
 
-    # Convert ActualHours back to float for database storage
-    project.ActualHours = float(project.ActualHours)
+    project.ActualHours = float(total_actual_hours)
 
     return consultant_deliverables
+
 
 def update_project_status(project, current_date):
     if current_date < project.PlannedStartDate:
