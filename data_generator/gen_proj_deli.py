@@ -1,10 +1,11 @@
 import random
 from datetime import date, timedelta
+from decimal import Decimal, ROUND_HALF_UP
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import func, or_, and_
 from .create_db import (Project, Consultant, BusinessUnit, Client, ProjectBillingRate, 
                        ProjectExpense, Deliverable, ConsultantDeliverable, ConsultantTitleHistory, 
-                       Payroll, Title, engine)
+                       Payroll, engine)
 
 def get_available_consultants(session, year):
     start_date = date(year, 1, 1)
@@ -20,10 +21,22 @@ def get_available_consultants(session, year):
 
 def adjust_hours(planned_hours):
     if random.random() < 0.1:  # 10% chance of finishing early
-        actual_hours = planned_hours * random.uniform(0.8, 0.99)
-    else:  # 90% chance of overdue
-        actual_hours = planned_hours * random.uniform(1.01, 1.3)
-    return round(actual_hours, 1)
+        actual_hours = Decimal(planned_hours) * Decimal(random.uniform(0.8, 0.95))
+    else:  # 90% chance of overrunning
+        actual_hours = Decimal(planned_hours) * Decimal(random.uniform(1.05, 1.3))
+    return actual_hours.quantize(Decimal('0.1'), rounding=ROUND_HALF_UP)
+
+
+def adjust_end_date(start_date, planned_end_date, planned_hours, actual_hours):
+    planned_duration = (planned_end_date - start_date).days + 1
+    if planned_hours == 0:
+        actual_duration = planned_duration
+    else:
+        actual_duration = int((actual_hours / Decimal(planned_hours)) * planned_duration)
+    actual_end_date = start_date + timedelta(days=max(0, actual_duration - 1))
+    actual_end_date += timedelta(days=random.randint(-2, 2))
+    return max(start_date, actual_end_date)
+
 
 def calculate_hourly_cost(session, consultant, year):
     payroll_data = session.query(Payroll).filter(
@@ -198,47 +211,81 @@ def generate_deliverables(project):
 
 def generate_consultant_deliverables(deliverables, assigned_consultants, project, end_year):
     consultant_deliverables = []
-    project_end_date = min(project.PlannedEndDate, date(end_year, 12, 31))
+    simulation_end_date = date(end_year, 12, 31)
 
-    # Adjust project hours
-    adjusted_project_hours = adjust_hours(project.PlannedHours)
-    hour_adjustment_factor = adjusted_project_hours / project.PlannedHours
+    # Adjust project hours and end date
+    project.ActualHours = adjust_hours(project.PlannedHours)
+    project.ActualEndDate = adjust_end_date(project.ActualStartDate, project.PlannedEndDate, project.PlannedHours, project.ActualHours)
+    project.ActualEndDate = min(project.ActualEndDate, simulation_end_date)
+
+    hour_adjustment_factor = project.ActualHours / Decimal(project.PlannedHours) if project.PlannedHours > 0 else Decimal('1')
 
     for deliverable in deliverables:
         # Adjust deliverable hours based on the project adjustment
-        adjusted_deliverable_hours = round(deliverable.PlannedHours * hour_adjustment_factor, 1)
-        remaining_hours = adjusted_deliverable_hours
-        start_date = max(deliverable.PlannedStartDate, project.PlannedStartDate)
-        end_date = min(deliverable.DueDate, project_end_date)
+        deliverable.ActualHours = (Decimal(deliverable.PlannedHours) * hour_adjustment_factor).quantize(Decimal('0.1'), rounding=ROUND_HALF_UP)
+        remaining_hours = deliverable.ActualHours
+        
+        start_date = max(deliverable.PlannedStartDate, project.ActualStartDate)
+        planned_end_date = min(deliverable.DueDate, project.PlannedEndDate)
+        end_date = adjust_end_date(start_date, planned_end_date, deliverable.PlannedHours, deliverable.ActualHours)
+        end_date = min(end_date, project.ActualEndDate, simulation_end_date)
         
         current_date = start_date
         
-        while remaining_hours > 0 and current_date <= end_date:
+        while remaining_hours > Decimal('0') and current_date <= end_date:
             for consultant in assigned_consultants:
-                if remaining_hours <= 0 or current_date > end_date:
+                if remaining_hours <= Decimal('0') or current_date > end_date:
                     break
                 
-                consultant_factor = random.uniform(0.5, 1.0)
-                max_daily_hours = min(8 * consultant_factor, remaining_hours)
-                hours = round(random.uniform(0.1, max_daily_hours), 1)
+                consultant_factor = Decimal(random.uniform(0.5, 1.0))
+                max_daily_hours = min(Decimal('8') * consultant_factor, remaining_hours)
+                hours = Decimal(random.uniform(0.1, float(max_daily_hours))).quantize(Decimal('0.1'), rounding=ROUND_HALF_UP)
                 
-                if hours > 0:
+                if hours > Decimal('0'):
                     consultant_deliverable = ConsultantDeliverable(
                         ConsultantID=consultant.ConsultantID,
                         DeliverableID=deliverable.DeliverableID,
                         Date=current_date,
-                        Hours=hours
+                        Hours=float(hours)  # Convert back to float for database storage
                     )
                     consultant_deliverables.append(consultant_deliverable)
                     remaining_hours -= hours
             
             current_date += timedelta(days=1)
         
-        # Update the deliverable's actual hours
-        deliverable.ActualHours = adjusted_deliverable_hours - remaining_hours
+        deliverable.ActualHours = float(deliverable.ActualHours - remaining_hours)  # Convert back to float
+        deliverable.SubmissionDate = end_date
         
-        if remaining_hours > 0:
-            print(f"Warning: Deliverable {deliverable.DeliverableID} has {remaining_hours} unallocated hours")
+        # Calculate progress
+        if deliverable.PlannedHours > 0:
+            deliverable.Progress = min(100, int((deliverable.ActualHours / deliverable.PlannedHours) * 100))
+        else:
+            deliverable.Progress = 100 if deliverable.ActualHours > 0 else 0
+        
+        # Set status
+        if current_date > simulation_end_date:
+            deliverable.Status = 'Not Started'
+            deliverable.Progress = 0
+        elif deliverable.Progress == 100:
+            deliverable.Status = 'Completed'
+        else:
+            deliverable.Status = 'In Progress'
+        
+        if remaining_hours > Decimal('0.1'):
+            print(f"Warning: Deliverable {deliverable.DeliverableID} has {float(remaining_hours):.1f} unallocated hours")
+
+    # Update project status and progress
+    completed_deliverables = sum(1 for d in deliverables if d.Status == 'Completed')
+    total_deliverables = len(deliverables)
+    project.Progress = int((completed_deliverables / total_deliverables) * 100) if total_deliverables > 0 else 0
+    
+    if project.ActualEndDate <= simulation_end_date:
+        project.Status = 'Completed' if project.Progress == 100 else 'In Progress'
+    else:
+        project.Status = 'In Progress'
+
+    # Convert ActualHours back to float for database storage
+    project.ActualHours = float(project.ActualHours)
 
     return consultant_deliverables
 
@@ -331,7 +378,7 @@ def generate_projects(start_year, end_year):
             print(f"Generated {num_projects} projects for year {current_year}")
             
     except Exception as e:
-        print(f"An error occurred: {e}")
+        print(f"An error occurred while processing project {project.ProjectID}: {str(e)}")
         session.rollback()
     finally:
         session.close()
