@@ -1,22 +1,16 @@
 import random
-from faker import Faker
 from datetime import date, timedelta
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy import or_, func, and_
-from collections import defaultdict
-from data_generator.create_db import (Project, Consultant, BusinessUnit, Client, ProjectBillingRate, Payroll,
-                                      ProjectExpense,Deliverable, ConsultantDeliverable, ConsultantTitleHistory, engine)
-from data_generator.gen_cons_title_hist import get_growth_rate
-fake = Faker()
-
-def get_project_type():
-    return random.choices(['Time and Material', 'Fixed'], weights=[0.6, 0.4])[0]
+from sqlalchemy import func, or_, and_
+from .create_db import (Project, Consultant, BusinessUnit, Client, ProjectBillingRate, 
+                       ProjectExpense, Deliverable, ConsultantDeliverable, ConsultantTitleHistory, 
+                       Payroll, Title, engine)
 
 def get_available_consultants(session, year):
     start_date = date(year, 1, 1)
     end_date = date(year, 12, 31)
     
-    available_consultants = session.query(ConsultantTitleHistory).filter(
+    available_consultants = session.query(Consultant).join(ConsultantTitleHistory).filter(
         ConsultantTitleHistory.StartDate <= end_date,
         or_(ConsultantTitleHistory.EndDate >= start_date, ConsultantTitleHistory.EndDate == None),
         ConsultantTitleHistory.EventType.notin_(['Layoff', 'Attrition'])
@@ -46,10 +40,15 @@ def determine_project_count(available_consultants, growth_rate):
 def assign_consultants_to_project(project, available_consultants, session):
     consultants_by_title = {}
     for consultant in available_consultants:
-        title_id = consultant.TitleID
-        if title_id not in consultants_by_title:
-            consultants_by_title[title_id] = []
-        consultants_by_title[title_id].append(consultant)
+        current_title = session.query(ConsultantTitleHistory).filter(
+            ConsultantTitleHistory.ConsultantID == consultant.ConsultantID
+        ).order_by(ConsultantTitleHistory.StartDate.desc()).first()
+        
+        if current_title:
+            title_id = current_title.TitleID
+            if title_id not in consultants_by_title:
+                consultants_by_title[title_id] = []
+            consultants_by_title[title_id].append(consultant)
 
     assigned_consultants = []
 
@@ -68,7 +67,6 @@ def assign_consultants_to_project(project, available_consultants, session):
     assigned_consultants.extend(random.sample(all_consultants, num_additional_consultants))
 
     return assigned_consultants
-
 
 def set_project_dates(project, current_year):
     if project.Type == 'Fixed':
@@ -109,7 +107,6 @@ def generate_project_expenses(project, total_consultant_cost):
     
     return expenses
 
-
 def calculate_project_financials(project, assigned_consultants, session, current_year):
     total_consultant_cost = 0
     for consultant in assigned_consultants:
@@ -129,28 +126,110 @@ def calculate_project_financials(project, assigned_consultants, session, current
         
     return expenses
 
-
 def generate_project_billing_rates(session, project, assigned_consultants):
     billing_rates = []
     
     if project.Type == 'Time and Material':
         base_rates = {1: 100, 2: 150, 3: 200, 4: 250, 5: 300, 6: 400}
-        assigned_titles = set(consultant.TitleID for consultant in assigned_consultants)
+        assigned_titles = set()
         
-        for title_id in assigned_titles:
-            base_rate = base_rates[title_id]
-            adjusted_rate = base_rate * random.uniform(1.0, 1.2)
-            adjusted_rate = round(adjusted_rate / 5) * 5
+        for consultant in assigned_consultants:
+            current_title = session.query(ConsultantTitleHistory).filter(
+                ConsultantTitleHistory.ConsultantID == consultant.ConsultantID
+            ).order_by(ConsultantTitleHistory.StartDate.desc()).first()
             
-            billing_rate = ProjectBillingRate(
-                ProjectID=project.ProjectID,
-                TitleID=title_id,
-                Rate=adjusted_rate
-            )
-            billing_rates.append(billing_rate)
+            if current_title and current_title.TitleID not in assigned_titles:
+                base_rate = base_rates[current_title.TitleID]
+                adjusted_rate = base_rate * random.uniform(1.0, 1.2)
+                adjusted_rate = round(adjusted_rate / 5) * 5
+                
+                billing_rate = ProjectBillingRate(
+                    ProjectID=project.ProjectID,
+                    TitleID=current_title.TitleID,
+                    Rate=adjusted_rate
+                )
+                billing_rates.append(billing_rate)
+                assigned_titles.add(current_title.TitleID)
     
     return billing_rates
 
+def generate_deliverables(project):
+    num_deliverables = random.randint(3, 7)
+    deliverables = []
+    remaining_hours = project.PlannedHours
+    project_duration = (project.PlannedEndDate - project.PlannedStartDate).days
+
+    for i in range(num_deliverables):
+        is_last_deliverable = (i == num_deliverables - 1)
+        
+        if is_last_deliverable:
+            planned_hours = remaining_hours
+        else:
+            min_hours = 10
+            max_hours = max(min_hours, remaining_hours - (num_deliverables - i - 1) * min_hours)
+            planned_hours = random.randint(min_hours, max_hours)
+            remaining_hours -= planned_hours
+
+        start_date = project.PlannedStartDate if i == 0 else deliverables[-1].DueDate + timedelta(days=1)
+        deliverable_duration = max(1, int((planned_hours / project.PlannedHours) * project_duration))
+        due_date = min(start_date + timedelta(days=deliverable_duration), project.PlannedEndDate)
+
+        deliverable = Deliverable(
+            ProjectID=project.ProjectID,
+            Name=f"Deliverable {i+1}",
+            PlannedStartDate=start_date,
+            ActualStartDate=start_date,
+            Status='Not Started',
+            DueDate=due_date,
+            PlannedHours=planned_hours,
+            ActualHours=0,
+            Progress=0
+        )
+        deliverables.append(deliverable)
+
+    return deliverables
+
+def generate_consultant_deliverables(deliverables, assigned_consultants, project, end_year):
+    consultant_deliverables = []
+    project_end_date = min(project.PlannedEndDate, date(end_year, 12, 31))
+
+    for deliverable in deliverables:
+        remaining_hours = deliverable.PlannedHours
+        start_date = max(deliverable.PlannedStartDate, project.PlannedStartDate)
+        end_date = min(deliverable.DueDate, project_end_date)
+        
+        current_date = start_date
+        
+        while remaining_hours > 0 and current_date <= end_date:
+            daily_hours = min(remaining_hours, 24)  # Cap total daily hours
+            consultants_working_today = random.sample(assigned_consultants, min(len(assigned_consultants), 3))
+            
+            for consultant in consultants_working_today:
+                if daily_hours <= 0:
+                    break
+                
+                consultant_factor = random.uniform(0.5, 1.0)
+                max_daily_hours = min(8 * consultant_factor, daily_hours, remaining_hours)
+                hours = round(random.uniform(0.1, max_daily_hours), 1)
+                
+                if hours > 0:
+                    consultant_deliverable = ConsultantDeliverable(
+                        ConsultantID=consultant.ConsultantID,
+                        DeliverableID=deliverable.DeliverableID,
+                        Date=current_date,
+                        Hours=hours
+                    )
+                    consultant_deliverables.append(consultant_deliverable)
+                    remaining_hours -= hours
+                    daily_hours -= hours
+            
+            current_date += timedelta(days=1)
+        
+        # If we still have remaining hours after the end date, log them as unallocated
+        if remaining_hours > 0:
+            print(f"Warning: Deliverable {deliverable.DeliverableID} has {remaining_hours} unallocated hours")
+
+    return consultant_deliverables
 
 def update_project_status(project, current_date):
     if current_date < project.PlannedStartDate:
@@ -167,6 +246,20 @@ def update_project_status(project, current_date):
         if not project.ActualEndDate:
             project.ActualEndDate = project.PlannedEndDate
 
+def update_deliverable_status(deliverable, current_date):
+    if current_date < deliverable.PlannedStartDate:
+        deliverable.Status = 'Not Started'
+        deliverable.Progress = 0
+    elif current_date >= deliverable.PlannedStartDate and current_date <= deliverable.DueDate:
+        deliverable.Status = 'In Progress'
+        total_duration = (deliverable.DueDate - deliverable.PlannedStartDate).days
+        elapsed_duration = (current_date - deliverable.PlannedStartDate).days
+        deliverable.Progress = min(int((elapsed_duration / total_duration) * 100), 99)
+    else:
+        deliverable.Status = 'Completed'
+        deliverable.Progress = 100
+        if not deliverable.SubmissionDate:
+            deliverable.SubmissionDate = deliverable.DueDate
 
 def generate_projects(start_year, end_year):
     Session = sessionmaker(bind=engine)
@@ -204,17 +297,55 @@ def generate_projects(start_year, end_year):
                 billing_rates = generate_project_billing_rates(session, project, assigned_consultants)
                 session.add_all(billing_rates)
                 
-                # Update project status for all active projects
-                current_date = date(current_year, 12, 31)
-                all_active_projects = session.query(Project).filter(
-                    Project.PlannedStartDate <= current_date,
-                    or_(Project.ActualEndDate == None, Project.ActualEndDate >= date(current_year, 1, 1))
-                ).all()
+                deliverables = generate_deliverables(project)
+                session.add_all(deliverables)
+                session.flush()  # This will populate the DeliverableID
+
+                consultant_deliverables = generate_consultant_deliverables(deliverables, assigned_consultants, project, end_year)
+                session.add_all(consultant_deliverables)
                 
-                for active_project in all_active_projects:
-                    update_project_status(active_project, current_date)
+                # Update actual hours for deliverables
+                for deliverable in deliverables:
+                    actual_hours = sum(cd.Hours for cd in consultant_deliverables if cd.DeliverableID == deliverable.DeliverableID)
+                    deliverable.ActualHours = actual_hours
+                    
+                    # Calculate and update progress
+                    if deliverable.PlannedHours > 0:
+                        deliverable.Progress = min(100, int((actual_hours / deliverable.PlannedHours) * 100))
+                    else:
+                        deliverable.Progress = 0
+                    
+                    # Update status based on progress and dates
+                    current_date = date(current_year, 12, 31)
+                    if current_date < deliverable.PlannedStartDate:
+                        deliverable.Status = 'Not Started'
+                    elif current_date >= deliverable.PlannedStartDate and current_date <= deliverable.DueDate:
+                        deliverable.Status = 'In Progress'
+                    else:
+                        deliverable.Status = 'Completed'
+                
+                # Update project status and progress
+                project.Progress = int(sum(d.Progress for d in deliverables) / len(deliverables)) if deliverables else 0
+                if project.Progress == 0:
+                    project.Status = 'Not Started'
+                elif project.Progress == 100:
+                    project.Status = 'Completed'
+                    project.ActualEndDate = max(d.DueDate for d in deliverables)
+                else:
+                    project.Status = 'In Progress'
+                
+                # Handle unallocated hours
+                total_planned_hours = sum(d.PlannedHours for d in deliverables)
+                total_actual_hours = sum(d.ActualHours for d in deliverables)
+                if total_actual_hours < total_planned_hours:
+                    unallocated_hours = total_planned_hours - total_actual_hours
+                    print(f"Warning: Project {project.ProjectID} has {unallocated_hours} unallocated hours")
+                    
+                    # You might want to adjust the project's status or add a note here
+                    project.Status += " (Incomplete)"
+                
+                session.commit()
             
-            session.commit()
             print(f"Generated {num_projects} projects for year {current_year}")
             
     except Exception as e:
@@ -223,7 +354,7 @@ def generate_projects(start_year, end_year):
     finally:
         session.close()
 
-
 def main(start_year, end_year):
+    print("Generating Project Data...")
     generate_projects(start_year, end_year)
     print("Complete")

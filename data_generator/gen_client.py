@@ -1,5 +1,5 @@
 from sqlalchemy.orm import sessionmaker # type: ignore
-from data_generator.create_db import Client, Location, engine
+from .create_db import Client, Location, engine
 from faker import Faker
 import random
 

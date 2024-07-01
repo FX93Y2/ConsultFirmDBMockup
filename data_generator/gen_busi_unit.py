@@ -1,5 +1,5 @@
 from sqlalchemy.orm import sessionmaker # type: ignore
-from data_generator.create_db import BusinessUnit, engine
+from .create_db import BusinessUnit, engine
 
 def generate_business_units():
     Session = sessionmaker(bind=engine)

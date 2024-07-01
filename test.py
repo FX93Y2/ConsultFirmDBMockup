@@ -28,7 +28,7 @@ def main():
     title()
 
     #CONSULTANT AND TITLE HISTORY AND ASSIGNING BUSINESS UNIT
-    consult_title(initial_num_titles=200, start_year=startYear, end_year=endYear)
+    consult_title(initial_num_titles=100, start_year=startYear, end_year=endYear)
 
     #CONSULTANT PAYROLL
     payroll()
