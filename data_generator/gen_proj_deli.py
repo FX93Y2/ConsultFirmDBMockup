@@ -277,7 +277,6 @@ def generate_projects(start_year, end_year):
 
     try:
         for current_year in range(start_year, end_year + 1):
-            print(f"Generating projects for year {current_year}")
             
             available_consultants = get_available_consultants(session, current_year)
             growth_rate = 0.1  # You may want to implement a more sophisticated growth rate calculation
@@ -340,5 +339,3 @@ def main(start_year, end_year):
     generate_projects(start_year, end_year)
     print("Complete")
 
-if __name__ == "__main__":
-    main(2015, 2018)  # Adjust the year range as needed
