@@ -201,16 +201,13 @@ def generate_consultant_deliverables(deliverables, assigned_consultants, project
         current_date = start_date
         
         while remaining_hours > 0 and current_date <= end_date:
-            daily_hours = min(remaining_hours, 24)  # Cap total daily hours
-            consultants_working_today = random.sample(assigned_consultants, min(len(assigned_consultants), 3))
-            
-            for consultant in consultants_working_today:
-                if daily_hours <= 0:
+            for consultant in assigned_consultants:
+                if remaining_hours <= 0 or current_date > end_date:
                     break
                 
                 consultant_factor = random.uniform(0.5, 1.0)
-                max_daily_hours = min(8 * consultant_factor, daily_hours, remaining_hours)
-                hours = round(random.uniform(0.1, max_daily_hours), 1)
+                max_daily_hours = min(8 * consultant_factor, remaining_hours)
+                hours = round(random.uniform(0, max_daily_hours), 1)
                 
                 if hours > 0:
                     consultant_deliverable = ConsultantDeliverable(
@@ -221,13 +218,26 @@ def generate_consultant_deliverables(deliverables, assigned_consultants, project
                     )
                     consultant_deliverables.append(consultant_deliverable)
                     remaining_hours -= hours
-                    daily_hours -= hours
             
             current_date += timedelta(days=1)
         
-        # If we still have remaining hours after the end date, log them as unallocated
+        # If we still have remaining hours after the end date, distribute them on the last possible day
         if remaining_hours > 0:
-            print(f"Warning: Deliverable {deliverable.DeliverableID} has {remaining_hours} unallocated hours")
+            hours_per_consultant = remaining_hours / len(assigned_consultants)
+            for consultant in assigned_consultants:
+                hours = min(round(hours_per_consultant, 1), remaining_hours)
+                if hours > 0:
+                    consultant_deliverable = ConsultantDeliverable(
+                        ConsultantID=consultant.ConsultantID,
+                        DeliverableID=deliverable.DeliverableID,
+                        Date=end_date,
+                        Hours=hours
+                    )
+                    consultant_deliverables.append(consultant_deliverable)
+                    remaining_hours -= hours
+                
+                if remaining_hours <= 0:
+                    break
 
     return consultant_deliverables
 
@@ -301,51 +311,22 @@ def generate_projects(start_year, end_year):
                 session.add_all(deliverables)
                 session.flush()  # This will populate the DeliverableID
 
-                consultant_deliverables = generate_consultant_deliverables(deliverables, assigned_consultants, project, end_year)
+                consultant_deliverables = generate_consultant_deliverables(deliverables, assigned_consultants, project, end_year)                
                 session.add_all(consultant_deliverables)
                 
-                # Update actual hours for deliverables
-                for deliverable in deliverables:
-                    actual_hours = sum(cd.Hours for cd in consultant_deliverables if cd.DeliverableID == deliverable.DeliverableID)
-                    deliverable.ActualHours = actual_hours
-                    
-                    # Calculate and update progress
-                    if deliverable.PlannedHours > 0:
-                        deliverable.Progress = min(100, int((actual_hours / deliverable.PlannedHours) * 100))
-                    else:
-                        deliverable.Progress = 0
-                    
-                    # Update status based on progress and dates
-                    current_date = date(current_year, 12, 31)
-                    if current_date < deliverable.PlannedStartDate:
-                        deliverable.Status = 'Not Started'
-                    elif current_date >= deliverable.PlannedStartDate and current_date <= deliverable.DueDate:
-                        deliverable.Status = 'In Progress'
-                    else:
-                        deliverable.Status = 'Completed'
+                # Update project and deliverable status for all active projects
+                current_date = date(current_year, 12, 31)
+                all_active_projects = session.query(Project).filter(
+                    Project.PlannedStartDate <= current_date,
+                    or_(Project.ActualEndDate == None, Project.ActualEndDate >= date(current_year, 1, 1))
+                ).all()
                 
-                # Update project status and progress
-                project.Progress = int(sum(d.Progress for d in deliverables) / len(deliverables)) if deliverables else 0
-                if project.Progress == 0:
-                    project.Status = 'Not Started'
-                elif project.Progress == 100:
-                    project.Status = 'Completed'
-                    project.ActualEndDate = max(d.DueDate for d in deliverables)
-                else:
-                    project.Status = 'In Progress'
-                
-                # Handle unallocated hours
-                total_planned_hours = sum(d.PlannedHours for d in deliverables)
-                total_actual_hours = sum(d.ActualHours for d in deliverables)
-                if total_actual_hours < total_planned_hours:
-                    unallocated_hours = total_planned_hours - total_actual_hours
-                    print(f"Warning: Project {project.ProjectID} has {unallocated_hours} unallocated hours")
-                    
-                    # You might want to adjust the project's status or add a note here
-                    project.Status += " (Incomplete)"
-                
-                session.commit()
+                for active_project in all_active_projects:
+                    update_project_status(active_project, current_date)
+                    for deliverable in active_project.Deliverables:
+                        update_deliverable_status(deliverable, current_date)
             
+            session.commit()
             print(f"Generated {num_projects} projects for year {current_year}")
             
     except Exception as e:
@@ -358,3 +339,6 @@ def main(start_year, end_year):
     print("Generating Project Data...")
     generate_projects(start_year, end_year)
     print("Complete")
+
+if __name__ == "__main__":
+    main(2015, 2018)  # Adjust the year range as needed
