@@ -18,6 +18,13 @@ def get_available_consultants(session, year):
     
     return available_consultants
 
+def adjust_hours(planned_hours):
+    if random.random() < 0.1:  # 10% chance of finishing early
+        actual_hours = planned_hours * random.uniform(0.8, 0.99)
+    else:  # 90% chance of overdue
+        actual_hours = planned_hours * random.uniform(1.01, 1.3)
+    return round(actual_hours, 1)
+
 def calculate_hourly_cost(session, consultant, year):
     payroll_data = session.query(Payroll).filter(
         Payroll.ConsultantID == consultant.ConsultantID,
@@ -193,8 +200,14 @@ def generate_consultant_deliverables(deliverables, assigned_consultants, project
     consultant_deliverables = []
     project_end_date = min(project.PlannedEndDate, date(end_year, 12, 31))
 
+    # Adjust project hours
+    adjusted_project_hours = adjust_hours(project.PlannedHours)
+    hour_adjustment_factor = adjusted_project_hours / project.PlannedHours
+
     for deliverable in deliverables:
-        remaining_hours = deliverable.PlannedHours
+        # Adjust deliverable hours based on the project adjustment
+        adjusted_deliverable_hours = round(deliverable.PlannedHours * hour_adjustment_factor, 1)
+        remaining_hours = adjusted_deliverable_hours
         start_date = max(deliverable.PlannedStartDate, project.PlannedStartDate)
         end_date = min(deliverable.DueDate, project_end_date)
         
@@ -207,7 +220,7 @@ def generate_consultant_deliverables(deliverables, assigned_consultants, project
                 
                 consultant_factor = random.uniform(0.5, 1.0)
                 max_daily_hours = min(8 * consultant_factor, remaining_hours)
-                hours = round(random.uniform(0, max_daily_hours), 1)
+                hours = round(random.uniform(0.1, max_daily_hours), 1)
                 
                 if hours > 0:
                     consultant_deliverable = ConsultantDeliverable(
@@ -221,23 +234,11 @@ def generate_consultant_deliverables(deliverables, assigned_consultants, project
             
             current_date += timedelta(days=1)
         
-        # If we still have remaining hours after the end date, distribute them on the last possible day
+        # Update the deliverable's actual hours
+        deliverable.ActualHours = adjusted_deliverable_hours - remaining_hours
+        
         if remaining_hours > 0:
-            hours_per_consultant = remaining_hours / len(assigned_consultants)
-            for consultant in assigned_consultants:
-                hours = min(round(hours_per_consultant, 1), remaining_hours)
-                if hours > 0:
-                    consultant_deliverable = ConsultantDeliverable(
-                        ConsultantID=consultant.ConsultantID,
-                        DeliverableID=deliverable.DeliverableID,
-                        Date=end_date,
-                        Hours=hours
-                    )
-                    consultant_deliverables.append(consultant_deliverable)
-                    remaining_hours -= hours
-                
-                if remaining_hours <= 0:
-                    break
+            print(f"Warning: Deliverable {deliverable.DeliverableID} has {remaining_hours} unallocated hours")
 
     return consultant_deliverables
 
@@ -299,6 +300,7 @@ def generate_projects(start_year, end_year):
                 duration_months = set_project_dates(project, current_year)
                 
                 project.PlannedHours = duration_months * 160  # Assuming 160 working hours per month
+                project.ActualHours = adjust_hours(project.PlannedHours)
                 
                 expenses = calculate_project_financials(project, assigned_consultants, session, current_year)
                 session.add_all(expenses)

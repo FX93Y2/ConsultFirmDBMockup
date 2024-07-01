@@ -80,6 +80,7 @@ class Project(Base):
     ActualEndDate = Column(Date, nullable=True)
     Price = Column(Float, nullable=True)  # For fixed contract
     PlannedHours = Column(Integer, nullable=True)  # For TM contract
+    ActualHours = Column(Integer, nullable=True)
     Progress = Column(Integer)
     Client = relationship("Client")
     BusinessUnit = relationship("BusinessUnit")
@@ -98,7 +99,7 @@ class Deliverable(Base):
     SubmissionDate = Column(Date, nullable=True)
     Progress = Column(Integer)
     PlannedHours = Column(Integer)
-    ActualHours = Column(Integer)
+    ActualHours = Column(Integer, nullable=True)
     Project = relationship("Project", back_populates="Deliverables")
     ConsultantDeliverables = relationship("ConsultantDeliverable", back_populates="Deliverable")
 
