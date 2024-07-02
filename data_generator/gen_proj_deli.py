@@ -339,7 +339,7 @@ def generate_projects(start_year, end_year):
         for current_year in range(start_year, end_year + 1):
             
             available_consultants = get_available_consultants(session, current_year)
-            growth_rate = 0.1  # You may want to implement a more sophisticated growth rate calculation
+            growth_rate = 0.1
             num_projects = determine_project_count(available_consultants, growth_rate)
             
             for _ in range(num_projects):
@@ -358,7 +358,7 @@ def generate_projects(start_year, end_year):
                 assigned_consultants = assign_consultants_to_project(project, available_consultants, session)
                 duration_months = set_project_dates(project, current_year)
                 
-                project.PlannedHours = duration_months * 160  # Assuming 160 working hours per month
+                project.PlannedHours = duration_months * 160  # Say 160 working hours per month
                 project.ActualHours = adjust_hours(project.PlannedHours)
                 
                 expenses = calculate_project_financials(project, assigned_consultants, session, current_year)
