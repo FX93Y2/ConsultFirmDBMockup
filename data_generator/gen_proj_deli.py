@@ -11,6 +11,9 @@ MIN_DAILY_HOURS = Decimal('1.0')
 MAX_DAILY_HOURS = Decimal('8.0')
 WORK_PROBABILITY = 0.9  # 90% chance of working on any given day
 
+def round_to_nearest_thousand(value):
+    return int(Decimal(value).quantize(Decimal('1000'), rounding=ROUND_HALF_UP))
+
 def get_available_consultants(session, year):
     start_date = date(year, 1, 1)
     end_date = date(year, 12, 31)
@@ -203,7 +206,7 @@ def generate_deliverables(project):
 
         price = None
         if project.Type == 'Fixed':
-            price = (Decimal(planned_hours) / Decimal(project.PlannedHours) * Decimal(project.Price)).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+            price = round_to_nearest_thousand((Decimal(planned_hours) / Decimal(project.PlannedHours) * Decimal(project.Price)))
 
         deliverable = Deliverable(
             ProjectID=project.ProjectID,
@@ -236,11 +239,11 @@ def generate_consultant_deliverables(deliverables, assigned_consultants, project
         remaining_hours = deliverable.ActualHours
         
         start_date = max(deliverable.PlannedStartDate, project.ActualStartDate)
-        planned_end_date = min(deliverable.DueDate, project.PlannedEndDate)
+        end_date = simulation_end_date
         
         current_date = start_date
         
-        while remaining_hours > Decimal('0') and current_date <= min(planned_end_date, simulation_end_date):
+        while remaining_hours > Decimal('0') and current_date <= end_date:
             consultants_working_today = [c for c in assigned_consultants if random.random() < WORK_PROBABILITY]
             
             if not consultants_working_today:
@@ -277,7 +280,7 @@ def generate_consultant_deliverables(deliverables, assigned_consultants, project
         else:
             deliverable.Progress = 100 if deliverable.ActualHours > 0 else 0
         
-        if current_date > simulation_end_date or deliverable.Progress < 100:
+        if deliverable.Progress < 100:
             deliverable.Status = 'In Progress'
         else:
             deliverable.Status = 'Completed'
@@ -291,7 +294,7 @@ def generate_consultant_deliverables(deliverables, assigned_consultants, project
     project.ActualHours = float(total_actual_hours)
     calculate_project_progress(project, deliverables)
 
-    if project_extends_beyond_simulation or project.Progress < 100:
+    if project.Progress < 100:
         project.Status = 'In Progress'
         project.ActualEndDate = None
     else:
@@ -299,6 +302,8 @@ def generate_consultant_deliverables(deliverables, assigned_consultants, project
         project.ActualEndDate = max(d.SubmissionDate for d in deliverables if d.SubmissionDate)
 
     return consultant_deliverables
+
+
 
 def update_project_status(project, current_date):
     if current_date < project.PlannedStartDate:
@@ -373,9 +378,9 @@ def generate_projects(start_year, end_year):
                 consultant_deliverables = generate_consultant_deliverables(deliverables, assigned_consultants, project, end_year)                
                 session.add_all(consultant_deliverables)
                 
-                # Rounding the project price
+                # Rounding the project price to the nearest thousand
                 if project.Price:
-                    project.Price = Decimal(project.Price).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+                    project.Price = round_to_nearest_thousand(project.Price)
             
             session.commit()
             print(f"Generated {num_projects} projects for year {current_year}")
