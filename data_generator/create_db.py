@@ -26,7 +26,6 @@ class Consultant(Base):
     LastName = Column(String)
     Email = Column(String)
     Contact = Column(String)
-    Region = Column(String(50))
     BusinessUnit = relationship("BusinessUnit", back_populates="Consultants")
     TitleHistory = relationship("ConsultantTitleHistory", back_populates="Consultant")
     HireYear = 0

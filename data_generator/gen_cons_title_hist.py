@@ -17,21 +17,21 @@ SALARY_RANGE = {
 }
 TITLE_DISTRIBUTION = {1: 0.35, 2: 0.3, 3: 0.2, 4: 0.10, 5: 0.04, 6: 0.01}
 BUSINESS_UNIT_DISTRIBUTION = {
-    "North America": 0.6,
-    "Central and South America": 0.1,
-    "EMEA": 0.2,
-    "Asia Pacific": 0.1
+    1: 0.6,
+    2: 0.1,
+    3: 0.2,
+    4: 0.1
 }
-REGION_LOCALE_MAPPING = {
-    "North America": ["en_US", "en_CA"],
-    "Central and South America": ["es_MX", "pt_BR", "es_CO"],
-    "EMEA": ["en_GB", "de_DE", "fr_FR"],
-    "Asia Pacific": ["zh_CN", "ja_JP", "ko_KR", "en_AU"]
+UNIT_LOCALE_MAPPING = {
+    1: ["en_US", "en_CA"],
+    2: ["es_MX", "pt_BR", "es_CO"],
+    3: ["en_GB", "de_DE", "fr_FR"],
+    4: ["zh_CN", "ja_JP", "ko_KR", "en_AU"]
 }
 EXPANSION_THRESHOLDS = {
-    400: "EMEA",
-    800: "Asia Pacific",
-    1500: "Central and South America"
+    400: 3, #EMEA
+    800: 4, # AP
+    1500: 2 # Central and South America
 }
 MIN_PROMOTION_YEARS = {
     1: 0.5, 2: 2, 3: 2, 4: 3, 5: 3, 6: 0
@@ -39,7 +39,7 @@ MIN_PROMOTION_YEARS = {
 PROMOTION_CHANCE = 0.5
 
 fake = Faker()
-faker_instances = {locale: Faker(locale) for region in REGION_LOCALE_MAPPING for locale in REGION_LOCALE_MAPPING[region]}
+faker_instances = {locale: Faker(locale) for unit_id in UNIT_LOCALE_MAPPING for locale in UNIT_LOCALE_MAPPING[unit_id]}
 
 # Basic Helper functions
 def get_growth_rate(year):
@@ -52,9 +52,9 @@ def get_growth_rate(year):
     variation = random.uniform(-0.05, 0.05)
     return yearly_growth_rates.get(year, default_rate) + variation
 
-def get_faker_for_region(region):
-    if region in REGION_LOCALE_MAPPING:
-        locale = random.choice(REGION_LOCALE_MAPPING[region])
+def get_faker_for_unit(unit_id):
+    if unit_id in UNIT_LOCALE_MAPPING:
+        locale = random.choice(UNIT_LOCALE_MAPPING[unit_id])
         return faker_instances[locale]
     else:
         return faker_instances["en_US"]
@@ -186,9 +186,9 @@ def generate_consultant_data(initial_num_titles, start_year, end_year):
     title_history_data = []
     consultant_id_counter = 1
 
-    def create_consultant(region, title_id, year):
+    def create_consultant(unit_id, title_id, year):
         nonlocal consultant_id_counter
-        faker = get_faker_for_region(region)
+        faker = get_faker_for_unit(unit_id)
         consultant_id = f"C{consultant_id_counter:04d}"
         
         first_name = faker.first_name()
@@ -206,7 +206,7 @@ def generate_consultant_data(initial_num_titles, start_year, end_year):
 
         phone = faker.phone_number()
         consultant = Consultant(ConsultantID=consultant_id, FirstName=first_name, LastName=last_name, 
-                                Email=email, Contact=phone, Region=region, HireYear=year)
+                                Email=email, Contact=phone, BusinessUnitID=unit_id, HireYear=year)
         consultant_id_counter += 1
 
         start_date = get_hire_date(year)
@@ -222,7 +222,7 @@ def generate_consultant_data(initial_num_titles, start_year, end_year):
     for title_id in sorted(title_slots.keys(), reverse=True):
         num_slots = title_slots[title_id]
         for _ in range(num_slots):
-            consultant, title_history = create_consultant("North America", title_id, start_year)
+            consultant, title_history = create_consultant(1, title_id, start_year)  # Start with North America (unit_id 1)
             consultant_data.append(consultant)
             title_history_data.append(title_history)
 
@@ -319,56 +319,55 @@ def generate_consultant_data(initial_num_titles, start_year, end_year):
 
 def assign_business_units(consultant_data, session):
     business_units = session.query(BusinessUnit).all()
-    business_unit_dict = {bu.BusinessUnitName: bu for bu in business_units}
+    business_unit_dict = {bu.BusinessUnitID: bu for bu in business_units}
     
-    unmatched_regions = set()
+    unmatched_units = set()
     assigned_count = defaultdict(int)
     
     for consultant in consultant_data:
-        if consultant.Region in business_unit_dict:
-            consultant.BusinessUnitID = business_unit_dict[consultant.Region].BusinessUnitID
-            assigned_count[consultant.Region] += 1
+        if consultant.BusinessUnitID in business_unit_dict:
+            assigned_count[consultant.BusinessUnitID] += 1
         else:
-            unmatched_regions.add(consultant.Region)
-            # Assign to a default business unit (e.g., North America) if region doesn't match
-            consultant.BusinessUnitID = business_unit_dict["North America"].BusinessUnitID
-            assigned_count["North America"] += 1
+            unmatched_units.add(consultant.BusinessUnitID)
+            # Assign to a default business unit (e.g., North America) if unit doesn't match
+            consultant.BusinessUnitID = 1
+            assigned_count[1] += 1
 
-    if unmatched_regions:
-        print(f"Warning: The following regions did not match any business unit: {unmatched_regions}")
-        print("These consultants will be assigned to North America")
+    if unmatched_units:
+        print(f"Warning: The following unit IDs did not match any business unit: {unmatched_units}")
+        print("These consultants will be assigned to North America (unit ID 1)")
 
     return consultant_data
 
 def simulate_global_expansion(consultant_data, start_year, end_year):
-    regions = list(BUSINESS_UNIT_DISTRIBUTION.keys())
-    active_regions = ["North America"]
+    unit_ids = list(BUSINESS_UNIT_DISTRIBUTION.keys())
+    active_units = [1]  # Start with North America
     
     for year in range(start_year, end_year + 1):
         total_consultants = len([c for c in consultant_data if c.HireYear <= year])
         
-        for threshold, new_region in EXPANSION_THRESHOLDS.items():
-            if total_consultants >= threshold and new_region not in active_regions:
-                active_regions.append(new_region)
-                print(f"Year {year}: Expanded to {new_region}")
+        for threshold, new_unit in EXPANSION_THRESHOLDS.items():
+            if total_consultants >= threshold and new_unit not in active_units:
+                active_units.append(new_unit)
+                print(f"Year {year}: Expanded to unit ID {new_unit}")
                 break
         
         new_consultants = [c for c in consultant_data if c.HireYear == year]
         for consultant in new_consultants:
-            consultant.Region = random.choices(
-                active_regions,
-                weights=[BUSINESS_UNIT_DISTRIBUTION[r] for r in active_regions]
+            consultant.BusinessUnitID = random.choices(
+                active_units,
+                weights=[BUSINESS_UNIT_DISTRIBUTION[u] for u in active_units]
             )[0]
 
-    return active_regions
+    return active_units
 
 def main(initial_num_titles, start_year, end_year):
     print("Generating consultant data...")
     consultant_data, title_history_data = generate_consultant_data(initial_num_titles, start_year, end_year)
     
     print("\nSimulating global expansion...")
-    final_regions = simulate_global_expansion(consultant_data, start_year, end_year)
-    print(f"Final regions at {end_year}: {', '.join(final_regions)}")
+    final_units = simulate_global_expansion(consultant_data, start_year, end_year)
+    print(f"Final active unit IDs at {end_year}: {', '.join(map(str, final_units))}")
 
     print("\nAssigning business units...")
     Session = sessionmaker(bind=engine)
