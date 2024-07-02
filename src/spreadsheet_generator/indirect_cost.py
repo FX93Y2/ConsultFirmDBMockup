@@ -4,7 +4,7 @@ import numpy as np
 import random
 from datetime import datetime, timedelta
 from sqlalchemy.orm import sessionmaker
-from data_generator.create_db import Project, engine
+from src.create_db import Project, engine
 
 def generate_indirect_costs(mean_labor_cost=125000, stddev_labor_cost=5000, mean_other_expense=30000, stddev_other_expense=3000, 
                             outlier_probability=0.01, outlier_multiplier_range=(1.1, 1.3), base_inflation_rate=0.005, 

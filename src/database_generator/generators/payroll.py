@@ -3,9 +3,10 @@ from datetime import date
 from dateutil.relativedelta import relativedelta
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import func
-from .create_db import Consultant, ConsultantTitleHistory, Payroll, engine
+from ...create_db import Consultant, ConsultantTitleHistory, Payroll, engine
 
 def generate_payroll():
+    print("Generating Payroll Data...")
     Session = sessionmaker(bind=engine)
     session = Session()
 
@@ -46,11 +47,4 @@ def generate_payroll():
 
     session.commit()
     session.close()
-
-def main():
-    print("Generating Payroll Data...")
-    generate_payroll()
     print("Complete")
-
-if __name__ == "__main__":
-    main()

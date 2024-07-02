@@ -6,7 +6,7 @@ from unidecode import unidecode
 from datetime import timedelta, date
 from sqlalchemy.orm import sessionmaker
 from collections import defaultdict
-from .create_db import Consultant, Title, BusinessUnit, ConsultantTitleHistory, engine
+from src.create_db import Consultant, Title, BusinessUnit, ConsultantTitleHistory, engine
 
 # Constants and Distributions
 HIRING_SEASON_PROB = {'Spring': 0.4, 'Fall': 0.4, 'Other': 0.2}

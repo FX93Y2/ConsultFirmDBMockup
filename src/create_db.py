@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine, Column, Integer, String, Date, ForeignKey, Float, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
-from config import db_file_path
+from config.db_config import db_file_path
 
 Base = declarative_base()
 

@@ -1,7 +1,8 @@
-from sqlalchemy.orm import sessionmaker # type: ignore
-from .create_db import Title, engine
+from sqlalchemy.orm import sessionmaker
+from ...create_db import Title, engine
 
 def generate_titles():
+    print("Generating Titles...")
     Session = sessionmaker(bind=engine)
     session = Session()
 
@@ -17,8 +18,5 @@ def generate_titles():
     session.add_all(titles)
     session.commit()
     session.close()
-
-def main():
-    print("Generating Titles...")
-    generate_titles()
     print("Complete")
+    

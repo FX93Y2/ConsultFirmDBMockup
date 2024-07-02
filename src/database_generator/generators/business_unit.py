@@ -1,9 +1,10 @@
-from sqlalchemy.orm import sessionmaker # type: ignore
-from .create_db import BusinessUnit, engine
+from sqlalchemy.orm import sessionmaker
+from ...create_db import BusinessUnit, engine
 
 def generate_business_units():
     Session = sessionmaker(bind=engine)
     session = Session()
+    print("Generating Business Units...")
 
     business_units = [
         "North America",
@@ -18,10 +19,6 @@ def generate_business_units():
 
     session.commit()
     session.close()
-
-
-
-def main():
-    print("Generating Business Units...")
-    generate_business_units()
     print("Complete")
+
+    

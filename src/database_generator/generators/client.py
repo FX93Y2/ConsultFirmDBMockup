@@ -1,9 +1,10 @@
-from sqlalchemy.orm import sessionmaker # type: ignore
-from .create_db import Client, Location, engine
+from sqlalchemy.orm import sessionmaker
+from ...create_db import Client, Location, engine
 from faker import Faker
 import random
 
-def generate_client(num_clients):
+def generate_clients(num_clients):
+    print("Gnerating Client Data...")
     Session = sessionmaker(bind=engine)
     session = Session()
 
@@ -41,8 +42,5 @@ def generate_client(num_clients):
     session.add_all(client_data)
     session.commit()
     session.close()
-
-def main(num_clients):
-    print("Gnerating Client Data...")
-    generate_client(num_clients)
     print("Complete")
+    

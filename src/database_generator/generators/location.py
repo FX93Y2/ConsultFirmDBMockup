@@ -1,7 +1,8 @@
-from sqlalchemy.orm import sessionmaker # type: ignore
-from .create_db import Location, engine
+from sqlalchemy.orm import sessionmaker
+from ...create_db import Location, engine
 
-def generate_location():
+def generate_locations():
+    print("Generating Location Data...")
     Session = sessionmaker(bind=engine)
     session = Session()
 
@@ -54,8 +55,5 @@ def generate_location():
 
     session.commit()
     session.close()
-
-def main():
-    print("Generating Location Data...")
-    generate_location()
     print("Complete")
+    
