@@ -97,6 +97,7 @@ class Deliverable(Base):
     Price = Column(Float, nullable=True)
     DueDate = Column(Date)
     SubmissionDate = Column(Date, nullable=True)
+    InvoicedDate = Column(Date, nullable=True)
     Progress = Column(Integer, nullable=True)
     PlannedHours = Column(Integer)
     ActualHours = Column(Float, nullable=True)
