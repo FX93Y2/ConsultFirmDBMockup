@@ -9,7 +9,7 @@ from data_generator.gen_proj_deli import main as project_deliverable
 from data_generator.Indirect_Cost_Excel import main as generate_indirect_costs
 
 startYear = 2015
-endYear = 2018
+endYear = 2022
 
 
 def main():

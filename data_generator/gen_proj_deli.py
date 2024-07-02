@@ -3,6 +3,7 @@ from datetime import date, timedelta
 from decimal import Decimal, ROUND_HALF_UP
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import func, or_, and_
+from collections import Counter
 from .create_db import (Project, Consultant, BusinessUnit, Client, ProjectBillingRate, 
                        ProjectExpense, Deliverable, ConsultantDeliverable, ConsultantTitleHistory, 
                        Payroll, engine)
@@ -13,6 +14,13 @@ WORK_PROBABILITY = 0.9  # 90% chance of working on any given day
 
 def round_to_nearest_thousand(value):
     return int(Decimal(value).quantize(Decimal('1000'), rounding=ROUND_HALF_UP))
+
+def get_active_business_units(session, year):
+    # Query to get active business units for the given year
+    active_units = session.query(BusinessUnit).join(Consultant).filter(
+        Consultant.HireYear <= year
+    ).distinct().all()
+    return active_units
 
 def get_available_consultants(session, year):
     start_date = date(year, 1, 1)
@@ -62,7 +70,36 @@ def determine_project_count(available_consultants, growth_rate):
     adjusted_count = int(base_count * (1 + growth_rate))
     return max(5, adjusted_count)
 
-def assign_consultants_to_project(project, available_consultants, session):
+def assign_project_to_business_unit(session, assigned_consultants, active_units, current_year):
+    consultant_unit_counts = Counter(consultant.BusinessUnitID for consultant in assigned_consultants)
+    
+    project_counts = dict(session.query(
+        Project.UnitID, func.count(Project.ProjectID)
+    ).filter(
+        func.extract('year', Project.PlannedStartDate) == current_year,
+        Project.UnitID.in_([unit.BusinessUnitID for unit in active_units])
+    ).group_by(Project.UnitID).all())
+    
+    # Initialize project counts
+    for unit in active_units:
+        if unit.BusinessUnitID not in project_counts:
+            project_counts[unit.BusinessUnitID] = 0
+    
+    total_consultants = sum(consultant_unit_counts.values())
+    target_distribution = {unit.BusinessUnitID: consultant_unit_counts.get(unit.BusinessUnitID, 0) / total_consultants 
+                           for unit in active_units}
+    
+    total_projects = sum(project_counts.values())
+    current_distribution = {unit_id: count / (total_projects + 1)  # Add 1 to account for the new project
+                            for unit_id, count in project_counts.items()}
+    
+    distribution_difference = {unit_id: target_distribution.get(unit_id, 0) - current_distribution.get(unit_id, 0)
+                               for unit_id in project_counts.keys()}
+    chosen_unit_id = max(distribution_difference, key=distribution_difference.get)
+    
+    return chosen_unit_id
+
+def assign_consultants_to_project(available_consultants, session):
     consultants_by_title = {}
     for consultant in available_consultants:
         current_title = session.query(ConsultantTitleHistory).filter(
@@ -316,15 +353,18 @@ def generate_projects(start_year, end_year):
 
     try:
         for current_year in range(start_year, end_year + 1):
-            
             available_consultants = get_available_consultants(session, current_year)
+            active_units = get_active_business_units(session, current_year)
             growth_rate = 0.1
             num_projects = determine_project_count(available_consultants, growth_rate)
             
             for _ in range(num_projects):
+                assigned_consultants = assign_consultants_to_project(available_consultants, session)
+                assigned_unit_id = assign_project_to_business_unit(session, assigned_consultants, active_units, current_year)
+                
                 project = Project(
                     ClientID=random.choice(session.query(Client.ClientID).all())[0],
-                    UnitID=random.choice(session.query(BusinessUnit.BusinessUnitID).all())[0],
+                    UnitID=assigned_unit_id,
                     Name=f"Project_{current_year}_{random.randint(1000, 9999)}",
                     Type=random.choice(['Fixed', 'Time and Material']),
                     Status='Not Started',
@@ -334,7 +374,7 @@ def generate_projects(start_year, end_year):
                 session.add(project)
                 session.flush()  # This will populate the ProjectID
                 
-                assigned_consultants = assign_consultants_to_project(project, available_consultants, session)
+                assigned_consultants = assign_consultants_to_project(available_consultants, session)
                 duration_months = set_project_dates(project, current_year)
                 
                 project.PlannedHours = duration_months * 160  # Say 160 working hours per month
@@ -348,12 +388,12 @@ def generate_projects(start_year, end_year):
                 
                 deliverables = generate_deliverables(project)
                 session.add_all(deliverables)
-                session.flush()  # This will populate the DeliverableID
+                session.flush()  # This will populate DeliverableID
 
                 consultant_deliverables = generate_consultant_deliverables(deliverables, assigned_consultants, project, end_year)                
                 session.add_all(consultant_deliverables)
                 
-                # Rounding the project price to the nearest thousand
+                # Rounding project price to the nearest thousand
                 if project.Price:
                     project.Price = round_to_nearest_thousand(project.Price)
             
