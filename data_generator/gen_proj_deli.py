@@ -153,8 +153,12 @@ def calculate_project_financials(project, assigned_consultants, session, current
 
 def calculate_project_progress(project, deliverables):
     total_planned_hours = sum(d.PlannedHours for d in deliverables)
-    weighted_progress = sum((d.Progress * d.PlannedHours) for d in deliverables)
-    project.Progress = int(weighted_progress / total_planned_hours) if total_planned_hours > 0 else 0
+    completed_hours = sum(d.PlannedHours for d in deliverables if d.Status == 'Completed')
+    
+    if total_planned_hours > 0:
+        project.Progress = min(100, int((completed_hours / Decimal(total_planned_hours)) * 100))
+    else:
+        project.Progress = 100 if any(d.Status == 'Completed' for d in deliverables) else 0
 
 def generate_project_billing_rates(session, project, assigned_consultants):
     billing_rates = []
@@ -229,14 +233,15 @@ def generate_consultant_deliverables(deliverables, assigned_consultants, project
     simulation_end_date = date(end_year, 12, 31)
 
     project.ActualHours = adjust_hours(project.PlannedHours)
-    project_extends_beyond_simulation = project.PlannedEndDate > simulation_end_date
 
     hour_adjustment_factor = project.ActualHours / Decimal(project.PlannedHours) if project.PlannedHours > 0 else Decimal('1')
 
     total_actual_hours = Decimal('0')
+    last_worked_date = None
     for deliverable in deliverables:
-        deliverable.ActualHours = (Decimal(deliverable.PlannedHours) * hour_adjustment_factor).quantize(Decimal('0.1'), rounding=ROUND_HALF_UP)
-        remaining_hours = deliverable.ActualHours
+        deliverable.ActualHours = Decimal('0')
+        target_hours = (Decimal(deliverable.PlannedHours) * hour_adjustment_factor).quantize(Decimal('0.1'), rounding=ROUND_HALF_UP)
+        remaining_hours = target_hours
         
         start_date = max(deliverable.PlannedStartDate, project.ActualStartDate)
         end_date = simulation_end_date
@@ -270,21 +275,22 @@ def generate_consultant_deliverables(deliverables, assigned_consultants, project
                     remaining_hours -= consultant_hours
                     daily_hours_left -= consultant_hours
                     total_actual_hours += consultant_hours
+                    deliverable.ActualHours += consultant_hours
+                    last_worked_date = current_date
             
             current_date += timedelta(days=1)
         
-        deliverable.ActualHours = float(deliverable.ActualHours - remaining_hours)
-        
-        if deliverable.PlannedHours > 0:
-            deliverable.Progress = min(100, int((deliverable.ActualHours / deliverable.PlannedHours) * 100))
+        # Calculate progress based on actual vs target hours
+        if target_hours > Decimal('0'):
+            deliverable.Progress = min(100, int((deliverable.ActualHours / target_hours) * 100))
         else:
-            deliverable.Progress = 100 if deliverable.ActualHours > 0 else 0
+            deliverable.Progress = 100 if deliverable.ActualHours > Decimal('0') else 0
         
         if deliverable.Progress < 100:
             deliverable.Status = 'In Progress'
         else:
             deliverable.Status = 'Completed'
-            deliverable.SubmissionDate = current_date
+            deliverable.SubmissionDate = last_worked_date
             if project.Type == 'Fixed':
                 deliverable.InvoicedDate = deliverable.SubmissionDate + timedelta(days=random.randint(0, 7))
         
@@ -299,41 +305,10 @@ def generate_consultant_deliverables(deliverables, assigned_consultants, project
         project.ActualEndDate = None
     else:
         project.Status = 'Completed'
-        project.ActualEndDate = max(d.SubmissionDate for d in deliverables if d.SubmissionDate)
+        project.ActualEndDate = last_worked_date
 
     return consultant_deliverables
 
-
-
-def update_project_status(project, current_date):
-    if current_date < project.PlannedStartDate:
-        project.Status = 'Not Started'
-        project.Progress = 0
-    elif current_date >= project.PlannedStartDate and current_date <= project.PlannedEndDate:
-        project.Status = 'In Progress'
-        total_duration = (project.PlannedEndDate - project.PlannedStartDate).days
-        elapsed_duration = (current_date - project.PlannedStartDate).days
-        project.Progress = min(int((elapsed_duration / total_duration) * 100), 99)
-    else:
-        project.Status = 'Completed'
-        project.Progress = 100
-        if not project.ActualEndDate:
-            project.ActualEndDate = project.PlannedEndDate
-
-def update_deliverable_status(deliverable, current_date):
-    if current_date < deliverable.PlannedStartDate:
-        deliverable.Status = 'Not Started'
-        deliverable.Progress = 0
-    elif current_date >= deliverable.PlannedStartDate and current_date <= deliverable.DueDate:
-        deliverable.Status = 'In Progress'
-        total_duration = (deliverable.DueDate - deliverable.PlannedStartDate).days
-        elapsed_duration = (current_date - deliverable.PlannedStartDate).days
-        deliverable.Progress = min(int((elapsed_duration / total_duration) * 100), 99)
-    else:
-        deliverable.Status = 'Completed'
-        deliverable.Progress = 100
-        if not deliverable.SubmissionDate:
-            deliverable.SubmissionDate = deliverable.DueDate
 
 def generate_projects(start_year, end_year):
     Session = sessionmaker(bind=engine)
@@ -363,7 +338,7 @@ def generate_projects(start_year, end_year):
                 duration_months = set_project_dates(project, current_year)
                 
                 project.PlannedHours = duration_months * 160  # Say 160 working hours per month
-                project.ActualHours = adjust_hours(project.PlannedHours)
+                project.ActualHours = 0
                 
                 expenses = calculate_project_financials(project, assigned_consultants, session, current_year)
                 session.add_all(expenses)
