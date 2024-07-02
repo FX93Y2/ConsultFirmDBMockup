@@ -7,7 +7,7 @@ from .create_db import (Project, Consultant, BusinessUnit, Client, ProjectBillin
                        ProjectExpense, Deliverable, ConsultantDeliverable, ConsultantTitleHistory, 
                        Payroll, engine)
 
-MIN_DAILY_HOURS = Decimal('1.0') 
+MIN_DAILY_HOURS = Decimal('1.0')
 MAX_DAILY_HOURS = Decimal('8.0')
 WORK_PROBABILITY = 0.9  # 90% chance of working on any given day
 
@@ -30,7 +30,6 @@ def adjust_hours(planned_hours):
         actual_hours = Decimal(planned_hours) * Decimal(random.uniform(1.05, 1.3))
     return actual_hours.quantize(Decimal('0.1'), rounding=ROUND_HALF_UP)
 
-
 def adjust_end_date(start_date, planned_end_date, planned_hours, actual_hours):
     planned_duration = (planned_end_date - start_date).days + 1
     if planned_hours == 0:
@@ -40,7 +39,6 @@ def adjust_end_date(start_date, planned_end_date, planned_hours, actual_hours):
     actual_end_date = start_date + timedelta(days=max(0, actual_duration - 1))
     actual_end_date += timedelta(days=random.randint(-2, 2))
     return max(start_date, actual_end_date)
-
 
 def calculate_hourly_cost(session, consultant, year):
     payroll_data = session.query(Payroll).filter(
@@ -198,6 +196,10 @@ def generate_deliverables(project):
         deliverable_duration = max(1, int((planned_hours / project.PlannedHours) * project_duration))
         due_date = min(start_date + timedelta(days=deliverable_duration), project.PlannedEndDate)
 
+        price = None
+        if project.Type == 'Fixed':
+            price = (Decimal(planned_hours) / Decimal(project.PlannedHours) * Decimal(project.Price)).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+
         deliverable = Deliverable(
             ProjectID=project.ProjectID,
             Name=f"Deliverable {i+1}",
@@ -207,7 +209,8 @@ def generate_deliverables(project):
             DueDate=due_date,
             PlannedHours=planned_hours,
             ActualHours=0,
-            Progress=0
+            Progress=0,
+            Price=price
         )
         deliverables.append(deliverable)
 
@@ -282,6 +285,9 @@ def generate_consultant_deliverables(deliverables, assigned_consultants, project
             deliverable.Status = 'Completed'
         else:
             deliverable.Status = 'In Progress'
+
+        if project.Type == 'Fixed' and deliverable.Status == 'Completed':
+            deliverable.InvoicedDate = deliverable.SubmissionDate + timedelta(days=random.randint(0, 7))
         
         if remaining_hours > Decimal('0.1'):
             print(f"Warning: Deliverable {deliverable.DeliverableID} has {float(remaining_hours):.1f} unallocated hours")
@@ -299,7 +305,6 @@ def generate_consultant_deliverables(deliverables, assigned_consultants, project
     project.ActualHours = float(total_actual_hours)
 
     return consultant_deliverables
-
 
 def update_project_status(project, current_date):
     if current_date < project.PlannedStartDate:
@@ -399,4 +404,3 @@ def main(start_year, end_year):
     print("Generating Project Data...")
     generate_projects(start_year, end_year)
     print("Complete")
-
