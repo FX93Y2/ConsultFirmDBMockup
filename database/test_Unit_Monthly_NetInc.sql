@@ -1,4 +1,4 @@
--- check business unit Net Income by year and month
+-- check business unit Net Income by year and month --
 WITH exp AS (
     SELECT ProjectID, STRFTIME('%Y-%m', Date) AS Year_Month,
         SUM(Amount) as TotalExpenses
@@ -132,11 +132,20 @@ LEFT JOIN cons_pay
     ON unit_rev.Year_Month = cons_pay.Year_Month
     AND unit_rev.UnitID = cons_pay.BusinessUnitID
 
+
+---- Test Consultant Working Hours ----
+SELECT ConsultantID, Date, SUM(Hours) AS TotalHours
+from Consultant_Deliverable
+GROUP BY ConsultantID, Date
+HAVING TotalHours > 24
+
+
 --------------------------------------------------------------
 
 ------------ Below are old queries, use the above ------------
 
 --------------------------------------------------------------
+
 
 
 -- check payroll data in business unit

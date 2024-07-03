@@ -7,6 +7,7 @@ from src.database_generator.generators.consultant_title_history import main as g
 from src.database_generator.generators.payroll import generate_payroll
 from src.database_generator.generators.project_deliverable import generate_projects
 from src.spreadsheet_generator.indirect_cost import generate_indirect_costs
+from src.spreadsheet_generator.non_billable_time import generate_non_billable_time_report
 
 START_YEAR = 2015
 END_YEAR = 2018
@@ -26,6 +27,9 @@ def main():
     
     # Generate Spreadsheet
     generate_indirect_costs()
+
+    # Generate non-billable time report
+    generate_non_billable_time_report()
 
     # Generate json file
 
