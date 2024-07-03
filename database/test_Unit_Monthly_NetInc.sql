@@ -1,4 +1,4 @@
--- SQLite
+-- check unit Net Income
 WITH exp AS (
     SELECT ProjectID, STRFTIME('%Y-%m', Date) AS Year_Month,
         SUM(CASE WHEN IsBillable = 1 THEN Amount
@@ -8,19 +8,16 @@ WITH exp AS (
     GROUP BY ProjectID, STRFTIME('%Y-%m', Date)
 ),
 
-tb AS (
-    -- T&M projects charges by month
+tb_tm AS (
+    -- Time and Material projects charges by month
     SELECT Deliverable.ProjectID, 
         STRFTIME('%Y-%m', Consultant_Deliverable.Date) AS Year_Month,
         SUM(Consultant_Deliverable.Hours * ProjectBillingRate.Rate) as Amount
-
     FROM Consultant_Deliverable
-
     LEFT JOIN Deliverable 
         ON Deliverable.DeliverableID = Consultant_Deliverable.DeliverableID
     LEFT JOIN Project 
         ON Deliverable.ProjectID = Project.ProjectID
-
     LEFT JOIN Consultant_Title_History
         ON Consultant_Deliverable.ConsultantID = Consultant_Title_History.ConsultantID
         AND (Consultant_Deliverable.Date BETWEEN Consultant_Title_History.StartDate 
@@ -28,21 +25,52 @@ tb AS (
     LEFT JOIN ProjectBillingRate
         ON Consultant_Title_History.TitleID = ProjectBillingRate.TitleID
         AND ProjectBillingRate.ProjectID = Deliverable.ProjectID
-
     WHERE Project.Type = 'Time and Material'
+    GROUP BY Deliverable.ProjectID, STRFTIME('%Y-%m', Consultant_Deliverable.Date)
+),
 
-    Group BY Deliverable.ProjectID, STRFTIME('%Y-%m', Consultant_Deliverable.Date)
+tb_fixed AS (
+    -- Fixed projects charges by month using InvoicedDate
+    SELECT Deliverable.ProjectID, 
+        STRFTIME('%Y-%m', Deliverable.InvoicedDate) AS Year_Month,
+        SUM(Deliverable.Price) as Amount
+    FROM Deliverable
+    LEFT JOIN Project 
+        ON Deliverable.ProjectID = Project.ProjectID
+    WHERE Project.Type = 'Fixed' and Deliverable.Status = 'Completed'
+    GROUP BY Deliverable.ProjectID, STRFTIME('%Y-%m', Deliverable.InvoicedDate)
+),
+
+tb_combined AS (
+    SELECT * FROM tb_tm
+    UNION ALL
+    SELECT * FROM tb_fixed
 ),
 
 tb1 AS (
-    SELECT tb.ProjectID, tb.Year_Month, 
-        IFNULL(TotalExpenses, 0) as TotalExpenses, 
-        IFNULL(Amount, 0) as TotalAmount,
-        IFNULL(Amount, 0) + IFNULL(TotalExpenses, 0) as Revenue
-    FROM tb
+    SELECT 
+        COALESCE(tb_combined.ProjectID, exp.ProjectID) AS ProjectID,
+        COALESCE(tb_combined.Year_Month, exp.Year_Month) AS Year_Month,
+        IFNULL(exp.TotalExpenses, 0) AS TotalExpenses,
+        IFNULL(tb_combined.Amount, 0) AS TotalAmount,
+        IFNULL(tb_combined.Amount, 0) + IFNULL(exp.TotalExpenses, 0) AS Revenue
+    FROM tb_combined
     LEFT JOIN exp
-        ON tb.ProjectID = exp.ProjectID
-        AND tb.Year_Month = exp.Year_Month
+        ON tb_combined.ProjectID = exp.ProjectID
+        AND tb_combined.Year_Month = exp.Year_Month
+
+    UNION
+
+    SELECT 
+        COALESCE(tb_combined.ProjectID, exp.ProjectID) AS ProjectID,
+        COALESCE(tb_combined.Year_Month, exp.Year_Month) AS Year_Month,
+        IFNULL(exp.TotalExpenses, 0) AS TotalExpenses,
+        IFNULL(tb_combined.Amount, 0) AS TotalAmount,
+        IFNULL(tb_combined.Amount, 0) + IFNULL(exp.TotalExpenses, 0) AS Revenue
+    FROM exp
+    LEFT JOIN tb_combined
+        ON tb_combined.ProjectID = exp.ProjectID
+        AND tb_combined.Year_Month = exp.Year_Month
 ),
 
 unit_rev AS (
@@ -71,6 +99,12 @@ FROM unit_rev
 LEFT JOIN cons_pay
     ON unit_rev.Year_Month = cons_pay.Year_Month
     AND unit_rev.UnitID = cons_pay.BusinessUnitID
+--------------------------------------------------------------
+
+
+
+
+
 
 -- check payroll data in business unit
 SELECT *
@@ -80,3 +114,20 @@ WHERE ConsultantID IN (
     FROM Consultant
     WHERE BusinessUnitID = 2
 )
+
+--Check conmpleted fixed deliverables
+SELECT STRFTIME('%Y-%m', InvoicedDate) as Year_Month, SUM(Price) as Revenue
+from Deliverable
+where Status = 'Completed'
+GROUP BY STRFTIME('%Y-%m', InvoicedDate)
+
+-- check billable
+select *
+from ProjectExpense
+where IsBillable = 1
+
+--check project
+select *
+from Deliverable
+left join Project
+where Project.UnitID = 3
