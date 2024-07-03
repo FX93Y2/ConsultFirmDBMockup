@@ -29,7 +29,7 @@ DELIVERABLE_COUNT_RANGE = (3, 7)
 # Profit Margin Range for Fixed Projects
 PROFIT_MARGIN_RANGE = (0.15, 0.30)
 
-# Overhead Percentage
+# Hourly Cost Overhead Percentage
 OVERHEAD_PERCENTAGE = 0.3
 
 # Working Hours per Month

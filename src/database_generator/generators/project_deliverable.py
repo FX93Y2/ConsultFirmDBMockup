@@ -119,8 +119,6 @@ def set_project_dates(project, current_year, assigned_consultants, session):
     
     # Set Actual Start Date
     min_actual_start = max(project.PlannedStartDate, latest_consultant_start)
-    
-    # Ensure that the delay calculation doesn't result in a negative range
     max_delay_days = max(0, (project.PlannedEndDate - min_actual_start).days // 5)
     actual_start_delay = random.randint(0, min(30, max_delay_days))  # Cap at 30 days
     
