@@ -37,9 +37,15 @@ def determine_project_count(available_consultants, growth_rate):
 
 def calculate_project_progress(project, deliverables):
     total_planned_hours = sum(d.PlannedHours for d in deliverables)
-    completed_hours = sum(d.PlannedHours for d in deliverables if d.Status == 'Completed')
     
-    if total_planned_hours > 0:
-        project.Progress = min(100, int((completed_hours / Decimal(total_planned_hours)) * 100))
-    else:
-        project.Progress = 100 if any(d.Status == 'Completed' for d in deliverables) else 0
+    if total_planned_hours == 0:
+        project.Progress = 0
+        return
+
+    weighted_progress = Decimal(0)
+    for deliverable in deliverables:
+        weight = Decimal(deliverable.PlannedHours) / Decimal(total_planned_hours)
+        weighted_progress += weight * Decimal(deliverable.Progress)
+
+    project.Progress = int(weighted_progress.quantize(Decimal('1.'), rounding=ROUND_HALF_UP))
+

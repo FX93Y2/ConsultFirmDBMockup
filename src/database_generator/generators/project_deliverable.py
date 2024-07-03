@@ -304,16 +304,21 @@ def generate_consultant_deliverables(deliverables, assigned_consultants, project
         
         #if remaining_hours > Decimal('0.1'):
             #print(f"Warning: Deliverable {deliverable.DeliverableID} has {float(remaining_hours):.1f} unallocated hours")
-
+           
+    # Update PROJECT progress and status after allocate hours to deliverables
     project.ActualHours = float(total_actual_hours)
     calculate_project_progress(project, deliverables)
 
-    if project.Progress < 100:
+    if project.Progress < 100 and project.Progress > 0:
         project.Status = 'In Progress'
         project.ActualEndDate = None
-    else:
+    elif project.Progress == 100:
         project.Status = 'Completed'
         project.ActualEndDate = last_worked_date
+    else:
+        project.Status = 'Not Started'
+        project.ActualEndDate = None 
+
 
     return consultant_deliverables
 
