@@ -243,8 +243,6 @@ def generate_consultant_deliverables(deliverables, assigned_consultants, project
     consultant_deliverables = []
     simulation_end_date = date(end_year, 12, 31)
 
-    project.ActualHours = adjust_hours(project.PlannedHours)
-
     hour_adjustment_factor = project.ActualHours / Decimal(project.PlannedHours) if project.PlannedHours > 0 else Decimal('1')
 
     total_actual_hours = Decimal('0')
@@ -349,7 +347,7 @@ def generate_projects(start_year, end_year):
 
                 duration_months = set_project_dates(project, current_year, assigned_consultants, session)
                 project.PlannedHours = duration_months * project_settings.WORKING_HOURS_PER_MONTH
-                project.ActualHours = 0
+                project.ActualHours = adjust_hours(project.PlannedHours)
                 
                 expenses = calculate_project_financials(project, assigned_consultants, session, current_year)
                 session.add_all(expenses)

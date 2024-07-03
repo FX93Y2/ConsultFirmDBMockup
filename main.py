@@ -9,7 +9,7 @@ from src.database_generator.generators.project_deliverable import generate_proje
 from src.spreadsheet_generator.indirect_cost import generate_indirect_costs
 
 START_YEAR = 2015
-END_YEAR = 2020
+END_YEAR = 2017
 
 def main():
     # Initialize DB
