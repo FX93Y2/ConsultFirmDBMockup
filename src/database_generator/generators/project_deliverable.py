@@ -27,6 +27,19 @@ def get_available_consultants(session, year):
         ConsultantTitleHistory.EventType.notin_(['Layoff', 'Attrition'])
     ).all()
 
+def get_latest_consultant_start_date(assigned_consultants, session, current_year):
+    latest_start_date = date(current_year, 1, 1)
+    for consultant in assigned_consultants:
+        title_history = session.query(ConsultantTitleHistory).filter(
+            ConsultantTitleHistory.ConsultantID == consultant.ConsultantID,
+            ConsultantTitleHistory.StartDate.between(date(current_year, 1, 1), date(current_year, 12, 31))
+        ).order_by(ConsultantTitleHistory.StartDate.desc()).first()
+        
+        if title_history and title_history.StartDate > latest_start_date:
+            latest_start_date = title_history.StartDate
+    
+    return latest_start_date
+
 def assign_project_to_business_unit(session, assigned_consultants, active_units, current_year):
     consultant_unit_counts = Counter(consultant.BusinessUnitID for consultant in assigned_consultants)
     
@@ -82,18 +95,45 @@ def assign_consultants_to_project(available_consultants, session):
 
     return assigned_consultants
 
-def set_project_dates(project, current_year):
+def set_project_dates(project, current_year, assigned_consultants, session):
     if project.Type == 'Fixed':
         duration_months = random.randint(*project_settings.FIXED_PROJECT_DURATION_RANGE)
     else:  # Time and Material
         duration_months = random.randint(*project_settings.TIME_MATERIAL_PROJECT_DURATION_RANGE)
     
-    start_month = random.randint(1, 12)
-    start_day = random.randint(1, 28)  # Avoid issues with February
+    latest_consultant_start = get_latest_consultant_start_date(assigned_consultants, session, current_year)
     
-    project.PlannedStartDate = date(current_year, start_month, start_day)
+    # Set Planned Start Date
+    earliest_possible_start = date(current_year, 1, 1)
+    latest_possible_start = date(current_year, 12, 31)
+    
+    planned_start_options = [
+        earliest_possible_start,
+        latest_consultant_start - timedelta(days=random.randint(0, 90)),
+        date(current_year, random.randint(1, 12), random.randint(1, 28))
+    ]
+    planned_start = max(earliest_possible_start, min(random.choice(planned_start_options), latest_possible_start))
+    
+    project.PlannedStartDate = planned_start
     project.PlannedEndDate = project.PlannedStartDate + timedelta(days=duration_months * 30)
-    project.ActualStartDate = project.PlannedStartDate
+    
+    # Set Actual Start Date
+    min_actual_start = max(project.PlannedStartDate, latest_consultant_start)
+    
+    # Ensure that the delay calculation doesn't result in a negative range
+    max_delay_days = max(0, (project.PlannedEndDate - min_actual_start).days // 5)
+    actual_start_delay = random.randint(0, min(30, max_delay_days))  # Cap at 30 days
+    
+    project.ActualStartDate = min_actual_start + timedelta(days=actual_start_delay)
+    
+    # Set Actual End Date initially the same as Planned End Date
+    project.ActualEndDate = project.PlannedEndDate
+    
+    # Set initial status
+    if project.ActualStartDate <= date(current_year, 12, 31):
+        project.Status = 'In Progress'
+    else:
+        project.Status = 'Not Started'
     
     return duration_months
 
@@ -264,8 +304,8 @@ def generate_consultant_deliverables(deliverables, assigned_consultants, project
             if project.Type == 'Fixed':
                 deliverable.InvoicedDate = deliverable.SubmissionDate + timedelta(days=random.randint(0, 7))
         
-        if remaining_hours > Decimal('0.1'):
-            print(f"Warning: Deliverable {deliverable.DeliverableID} has {float(remaining_hours):.1f} unallocated hours")
+        #if remaining_hours > Decimal('0.1'):
+            #print(f"Warning: Deliverable {deliverable.DeliverableID} has {float(remaining_hours):.1f} unallocated hours")
 
     project.ActualHours = float(total_actual_hours)
     calculate_project_progress(project, deliverables)
@@ -306,10 +346,8 @@ def generate_projects(start_year, end_year):
                 
                 session.add(project)
                 session.flush()  # This will populate the ProjectID
-                
-                assigned_consultants = assign_consultants_to_project(available_consultants, session)
-                duration_months = set_project_dates(project, current_year)
-                
+
+                duration_months = set_project_dates(project, current_year, assigned_consultants, session)
                 project.PlannedHours = duration_months * project_settings.WORKING_HOURS_PER_MONTH
                 project.ActualHours = 0
                 

@@ -5,12 +5,13 @@ import random
 from datetime import datetime, timedelta
 from sqlalchemy.orm import sessionmaker
 from src.create_db import Project, engine
+from config.ss_config import ss_file_path
 
 def generate_indirect_costs(mean_labor_cost=125000, stddev_labor_cost=5000, mean_other_expense=30000, stddev_other_expense=3000, 
                             outlier_probability=0.01, outlier_multiplier_range=(1.1, 1.3), base_inflation_rate=0.005, 
                             inflation_fluctuation_range=(-0.0005, 0.0005), seasonality_amplitude=0.05, 
                             dependency_factor=0.5, initial_cost_multiplier=2, business_unit_buffer_days=30, 
-                            random_seed=42, output_file="Indirect_Costs.xlsx"):
+                            random_seed=42):
     # Set the seed for reproducibility
     random.seed(random_seed)
     np.random.seed(random_seed)
@@ -96,15 +97,9 @@ def generate_indirect_costs(mean_labor_cost=125000, stddev_labor_cost=5000, mean
     # Create DataFrame
     df = pd.DataFrame(data, columns=["Month", "Business Unit ID", "Non-proj Labor Costs", "Other Expense Costs", "Total Indirect Costs"])
 
-    # Define the base path and the path for the Excel file
-    base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    data_path = os.path.join(base_path, 'data')
-    os.makedirs(data_path, exist_ok=True)
-    excel_file_path = os.path.join(data_path, output_file)
-
     # Save DataFrame to Excel
-    df.to_excel(excel_file_path, index=False)
-    print(f"Data saved to {excel_file_path}")
+    df.to_excel(ss_file_path, index=False)
+    print(f"Data saved to {ss_file_path}")
 
     session.close()
 

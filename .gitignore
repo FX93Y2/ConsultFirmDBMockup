@@ -2,4 +2,4 @@ __pycache__/
 *.pyc
 /myenv
 database/consulting_firm.db
-data/Indirect_Costs.xlsx
+spreadsheets/indirect_costs.xlsx
