@@ -239,7 +239,8 @@ def generate_consultant_deliverables(deliverables, assigned_consultants, project
         target_hours = (Decimal(deliverable.PlannedHours) * hour_adjustment_factor).quantize(Decimal('0.1'), rounding=ROUND_HALF_UP)
         remaining_hours = target_hours
         
-        start_date = max(deliverable.PlannedStartDate, project.PlannedStartDate)
+        start_delay = timedelta(days=random.randint(0, 14))
+        start_date = max(deliverable.PlannedStartDate, project.PlannedStartDate) + start_delay
         end_date = min(simulation_end_date, deliverable.DueDate)
         
         current_date = start_date
