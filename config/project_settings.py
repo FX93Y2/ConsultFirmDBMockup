@@ -2,6 +2,7 @@
 MIN_DAILY_HOURS = 1.0
 MAX_DAILY_HOURS = 8.0
 WORK_PROBABILITY = 0.9  # 90% chance of working on any given day
+MAX_DAILY_CONSULTANT_HOURS = 10.0
 
 # Expense Categories and Percentages
 EXPENSE_CATEGORIES = {

@@ -2,13 +2,13 @@ import random
 from datetime import date, timedelta
 from decimal import Decimal
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy import func, or_, and_
-from collections import Counter
+from sqlalchemy import func, or_
+from collections import Counter, defaultdict
 from decimal import Decimal, ROUND_HALF_UP
 from src.create_db import (Project, Consultant, BusinessUnit, Client, ProjectBillingRate, 
                          ProjectExpense, Deliverable, ConsultantDeliverable, ConsultantTitleHistory, 
                          Payroll, engine)
-from ..utils.project_utils import (round_to_nearest_thousand, adjust_hours, calculate_hourly_cost, 
+from ..utils.project_utils import (get_consultant_daily_hours, round_to_nearest_thousand, adjust_hours, calculate_hourly_cost, 
                                  determine_project_count, calculate_project_progress)
 from config import project_settings
 
@@ -237,21 +237,21 @@ def generate_deliverables(project):
     return deliverables
 
 
-def generate_consultant_deliverables(deliverables, assigned_consultants, project, end_year):
+def generate_consultant_deliverables(deliverables, assigned_consultants, project, end_year, session):
     consultant_deliverables = []
     simulation_end_date = date(end_year, 12, 31)
 
-    hour_adjustment_factor = project.ActualHours / Decimal(project.PlannedHours) if project.PlannedHours > 0 else Decimal('1')
-
     total_actual_hours = Decimal('0')
     last_worked_date = None
+    
+    consultant_daily_hours = defaultdict(lambda: defaultdict(float))
+
     for deliverable in deliverables:
         deliverable.ActualHours = Decimal('0')
-        target_hours = (Decimal(deliverable.PlannedHours) * hour_adjustment_factor).quantize(Decimal('0.1'), rounding=ROUND_HALF_UP)
-        remaining_hours = target_hours
+        remaining_hours = Decimal(deliverable.PlannedHours)
         
         start_date = max(deliverable.PlannedStartDate, project.ActualStartDate)
-        end_date = simulation_end_date
+        end_date = min(simulation_end_date, deliverable.DueDate)
         
         current_date = start_date
         
@@ -262,13 +262,18 @@ def generate_consultant_deliverables(deliverables, assigned_consultants, project
                 current_date += timedelta(days=1)
                 continue
             
-            daily_hours_left = Decimal(len(consultants_working_today)) * Decimal(project_settings.MAX_DAILY_HOURS)
-            
             for consultant in consultants_working_today:
-                if remaining_hours <= Decimal('0') or daily_hours_left <= Decimal('0'):
+                if remaining_hours <= Decimal('0'):
                     break
                 
-                max_consultant_hours = min(Decimal(project_settings.MAX_DAILY_HOURS), daily_hours_left, remaining_hours)
+                # Check consultant's total hours for the day across all projects
+                total_daily_hours = get_consultant_daily_hours(session, consultant.ConsultantID, current_date)
+                available_hours = max(0, project_settings.MAX_DAILY_CONSULTANT_HOURS - total_daily_hours)
+                
+                if available_hours <= 0:
+                    continue
+                
+                max_consultant_hours = min(Decimal(available_hours), Decimal(project_settings.MAX_DAILY_HOURS), remaining_hours)
                 consultant_hours = Decimal(random.uniform(float(project_settings.MIN_DAILY_HOURS), float(max_consultant_hours))).quantize(Decimal('0.1'), rounding=ROUND_HALF_UP)
                 
                 if consultant_hours > Decimal('0'):
@@ -280,43 +285,28 @@ def generate_consultant_deliverables(deliverables, assigned_consultants, project
                     )
                     consultant_deliverables.append(consultant_deliverable)
                     remaining_hours -= consultant_hours
-                    daily_hours_left -= consultant_hours
                     total_actual_hours += consultant_hours
                     deliverable.ActualHours += consultant_hours
                     last_worked_date = current_date
+                    
+                    # Update consultant's daily hours
+                    consultant_daily_hours[consultant.ConsultantID][current_date] += float(consultant_hours)
             
             current_date += timedelta(days=1)
         
-        if target_hours > Decimal('0'):
-            deliverable.Progress = min(100, int((deliverable.ActualHours / target_hours) * 100))
+        if deliverable.PlannedHours > 0:
+            deliverable.Progress = min(100, int((deliverable.ActualHours / Decimal(deliverable.PlannedHours)) * 100))
         else:
             deliverable.Progress = 100 if deliverable.ActualHours > Decimal('0') else 0
         
-        if deliverable.Progress < 100:
-            deliverable.Status = 'In Progress'
-        else:
-            deliverable.Status = 'Completed'
+        deliverable.Status = 'Completed' if deliverable.Progress == 100 else 'In Progress' if deliverable.Progress > 0 else 'Not Started'
+        if deliverable.Status == 'Completed':
             deliverable.SubmissionDate = last_worked_date
             if project.Type == 'Fixed':
                 deliverable.InvoicedDate = deliverable.SubmissionDate + timedelta(days=random.randint(0, 7))
-        
-        #if remaining_hours > Decimal('0.1'):
-            #print(f"Warning: Deliverable {deliverable.DeliverableID} has {float(remaining_hours):.1f} unallocated hours")
-           
-    # Update PROJECT progress and status after allocate hours to deliverables
+
     project.ActualHours = float(total_actual_hours)
     calculate_project_progress(project, deliverables)
-
-    if project.Progress < 100 and project.Progress > 0:
-        project.Status = 'In Progress'
-        project.ActualEndDate = None
-    elif project.Progress == 100:
-        project.Status = 'Completed'
-        project.ActualEndDate = last_worked_date
-    else:
-        project.Status = 'Not Started'
-        project.ActualEndDate = None 
-
 
     return consultant_deliverables
 
@@ -362,7 +352,7 @@ def generate_projects(start_year, end_year):
                 session.add_all(deliverables)
                 session.flush()  # This will populate DeliverableID
 
-                consultant_deliverables = generate_consultant_deliverables(deliverables, assigned_consultants, project, end_year)                
+                consultant_deliverables = generate_consultant_deliverables(deliverables, assigned_consultants, project, end_year, session)                
                 session.add_all(consultant_deliverables)
                 
                 # Rounding project price to the nearest thousand
