@@ -285,6 +285,18 @@ def generate_consultant_deliverables(deliverables, assigned_consultants, project
         if deliverable.ActualHours > 0:
             deliverable.SubmissionDate = current_date - timedelta(days=1)
 
+            # Calculate deliverable progress and update InvocedDate for fixed projects
+            deliverable.Progress = min(100, int((deliverable.ActualHours / target_hours) * 100))
+            if deliverable.Progress == 100:
+                deliverable.Status = 'Completed'
+                if project.Type == 'Fixed':
+                    invoice_delay = timedelta(days=random.randint(1, 7))
+                    deliverable.InvoicedDate = deliverable.SubmissionDate + invoice_delay
+            elif deliverable.Progress > 0:
+                deliverable.Status = 'In Progress'
+            else:
+                deliverable.Status = 'Not Started'
+
     project.ActualHours = float(total_actual_hours)
 
     return consultant_deliverables
@@ -299,7 +311,7 @@ def update_project_and_deliverable_status(project, deliverables, simulation_end_
     for deliverable in deliverables:
         if deliverable.ActualHours > 0:
             deliverable.Status = 'Completed' if deliverable.ActualHours >= deliverable.PlannedHours else 'In Progress'
-            deliverable.Progress = min(100, int((deliverable.ActualHours / deliverable.PlannedHours) * 100))
+            #deliverable.Progress = min(100, int((deliverable.ActualHours / deliverable.PlannedHours) * 100))
             
             if project.ActualStartDate is None or deliverable.ActualStartDate < project.ActualStartDate:
                 project.ActualStartDate = deliverable.ActualStartDate
