@@ -8,7 +8,7 @@ from decimal import Decimal, ROUND_HALF_UP
 from src.create_db import (Project, Consultant, BusinessUnit, Client, ProjectBillingRate, 
                          ProjectExpense, Deliverable, ConsultantDeliverable, ConsultantTitleHistory, 
                          Payroll, engine)
-from ..utils.project_utils import (get_consultant_daily_hours, round_to_nearest_thousand, adjust_hours, calculate_hourly_cost, 
+from ..utils.project_utils import (round_to_nearest_thousand, adjust_hours, calculate_hourly_cost, 
                                  determine_project_count, calculate_project_progress)
 from config import project_settings
 
@@ -26,6 +26,13 @@ def get_available_consultants(session, year):
         or_(ConsultantTitleHistory.EndDate >= start_date, ConsultantTitleHistory.EndDate == None),
         ConsultantTitleHistory.EventType.notin_(['Layoff', 'Attrition'])
     ).all()
+
+def get_consultant_daily_hours(session, consultant_id, date):
+    total_hours = session.query(func.sum(ConsultantDeliverable.Hours)).filter(
+        ConsultantDeliverable.ConsultantID == consultant_id,
+        ConsultantDeliverable.Date == date
+    ).scalar() or 0
+    return total_hours
 
 def get_latest_consultant_start_date(assigned_consultants, session, current_year):
     latest_start_date = date(current_year, 1, 1)
@@ -103,7 +110,6 @@ def set_project_dates(project, current_year, assigned_consultants, session):
     
     latest_consultant_start = get_latest_consultant_start_date(assigned_consultants, session, current_year)
     
-    # Set Planned Start Date
     earliest_possible_start = date(current_year, 1, 1)
     latest_possible_start = date(current_year, 12, 31)
     
@@ -117,29 +123,13 @@ def set_project_dates(project, current_year, assigned_consultants, session):
     project.PlannedStartDate = planned_start
     project.PlannedEndDate = project.PlannedStartDate + timedelta(days=duration_months * 30)
     
-    # Set Actual Start Date
-    min_actual_start = max(project.PlannedStartDate, latest_consultant_start)
-    max_delay_days = max(0, (project.PlannedEndDate - min_actual_start).days // 5)
-    actual_start_delay = random.randint(0, min(30, max_delay_days))  # Cap at 30 days
-    
-    project.ActualStartDate = min_actual_start + timedelta(days=actual_start_delay)
-    
-    # Set Actual End Date initially the same as Planned End Date
-    project.ActualEndDate = project.PlannedEndDate
-    
-    # Set initial status
-    if project.ActualStartDate <= date(current_year, 12, 31):
-        project.Status = 'In Progress'
-    else:
-        project.Status = 'Not Started'
-    
     return duration_months
 
 def generate_project_expenses(project, total_consultant_cost):
     expenses = []
     
     for category, percentage in project_settings.EXPENSE_CATEGORIES.items():
-        amount = total_consultant_cost * percentage * random.uniform(0.8, 1.2)
+        amount = round(total_consultant_cost * percentage * random.uniform(0.8, 1.2), -3)
         expense = ProjectExpense(
             ProjectID=project.ProjectID,
             Date=project.PlannedStartDate + timedelta(days=random.randint(0, (project.PlannedEndDate - project.PlannedStartDate).days)),
@@ -224,7 +214,6 @@ def generate_deliverables(project):
             ProjectID=project.ProjectID,
             Name=f"Deliverable {i+1}",
             PlannedStartDate=start_date,
-            ActualStartDate=start_date,
             Status='Not Started',
             DueDate=due_date,
             PlannedHours=planned_hours,
@@ -241,16 +230,16 @@ def generate_consultant_deliverables(deliverables, assigned_consultants, project
     consultant_deliverables = []
     simulation_end_date = date(end_year, 12, 31)
 
-    total_actual_hours = Decimal('0')
-    last_worked_date = None
-    
-    consultant_daily_hours = defaultdict(lambda: defaultdict(float))
+    project.ActualHours = adjust_hours(project.PlannedHours)
+    hour_adjustment_factor = project.ActualHours / Decimal(project.PlannedHours) if project.PlannedHours > 0 else Decimal('1')
 
+    total_actual_hours = Decimal('0')
     for deliverable in deliverables:
         deliverable.ActualHours = Decimal('0')
-        remaining_hours = Decimal(deliverable.PlannedHours)
+        target_hours = (Decimal(deliverable.PlannedHours) * hour_adjustment_factor).quantize(Decimal('0.1'), rounding=ROUND_HALF_UP)
+        remaining_hours = target_hours
         
-        start_date = max(deliverable.PlannedStartDate, project.ActualStartDate)
+        start_date = max(deliverable.PlannedStartDate, project.PlannedStartDate)
         end_date = min(simulation_end_date, deliverable.DueDate)
         
         current_date = start_date
@@ -266,14 +255,13 @@ def generate_consultant_deliverables(deliverables, assigned_consultants, project
                 if remaining_hours <= Decimal('0'):
                     break
                 
-                # Check consultant's total hours for the day across all projects
-                total_daily_hours = get_consultant_daily_hours(session, consultant.ConsultantID, current_date)
-                available_hours = max(0, project_settings.MAX_DAILY_CONSULTANT_HOURS - total_daily_hours)
+                consultant_daily_hours = get_consultant_daily_hours(session, consultant.ConsultantID, current_date)
+                available_hours = max(0, project_settings.MAX_DAILY_HOURS - consultant_daily_hours)
                 
                 if available_hours <= 0:
                     continue
                 
-                max_consultant_hours = min(Decimal(available_hours), Decimal(project_settings.MAX_DAILY_HOURS), remaining_hours)
+                max_consultant_hours = min(Decimal(available_hours), remaining_hours)
                 consultant_hours = Decimal(random.uniform(float(project_settings.MIN_DAILY_HOURS), float(max_consultant_hours))).quantize(Decimal('0.1'), rounding=ROUND_HALF_UP)
                 
                 if consultant_hours > Decimal('0'):
@@ -287,28 +275,45 @@ def generate_consultant_deliverables(deliverables, assigned_consultants, project
                     remaining_hours -= consultant_hours
                     total_actual_hours += consultant_hours
                     deliverable.ActualHours += consultant_hours
-                    last_worked_date = current_date
                     
-                    # Update consultant's daily hours
-                    consultant_daily_hours[consultant.ConsultantID][current_date] += float(consultant_hours)
+                    if deliverable.ActualStartDate is None:
+                        deliverable.ActualStartDate = current_date
             
             current_date += timedelta(days=1)
         
-        if deliverable.PlannedHours > 0:
-            deliverable.Progress = min(100, int((deliverable.ActualHours / Decimal(deliverable.PlannedHours)) * 100))
-        else:
-            deliverable.Progress = 100 if deliverable.ActualHours > Decimal('0') else 0
-        
-        deliverable.Status = 'Completed' if deliverable.Progress == 100 else 'In Progress' if deliverable.Progress > 0 else 'Not Started'
-        if deliverable.Status == 'Completed':
-            deliverable.SubmissionDate = last_worked_date
-            if project.Type == 'Fixed':
-                deliverable.InvoicedDate = deliverable.SubmissionDate + timedelta(days=random.randint(0, 7))
+        if deliverable.ActualHours > 0:
+            deliverable.SubmissionDate = current_date - timedelta(days=1)
 
     project.ActualHours = float(total_actual_hours)
-    calculate_project_progress(project, deliverables)
 
     return consultant_deliverables
+
+
+def update_project_and_deliverable_status(project, deliverables):
+    project.ActualStartDate = None
+    project.ActualEndDate = None
+    project.Status = 'Not Started'
+
+    for deliverable in deliverables:
+        if deliverable.ActualHours > 0:
+            deliverable.Status = 'Completed' if deliverable.ActualHours >= deliverable.PlannedHours else 'In Progress'
+            deliverable.Progress = min(100, int((deliverable.ActualHours / deliverable.PlannedHours) * 100))
+            
+            if project.ActualStartDate is None or deliverable.ActualStartDate < project.ActualStartDate:
+                project.ActualStartDate = deliverable.ActualStartDate
+            
+            if deliverable.Status == 'Completed' and (project.ActualEndDate is None or deliverable.SubmissionDate > project.ActualEndDate):
+                project.ActualEndDate = deliverable.SubmissionDate
+
+    calculate_project_progress(project, deliverables)
+
+    if project.Progress > 0:
+        project.Status = 'Completed' if project.Progress == 100 else 'In Progress'
+
+    if project.Status == 'Completed' and project.ActualEndDate is None:
+        project.ActualEndDate = max(d.SubmissionDate for d in deliverables if d.SubmissionDate)
+
+    return project, deliverables
 
 def generate_projects(start_year, end_year):
     Session = sessionmaker(bind=engine)
@@ -340,7 +345,7 @@ def generate_projects(start_year, end_year):
 
                 duration_months = set_project_dates(project, current_year, assigned_consultants, session)
                 project.PlannedHours = duration_months * project_settings.WORKING_HOURS_PER_MONTH
-                project.ActualHours = adjust_hours(project.PlannedHours)
+                project.ActualHours = 0
                 
                 expenses = calculate_project_financials(project, assigned_consultants, session, current_year)
                 session.add_all(expenses)
@@ -355,7 +360,11 @@ def generate_projects(start_year, end_year):
                 consultant_deliverables = generate_consultant_deliverables(deliverables, assigned_consultants, project, end_year, session)                
                 session.add_all(consultant_deliverables)
                 
-                # Rounding project price to the nearest thousand
+                project, deliverables = update_project_and_deliverable_status(project, deliverables)
+                
+                session.add(project)
+                session.add_all(deliverables)
+
                 if project.Price:
                     project.Price = round_to_nearest_thousand(project.Price)
             
@@ -367,5 +376,5 @@ def generate_projects(start_year, end_year):
         session.rollback()
     finally:
         session.close()
-        print("Complete")
+    print("Complete")
     
