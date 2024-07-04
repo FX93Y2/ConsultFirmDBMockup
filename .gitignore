@@ -1,5 +1,4 @@
 __pycache__/
 *.pyc
 /myenv
-database/consulting_firm.db
-spreadsheets/indirect_costs.xlsx
+output/spreadsheets/indirect_costs.xlsx

@@ -289,11 +289,12 @@ def generate_consultant_deliverables(deliverables, assigned_consultants, project
     return consultant_deliverables
 
 
-def update_project_and_deliverable_status(project, deliverables):
+def update_project_and_deliverable_status(project, deliverables, simulation_end_date):
     project.ActualStartDate = None
     project.ActualEndDate = None
     project.Status = 'Not Started'
 
+    all_deliverables_completed = True
     for deliverable in deliverables:
         if deliverable.ActualHours > 0:
             deliverable.Status = 'Completed' if deliverable.ActualHours >= deliverable.PlannedHours else 'In Progress'
@@ -302,22 +303,29 @@ def update_project_and_deliverable_status(project, deliverables):
             if project.ActualStartDate is None or deliverable.ActualStartDate < project.ActualStartDate:
                 project.ActualStartDate = deliverable.ActualStartDate
             
-            if deliverable.Status == 'Completed' and (project.ActualEndDate is None or deliverable.SubmissionDate > project.ActualEndDate):
-                project.ActualEndDate = deliverable.SubmissionDate
+            if deliverable.Status == 'Completed':
+                if project.ActualEndDate is None or deliverable.SubmissionDate > project.ActualEndDate:
+                    project.ActualEndDate = deliverable.SubmissionDate
+            else:
+                all_deliverables_completed = False
+        else:
+            all_deliverables_completed = False
 
     calculate_project_progress(project, deliverables)
 
     if project.Progress > 0:
-        project.Status = 'Completed' if project.Progress == 100 else 'In Progress'
-
-    if project.Status == 'Completed' and project.ActualEndDate is None:
-        project.ActualEndDate = max(d.SubmissionDate for d in deliverables if d.SubmissionDate)
+        project.Status = 'In Progress'
+        if all_deliverables_completed and project.PlannedEndDate <= simulation_end_date:
+            project.Status = 'Completed'
+        else:
+            project.ActualEndDate = None
 
     return project, deliverables
 
 def generate_projects(start_year, end_year):
     Session = sessionmaker(bind=engine)
     session = Session()
+    simulation_end_date = date(end_year, 12, 31)
     print("Generating Project Data...")
 
     try:
@@ -360,7 +368,7 @@ def generate_projects(start_year, end_year):
                 consultant_deliverables = generate_consultant_deliverables(deliverables, assigned_consultants, project, end_year, session)                
                 session.add_all(consultant_deliverables)
                 
-                project, deliverables = update_project_and_deliverable_status(project, deliverables)
+                project, deliverables = update_project_and_deliverable_status(project, deliverables, simulation_end_date)
                 
                 session.add(project)
                 session.add_all(deliverables)
