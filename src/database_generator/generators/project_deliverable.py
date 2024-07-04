@@ -125,38 +125,63 @@ def set_project_dates(project, current_year, assigned_consultants, session):
     
     return duration_months
 
-def generate_project_expenses(project, total_consultant_cost):
+def generate_project_expenses(project, total_consultant_cost, deliverables, consultant_deliverables):
     expenses = []
     
-    for category, percentage in project_settings.EXPENSE_CATEGORIES.items():
-        amount = round(total_consultant_cost * percentage * random.uniform(0.8, 1.2), -3)
-        expense = ProjectExpense(
-            ProjectID=project.ProjectID,
-            Date=project.PlannedStartDate + timedelta(days=random.randint(0, (project.PlannedEndDate - project.PlannedStartDate).days)),
-            Amount=amount,
-            Description=f"{category} expense for {project.Name}",
-            Category=category,
-            IsBillable=False
-        )
-        expenses.append(expense)
+    for deliverable in deliverables:
+        deliverable_consultant_records = [cd for cd in consultant_deliverables if cd.DeliverableID == deliverable.DeliverableID]
+        deliverable_duration = (deliverable.DueDate - deliverable.PlannedStartDate).days
+        
+        for category, percentage in project_settings.EXPENSE_CATEGORIES.items():
+            is_billable = random.choice([True, False])
+            base_amount = Decimal(total_consultant_cost) * Decimal(percentage) * Decimal(random.uniform(0.8, 1.2))
+            
+            # Adjust amount based on deliverable's portion of the project
+            if project.PlannedHours and project.PlannedHours > 0:
+                amount = round((base_amount * Decimal(deliverable.PlannedHours) / Decimal(project.PlannedHours)), -2)
+            else:
+                amount = round(base_amount, -2)
+            
+            if amount > 0:
+                expense_date = random.choice(deliverable_consultant_records).Date if deliverable_consultant_records else deliverable.PlannedStartDate
+                
+                expense = ProjectExpense(
+                    ProjectID=project.ProjectID,
+                    DeliverableID=deliverable.DeliverableID,
+                    Date=expense_date,
+                    Amount=float(amount),  # Convert Decimal to float for database storage
+                    Description=f"{category} expense for {deliverable.Name}",
+                    Category=category,
+                    IsBillable=is_billable
+                )
+                expenses.append(expense)
     
     return expenses
 
-def calculate_project_financials(project, assigned_consultants, session, current_year):
-    total_consultant_cost = sum(calculate_hourly_cost(session, consultant, current_year) * project.PlannedHours 
+
+def calculate_project_financials(project, assigned_consultants, session, current_year, deliverables, consultant_deliverables):
+    total_consultant_cost = sum(calculate_hourly_cost(session, consultant, current_year) * (project.PlannedHours or 0) 
                                 for consultant in assigned_consultants)
 
-    expenses = generate_project_expenses(project, total_consultant_cost)
-    total_expenses = sum(expense.Amount for expense in expenses)
+    expenses = generate_project_expenses(project, total_consultant_cost, deliverables, consultant_deliverables)
     
-    total_cost = total_consultant_cost + total_expenses
+    total_cost = Decimal(total_consultant_cost) + sum(Decimal(expense.Amount) for expense in expenses if not expense.IsBillable)
+    total_billable_expense = sum(Decimal(expense.Amount) for expense in expenses if expense.IsBillable)
     
     if project.Type == 'Fixed':
-        profit_margin = random.uniform(*project_settings.PROFIT_MARGIN_RANGE)
-        project.Price = total_cost * (1 + profit_margin)
+        profit_margin = Decimal(random.uniform(*project_settings.PROFIT_MARGIN_RANGE))
+        project.Price = float(round_to_nearest_thousand((total_cost * (1 + profit_margin)) + total_billable_expense))
     else:  # Time and Material
-        project.Price = None
-        
+        '''
+        For T&M projects, we'll set an estimated budget instead of a fixed price
+        Estimated budget are set 10-30% higher than the calculated cost
+        '''
+
+        buffer_factor = project_settings.ESTIMATED_BUDGET_FACTORS
+        estimated_budget = (total_cost + total_billable_expense) * buffer_factor
+        project.EstimatedBudget = float(round_to_nearest_thousand(estimated_budget))
+        project.Price = None  # T&M projects don't have a fixed price
+    
     return expenses
 
 def generate_project_billing_rates(session, project, assigned_consultants):
@@ -207,8 +232,11 @@ def generate_deliverables(project):
         due_date = min(start_date + timedelta(days=deliverable_duration), project.PlannedEndDate)
 
         price = None
-        if project.Type == 'Fixed':
+        if project.Type == 'Fixed' and project.Price is not None:
             price = round_to_nearest_thousand((Decimal(planned_hours) / Decimal(project.PlannedHours) * Decimal(project.Price)))
+        elif project.Type == 'Time and Material' and project.EstimatedBudget is not None:
+            # For T&M projects, set an estimated price based on the EstimatedBudget
+            price = round_to_nearest_thousand((Decimal(planned_hours) / Decimal(project.PlannedHours) * Decimal(project.EstimatedBudget)))
 
         deliverable = Deliverable(
             ProjectID=project.ProjectID,
@@ -358,7 +386,9 @@ def generate_projects(start_year, end_year):
                     Name=f"Project_{current_year}_{random.randint(1000, 9999)}",
                     Type=random.choices(project_settings.PROJECT_TYPES, weights=project_settings.PROJECT_TYPE_WEIGHTS)[0],
                     Status='Not Started',
-                    Progress=0
+                    Progress=0,
+                    EstimatedBudget=None,
+                    Price=None
                 )
                 
                 session.add(project)
@@ -368,12 +398,6 @@ def generate_projects(start_year, end_year):
                 project.PlannedHours = duration_months * project_settings.WORKING_HOURS_PER_MONTH
                 project.ActualHours = 0
                 
-                expenses = calculate_project_financials(project, assigned_consultants, session, current_year)
-                session.add_all(expenses)
-                
-                billing_rates = generate_project_billing_rates(session, project, assigned_consultants)
-                session.add_all(billing_rates)
-                
                 deliverables = generate_deliverables(project)
                 session.add_all(deliverables)
                 session.flush()  # This will populate DeliverableID
@@ -381,19 +405,27 @@ def generate_projects(start_year, end_year):
                 consultant_deliverables = generate_consultant_deliverables(deliverables, assigned_consultants, project, end_year, session)                
                 session.add_all(consultant_deliverables)
                 
+                expenses = calculate_project_financials(project, assigned_consultants, session, current_year, deliverables, consultant_deliverables)
+                session.add_all(expenses)
+                
+                billing_rates = generate_project_billing_rates(session, project, assigned_consultants)
+                session.add_all(billing_rates)
+                
                 project, deliverables = update_project_and_deliverable_status(project, deliverables, simulation_end_date)
                 
                 session.add(project)
                 session.add_all(deliverables)
-
-                if project.Price:
-                    project.Price = round_to_nearest_thousand(project.Price)
             
             session.commit()
             print(f"Generated {num_projects} projects for year {current_year}")
             
     except Exception as e:
         print(f"An error occurred while processing projects: {str(e)}")
+        print(f"Error type: {type(e)}")
+        print(f"Error details: {e.args}")
+        import traceback
+        print("Traceback:")
+        print(traceback.format_exc())
         session.rollback()
     finally:
         session.close()

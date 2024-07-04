@@ -1,3 +1,6 @@
+from decimal import Decimal
+import random
+
 # Project Deliverable Constants
 MIN_DAILY_HOURS = 1.0
 MAX_DAILY_HOURS = 8.0
@@ -36,3 +39,5 @@ OVERHEAD_PERCENTAGE = 0.3
 # Working Hours per Month
 WORKING_HOURS_PER_MONTH = 160
 
+# Estmated Budgets for Time and Material Projects
+ESTIMATED_BUDGET_FACTORS = Decimal(random.uniform(1.1, 1.3))
