@@ -10,5 +10,6 @@ os.makedirs(ss_path, exist_ok=True)
 os.makedirs(json_path, exist_ok=True)
 
 db_file_path = os.path.join(db_path, 'consulting_firm.db')
-ss_file_path = os.path.join(ss_path, 'indirect_costs.xlsx')
+indirect_costs_path = os.path.join(ss_path, 'indirect_costs.xlsx')
+non_billable_time_path = os.path.join(ss_path, 'non_billable_time.xlsx')
 json_path = os.path.join(json_path, 'json_output.json')

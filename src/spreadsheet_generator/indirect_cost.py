@@ -5,7 +5,7 @@ import random
 from datetime import datetime, timedelta
 from sqlalchemy.orm import sessionmaker
 from src.create_db import Project, engine
-from config.path_config import ss_file_path
+from config.path_config import indirect_costs_path
 
 def generate_indirect_costs(mean_labor_cost=125000, stddev_labor_cost=5000, mean_other_expense=30000, stddev_other_expense=3000, 
                             outlier_probability=0.01, outlier_multiplier_range=(1.1, 1.3), base_inflation_rate=0.005, 
@@ -98,8 +98,8 @@ def generate_indirect_costs(mean_labor_cost=125000, stddev_labor_cost=5000, mean
     df = pd.DataFrame(data, columns=["Month", "Business Unit ID", "Non-proj Labor Costs", "Other Expense Costs", "Total Indirect Costs"])
 
     # Save DataFrame to Excel
-    df.to_excel(ss_file_path, index=False)
-    print(f"Data saved to {ss_file_path}")
+    df.to_excel(indirect_costs_path, index=False)
+    print(f"Data saved to {indirect_costs_path}")
 
     session.close()
 

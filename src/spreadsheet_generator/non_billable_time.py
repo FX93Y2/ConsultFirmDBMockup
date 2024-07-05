@@ -4,8 +4,9 @@ import numpy as np
 from datetime import datetime, timedelta
 from sqlalchemy.orm import sessionmaker
 from src.create_db import Consultant, ConsultantDeliverable, engine
+from config.path_config import non_billable_time_path
 
-def generate_non_billable_time_report(output_file="Non_Billable_Time.xlsx", working_hours_per_month=160):
+def generate_non_billable_time_report(working_hours_per_month=160):
 
     Session = sessionmaker(bind=engine)
     session = Session()
@@ -39,15 +40,10 @@ def generate_non_billable_time_report(output_file="Non_Billable_Time.xlsx", work
     project_hours_df = project_hours_df.merge(consultants_df, on='ConsultantID')
     project_hours_df['YearMonth'] = project_hours_df['YearMonth'].dt.strftime('%Y-%m')
     
-    # Define the base path and the path for the Excel file
-    base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    data_path = os.path.join(base_path, 'data')
-    os.makedirs(data_path, exist_ok=True)
-    excel_file_path = os.path.join(data_path, output_file)
 
     # Save DataFrame to Excel
-    project_hours_df.to_excel(excel_file_path, index=False)
-    print(f"Data saved to {excel_file_path}")
+    project_hours_df.to_excel(non_billable_time_path, index=False)
+    print(f"Data saved to {non_billable_time_path}")
 
     session.close()
 
