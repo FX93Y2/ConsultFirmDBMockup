@@ -6,7 +6,7 @@ from unidecode import unidecode
 from datetime import timedelta, date
 from sqlalchemy.orm import sessionmaker
 from collections import defaultdict
-from src.create_db import Consultant, Title, BusinessUnit, ConsultantTitleHistory, engine
+from ...db_model import Consultant, Title, BusinessUnit, ConsultantTitleHistory, engine
 
 # Constants and Distributions
 HIRING_SEASON_PROB = {'Spring': 0.4, 'Fall': 0.4, 'Other': 0.2}
@@ -163,7 +163,7 @@ def perform_layoffs(active_consultants, growth_rate, year, title_history_data, c
         layoffs.extend(consultants[:title_layoffs])
         active_consultants[title] = consultants[title_layoffs:]
 
-    for consultant, years_in_role, total_years in layoffs:
+    for consultant in layoffs:
         current_title_history = next(th for th in reversed(title_history_data) 
                                      if th.ConsultantID == consultant.ConsultantID and th.EndDate is None)
         layoff_date = date(year, random.randint(1, 12), random.randint(1, 28))

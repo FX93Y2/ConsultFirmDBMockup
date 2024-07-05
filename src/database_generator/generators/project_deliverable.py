@@ -5,7 +5,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy import func, or_
 from collections import Counter, defaultdict
 from decimal import Decimal, ROUND_HALF_UP
-from src.create_db import (Project, Consultant, BusinessUnit, Client, ProjectBillingRate, 
+from ...db_model import (Project, Consultant, BusinessUnit, Client, ProjectBillingRate, 
                          ProjectExpense, Deliverable, ConsultantDeliverable, ConsultantTitleHistory, 
                          Payroll, engine)
 from ..utils.project_utils import (round_to_nearest_thousand, adjust_hours, calculate_hourly_cost, 

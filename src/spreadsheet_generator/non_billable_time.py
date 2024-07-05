@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
 from sqlalchemy.orm import sessionmaker
-from src.create_db import Consultant, ConsultantDeliverable, engine
+from ..db_model import Consultant, ConsultantDeliverable, engine
 from config.path_config import non_billable_time_path
 
 def generate_non_billable_time_report(working_hours_per_month=160):

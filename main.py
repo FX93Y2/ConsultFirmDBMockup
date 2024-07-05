@@ -1,4 +1,4 @@
-from src.create_db import main as create_db
+from src.db_model import main as create_db
 from src.database_generator.generators.client import generate_clients
 from src.database_generator.generators.location import generate_locations
 from src.database_generator.generators.title import generate_titles

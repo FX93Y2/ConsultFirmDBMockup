@@ -1,5 +1,5 @@
 from sqlalchemy.orm import sessionmaker
-from ...create_db import Title, engine
+from ...db_model import Title, engine
 
 def generate_titles():
     print("Generating Titles...")
