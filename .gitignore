@@ -3,3 +3,4 @@ __pycache__/
 /myenv
 database/consulting_firm.db
 data/Indirect_Costs.xlsx
+output/database/consulting_firm.db
