@@ -25,7 +25,7 @@ PROJECT_TYPE_WEIGHTS = [0.5, 0.5]  # Equal probability for this example
 
 # Project Duration Ranges (in months)
 FIXED_PROJECT_DURATION_RANGE = (3, 24)
-TIME_MATERIAL_PROJECT_DURATION_RANGE = (1, 36)
+TIME_MATERIAL_PROJECT_DURATION_RANGE = (1, 12)
 
 # Deliverable Count Range
 DELIVERABLE_COUNT_RANGE = (3, 7)

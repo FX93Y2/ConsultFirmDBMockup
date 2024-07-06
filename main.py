@@ -22,7 +22,7 @@ def main():
     generate_clients(358)
     generate_titles()
     generate_consultant_title_history(initial_num_titles=100, start_year=START_YEAR, end_year=END_YEAR)
-    generate_payroll()
+    generate_payroll(END_YEAR)
     generate_projects(START_YEAR, END_YEAR)
     
     # Generate Spreadsheet

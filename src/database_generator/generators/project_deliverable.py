@@ -2,7 +2,7 @@ import random
 from datetime import date, timedelta
 from decimal import Decimal
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy import func, or_
+from sqlalchemy import func, or_, and_
 from collections import Counter, defaultdict
 from decimal import Decimal, ROUND_HALF_UP
 from ...db_model import (Project, Consultant, BusinessUnit, Client, ProjectBillingRate, 
@@ -20,12 +20,41 @@ def get_active_business_units(session, year):
 def get_available_consultants(session, year):
     start_date = date(year, 1, 1)
     end_date = date(year, 12, 31)
-    
-    return session.query(Consultant).join(ConsultantTitleHistory).filter(
-        ConsultantTitleHistory.StartDate <= end_date,
-        or_(ConsultantTitleHistory.EndDate >= start_date, ConsultantTitleHistory.EndDate == None),
-        ConsultantTitleHistory.EventType.notin_(['Layoff', 'Attrition'])
-    ).all()
+
+    # Get the latest title for each consultant
+    latest_title = session.query(ConsultantTitleHistory.ConsultantID,
+                                 func.max(ConsultantTitleHistory.StartDate).label('max_start_date'))\
+        .group_by(ConsultantTitleHistory.ConsultantID)\
+        .subquery()
+
+    consultants_with_latest_title = session.query(Consultant)\
+        .join(latest_title, Consultant.ConsultantID == latest_title.c.ConsultantID)\
+        .join(ConsultantTitleHistory,
+              and_(ConsultantTitleHistory.ConsultantID == Consultant.ConsultantID,
+                   ConsultantTitleHistory.StartDate == latest_title.c.max_start_date))
+
+    # Filter by start date
+    consultants_active_in_year = consultants_with_latest_title.filter(
+        ConsultantTitleHistory.StartDate <= end_date
+    )
+
+    # Handeling egde case(first year of simulation)
+    if consultants_active_in_year.count() == 0:
+        available_consultants = session.query(Consultant)\
+            .join(ConsultantTitleHistory)\
+            .filter(ConsultantTitleHistory.StartDate <= end_date)\
+            .filter(ConsultantTitleHistory.EventType == 'Hire')\
+            .all()
+    else:
+        consultants_not_ended = consultants_active_in_year.filter(
+            or_(ConsultantTitleHistory.EndDate >= start_date, ConsultantTitleHistory.EndDate == None)
+        )
+        # Filter out layoffs and attrition
+        available_consultants = consultants_not_ended.filter(
+            ConsultantTitleHistory.EventType.notin_(['Layoff', 'Attrition'])
+        ).all()
+
+    return available_consultants
 
 def get_consultant_daily_hours(session, consultant_id, date):
     total_hours = session.query(func.sum(ConsultantDeliverable.Hours)).filter(
@@ -97,7 +126,7 @@ def assign_consultants_to_project(available_consultants, session):
             break
 
     all_consultants = [c for consultants in consultants_by_title.values() for c in consultants]
-    num_additional_consultants = min(len(all_consultants), random.randint(2, 5))
+    num_additional_consultants = min(len(all_consultants), random.randint(10, 15))
     assigned_consultants.extend(random.sample(all_consultants, num_additional_consultants))
 
     return assigned_consultants
@@ -110,60 +139,62 @@ def set_project_dates(project, current_year, assigned_consultants, session):
     
     latest_consultant_start = get_latest_consultant_start_date(assigned_consultants, session, current_year)
     
-    earliest_possible_start = date(current_year, 1, 1)
-    latest_possible_start = date(current_year, 12, 31)
-    
-    planned_start_options = [
-        earliest_possible_start,
-        latest_consultant_start - timedelta(days=random.randint(0, 90)),
-        date(current_year, random.randint(1, 12), random.randint(1, 28))
-    ]
-    planned_start = max(earliest_possible_start, min(random.choice(planned_start_options), latest_possible_start))
+    planned_start = latest_consultant_start + timedelta(days=random.randint(0, 15))
     
     project.PlannedStartDate = planned_start
     project.PlannedEndDate = project.PlannedStartDate + timedelta(days=duration_months * 30)
     
     return duration_months
 
-def generate_project_expenses(project, total_consultant_cost, deliverables, consultant_deliverables):
+def generate_project_expenses(project, total_consultant_cost, deliverables, consultant_deliverables, simulation_end_date):
     expenses = []
     
     for deliverable in deliverables:
         deliverable_consultant_records = [cd for cd in consultant_deliverables if cd.DeliverableID == deliverable.DeliverableID]
-        deliverable_duration = (deliverable.DueDate - deliverable.PlannedStartDate).days
+        if not deliverable_consultant_records:
+            continue
+
+        deliverable_start = deliverable.ActualStartDate or deliverable.PlannedStartDate
+        deliverable_end = deliverable.SubmissionDate or deliverable.DueDate
         
+        expense_start_date = max(deliverable_start, project.PlannedStartDate)
+        expense_end_date = min(deliverable_end, simulation_end_date, project.ActualEndDate or project.PlannedEndDate)
+        
+        if expense_start_date >= expense_end_date:
+            continue 
+
         for category, percentage in project_settings.EXPENSE_CATEGORIES.items():
             is_billable = random.choice([True, False])
             base_amount = Decimal(total_consultant_cost) * Decimal(percentage) * Decimal(random.uniform(0.8, 1.2))
             
-            # Adjust amount based on deliverable's portion of the project
             if project.PlannedHours and project.PlannedHours > 0:
                 amount = round((base_amount * Decimal(deliverable.PlannedHours) / Decimal(project.PlannedHours)), -2)
             else:
                 amount = round(base_amount, -2)
             
             if amount > 0:
-                expense_date = random.choice(deliverable_consultant_records).Date if deliverable_consultant_records else deliverable.PlannedStartDate
+                expense_date = random.choice([cd.Date for cd in deliverable_consultant_records if expense_start_date <= cd.Date <= expense_end_date])
                 
-                expense = ProjectExpense(
-                    ProjectID=project.ProjectID,
-                    DeliverableID=deliverable.DeliverableID,
-                    Date=expense_date,
-                    Amount=float(amount),  # Convert Decimal to float for database storage
-                    Description=f"{category} expense for {deliverable.Name}",
-                    Category=category,
-                    IsBillable=is_billable
-                )
-                expenses.append(expense)
+                if expense_date:
+                    expense = ProjectExpense(
+                        ProjectID=project.ProjectID,
+                        DeliverableID=deliverable.DeliverableID,
+                        Date=expense_date,
+                        Amount=float(amount),
+                        Description=f"{category} expense for {deliverable.Name}",
+                        Category=category,
+                        IsBillable=is_billable
+                    )
+                    expenses.append(expense)
     
     return expenses
 
 
-def calculate_project_financials(project, assigned_consultants, session, current_year, deliverables, consultant_deliverables):
+def calculate_project_financials(project, assigned_consultants, session, current_year, deliverables, consultant_deliverables, simulation_end_date):
     total_consultant_cost = sum(calculate_hourly_cost(session, consultant, current_year) * (project.PlannedHours or 0) 
                                 for consultant in assigned_consultants)
 
-    expenses = generate_project_expenses(project, total_consultant_cost, deliverables, consultant_deliverables)
+    expenses = generate_project_expenses(project, total_consultant_cost, deliverables, consultant_deliverables, simulation_end_date)
     
     total_cost = Decimal(total_consultant_cost) + sum(Decimal(expense.Amount) for expense in expenses if not expense.IsBillable)
     total_billable_expense = sum(Decimal(expense.Amount) for expense in expenses if expense.IsBillable)
@@ -171,12 +202,7 @@ def calculate_project_financials(project, assigned_consultants, session, current
     if project.Type == 'Fixed':
         profit_margin = Decimal(random.uniform(*project_settings.PROFIT_MARGIN_RANGE))
         project.Price = float(round_to_nearest_thousand((total_cost * (1 + profit_margin)) + total_billable_expense))
-    else:  # Time and Material
-        '''
-        For T&M projects, we'll set an estimated budget instead of a fixed price
-        Estimated budget are set 10-30% higher than the calculated cost
-        '''
-
+    else:
         buffer_factor = project_settings.ESTIMATED_BUDGET_FACTORS
         estimated_budget = (total_cost + total_billable_expense) * buffer_factor
         project.EstimatedBudget = float(round_to_nearest_thousand(estimated_budget))
@@ -405,7 +431,7 @@ def generate_projects(start_year, end_year):
                 consultant_deliverables = generate_consultant_deliverables(deliverables, assigned_consultants, project, end_year, session)                
                 session.add_all(consultant_deliverables)
                 
-                expenses = calculate_project_financials(project, assigned_consultants, session, current_year, deliverables, consultant_deliverables)
+                expenses = calculate_project_financials(project, assigned_consultants, session, current_year, deliverables, consultant_deliverables, simulation_end_date)
                 session.add_all(expenses)
                 
                 billing_rates = generate_project_billing_rates(session, project, assigned_consultants)

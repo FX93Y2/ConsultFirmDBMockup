@@ -44,8 +44,8 @@ faker_instances = {locale: Faker(locale) for unit_id in UNIT_LOCALE_MAPPING for 
 # Basic Helper functions
 def get_growth_rate(year):
     yearly_growth_rates = {
-        2015: 0.50, 2016: 0.60, 2017: 0.40, 2018: 0.30,
-        2019: 0.20, 2020: 0.10, 2021: 0.05, 2022: 0.05, 
+        2015: 0.2, 2016: 0.20, 2017: 0.10, 2018: 0.10,
+        2019: 0.10, 2020: 0.05, 2021: 0.04, 2022: 0.02, 
         2023: -0.05, 2024: -0.06
     }
     default_rate = 0.25
@@ -176,7 +176,6 @@ def perform_layoffs(active_consultants, growth_rate, year, title_history_data, c
             EventType='Layoff', 
             Salary=current_title_history.Salary
         ))
-        consultant_data.remove(consultant)
 
     return num_layoffs, title_history_data, consultant_data
 
@@ -252,7 +251,6 @@ def generate_consultant_data(initial_num_titles, start_year, end_year):
                     StartDate=date(year, 1, 1), EndDate=leave_date, 
                     EventType='Attrition', Salary=current_title_history.Salary
                 ))
-                consultant_data.remove(consultant)
             else:
                 active_consultants[current_title_id].append((consultant, years_in_role, total_years))
 

@@ -5,7 +5,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy import func
 from ...db_model import Consultant, ConsultantTitleHistory, Payroll, engine
 
-def generate_payroll():
+def generate_payroll(end_year):
     print("Generating Payroll Data...")
     Session = sessionmaker(bind=engine)
     session = Session()
@@ -18,7 +18,7 @@ def generate_payroll():
 
         for i in range(len(title_history)):
             start_date = title_history[i].StartDate
-            end_date = title_history[i].EndDate if title_history[i].EndDate else date.today()
+            end_date = min(title_history[i].EndDate or date(end_year, 12, 31), date(end_year, 12, 31))
 
             base_salary = title_history[i].Salary
             monthly_base = base_salary / 12  # Monthly base salary

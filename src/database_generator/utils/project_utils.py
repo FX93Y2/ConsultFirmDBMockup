@@ -51,3 +51,4 @@ def calculate_project_progress(project, deliverables):
 
     project.Progress = int(weighted_progress.quantize(Decimal('1.'), rounding=ROUND_HALF_UP))
 
+
