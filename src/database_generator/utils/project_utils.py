@@ -33,7 +33,7 @@ def calculate_hourly_cost(session, consultant, year):
     return hourly_cost * (1 + project_settings.OVERHEAD_PERCENTAGE)
 
 def determine_project_count(available_consultants, growth_rate):
-    base_count = len(available_consultants) // random.randint(3, 5)
+    base_count = len(available_consultants) // random.randint(3, 5) # number of consultants per project
     adjusted_count = int(base_count * (1 + growth_rate))
     return max(5, adjusted_count)
 

@@ -117,7 +117,7 @@ def assign_consultants_to_project(available_consultants, session):
 
     assigned_consultants = []
 
-    higher_level_titles = [5, 6]
+    higher_level_titles = [4, 5, 6]
     for title_id in higher_level_titles:
         if title_id in consultants_by_title and consultants_by_title[title_id]:
             higher_level_consultant = random.choice(consultants_by_title[title_id])
@@ -126,7 +126,7 @@ def assign_consultants_to_project(available_consultants, session):
             break
 
     all_consultants = [c for consultants in consultants_by_title.values() for c in consultants]
-    num_additional_consultants = min(len(all_consultants), random.randint(10, 15))
+    num_additional_consultants = min(len(all_consultants), random.randint(5, 10))
     assigned_consultants.extend(random.sample(all_consultants, num_additional_consultants))
 
     return assigned_consultants
