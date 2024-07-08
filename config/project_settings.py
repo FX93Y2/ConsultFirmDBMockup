@@ -6,6 +6,7 @@ MIN_DAILY_HOURS = 1.0
 MAX_DAILY_HOURS = 8.0
 WORK_PROBABILITY = 0.9  # 90% chance of working on any given day
 MAX_DAILY_CONSULTANT_HOURS = 10.0
+AVERAGE_WORKING_HOURS_PER_DAY = 6
 
 # Expense Categories and Percentages
 EXPENSE_CATEGORIES = {
@@ -15,6 +16,8 @@ EXPENSE_CATEGORIES = {
     'Training': 0.02,
     'Miscellaneous': 0.05
 }
+
+TARGET_TEAM_SIZE = random.randint(5, 10)
 
 PROJECT_GROWTH_RATE = 0.1  # 10% growth rate
 

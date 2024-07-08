@@ -7,6 +7,7 @@ from collections import Counter, defaultdict
 from ...db_model import *
 from config import project_settings
 import math
+import logging
 
 def round_to_nearest_thousand(value):
     return Decimal(value).quantize(Decimal('1000'), rounding=ROUND_HALF_UP)
@@ -17,6 +18,15 @@ def adjust_hours(planned_hours):
     else:  # 90% chance of overrunning
         actual_hours = Decimal(planned_hours) * Decimal(random.uniform(1.05, 1.3))
     return actual_hours.quantize(Decimal('0.1'), rounding=ROUND_HALF_UP)
+
+def calculate_planned_hours(project, team_size):
+    duration_days = (project.PlannedEndDate - project.PlannedStartDate).days
+    working_days = math.ceil(duration_days * 5 / 7)  # Assuming 5 working days per week
+    
+    daily_team_hours = team_size * project_settings.AVERAGE_WORKING_HOURS_PER_DAY
+    total_planned_hours = working_days * daily_team_hours
+    
+    return round(total_planned_hours)
 
 def calculate_hourly_cost(session, consultant_id, year):
     from ...db_model import ConsultantTitleHistory
@@ -33,10 +43,30 @@ def calculate_hourly_cost(session, consultant_id, year):
     hourly_cost = (avg_salary / 12) / (52 * 40)  # Assuming 52 weeks and 40 hours per week
     return hourly_cost * (1 + project_settings.OVERHEAD_PERCENTAGE)
 
-def determine_project_count(available_consultants, growth_rate):
-    base_count = len(available_consultants) // random.randint(3, 5)  # number of consultants per project
-    adjusted_count = int(base_count * (1 + growth_rate))
-    return max(5, adjusted_count)
+def assign_project_team(session, project, assigned_consultants):
+    for consultant in assigned_consultants:
+        current_title = get_current_title(session, consultant.ConsultantID, project.ActualStartDate)
+        if current_title is None:
+            logging.warning(f"No current title found for consultant {consultant.ConsultantID} on {project.ActualStartDate}. Skipping assignment.")
+            continue
+        
+        if current_title.TitleID in [4, 5, 6]:
+            role = 'Project Manager'
+        elif current_title.TitleID in [1, 2, 3]:
+            role = 'Team Member'
+        else:
+            logging.warning(f"Unexpected title ID {current_title.TitleID} for consultant {consultant.ConsultantID}. Skipping assignment.")
+            continue
+        
+        team_member = ProjectTeam(
+            ProjectID=project.ProjectID,
+            ConsultantID=consultant.ConsultantID,
+            Role=role,
+            StartDate=project.ActualStartDate,
+            EndDate=None  # Initialize to None
+        )
+        session.add(team_member)
+        logging.info(f"Assigned consultant {consultant.ConsultantID} (Title {current_title.TitleID}) to project {project.ProjectID} as {role}")
 
 def calculate_project_progress(project, deliverables):
     total_planned_hours = sum(d.PlannedHours for d in deliverables)
@@ -46,7 +76,7 @@ def calculate_project_progress(project, deliverables):
         return
 
     weighted_progress = sum((d.ActualHours / d.PlannedHours) * (d.PlannedHours / total_planned_hours) * 100 for d in deliverables)
-    project.Progress = int(round(weighted_progress))
+    project.Progress = min(100, int(round(weighted_progress)))
 
 def get_working_days(year, month):
     start_date = date(year, month, 1)
@@ -64,6 +94,9 @@ def get_current_title(session, consultant_id, current_date):
         (ConsultantTitleHistory.EndDate.is_(None) | (ConsultantTitleHistory.EndDate >= current_date))
     ).order_by(ConsultantTitleHistory.StartDate.desc()).first()
     
+    if current_title is None:
+        logging.warning(f"No current title found for consultant {consultant_id} on {current_date}")
+    
     return current_title
 
 def get_available_consultants(session, current_date):
@@ -73,16 +106,41 @@ def get_available_consultants(session, current_date):
         ConsultantTitleHistory.EventType.notin_(['Layoff', 'Attrition'])
     ).all()
 
-    return [c for c in available_consultants if is_consultant_available(session, c.ConsultantID, current_date)]
+    truly_available = []
+    for consultant in available_consultants:
+        if is_consultant_available(session, consultant.ConsultantID, current_date):
+            truly_available.append(consultant)
+        else:
+            logging.info(f"Consultant {consultant.ConsultantID} is not available on {current_date}")
+
+    return truly_available
 
 def is_consultant_available(session, consultant_id, current_date):
+    # Consider only projects that have been active in the last 3 months
+    three_months_ago = current_date - timedelta(days=90)
+    
     active_projects = session.query(func.count(ProjectTeam.ProjectID)).filter(
         ProjectTeam.ConsultantID == consultant_id,
         ProjectTeam.StartDate <= current_date,
-        (ProjectTeam.EndDate.is_(None) | (ProjectTeam.EndDate >= current_date))
-    ).scalar()
+        (ProjectTeam.EndDate.is_(None) | (ProjectTeam.EndDate >= three_months_ago)),
+        Project.Status.in_(['In Progress', 'Not Started'])  # Only consider active projects
+    ).join(Project).scalar()
     
-    return active_projects < 3
+    if active_projects >= 3:
+        logging.info(f"Consultant {consultant_id} is assigned to {active_projects} active projects on {current_date}")
+        # Log the details of these projects
+        projects = session.query(Project).join(ProjectTeam).filter(
+            ProjectTeam.ConsultantID == consultant_id,
+            ProjectTeam.StartDate <= current_date,
+            (ProjectTeam.EndDate.is_(None) | (ProjectTeam.EndDate >= three_months_ago)),
+            Project.Status.in_(['In Progress', 'Not Started'])
+        ).all()
+        for project in projects:
+            logging.info(f"  Project {project.ProjectID}: Status {project.Status}, Start Date {project.ActualStartDate}")
+    else:
+        logging.info(f"Consultant {consultant_id} is assigned to {active_projects} active projects on {current_date}")
+    
+    return active_projects < 5
 
 def assign_project_to_business_unit(session, assigned_consultants, active_units, current_year):
     from ...db_model import Project
@@ -112,60 +170,65 @@ def assign_project_to_business_unit(session, assigned_consultants, active_units,
                                for unit_id in project_counts.keys()}
     return max(distribution_difference, key=distribution_difference.get)
 
-def assign_consultants_to_project(session, available_consultants, current_date):
-    consultants_by_title = defaultdict(list)
-    for consultant in available_consultants:
-        # Ensure we're working with Consultant objects
-        if isinstance(consultant, BusinessUnit):
-            for c in consultant.Consultants:
-                current_title = get_current_title(session, c.ConsultantID, current_date)
-                if current_title:
-                    consultants_by_title[current_title.TitleID].append(c)
-        else:
-            current_title = get_current_title(session, consultant.ConsultantID, current_date)
-            if current_title:
-                consultants_by_title[current_title.TitleID].append(consultant)
-
-    assigned_consultants = []
-
-    # Assign a project manager (title 4 or higher)
-    higher_level_titles = [6, 5, 4]
-    for title_id in higher_level_titles:
-        if consultants_by_title[title_id]:
-            project_manager = random.choice(consultants_by_title[title_id])
-            assigned_consultants.append(project_manager)
-            consultants_by_title[title_id].remove(project_manager)
-            break
-
-    if not assigned_consultants:
-        return []  # No suitable project manager found
-
-    # Assign team members (titles 3 or lower)
-    target_team_size = random.randint(5, 10)
-    lower_level_consultants = [c for title_id in [1, 2, 3] for c in consultants_by_title[title_id]]
+def assign_consultants_to_project(session, available_consultants, current_date, project_manager):
+    assigned_consultants = [project_manager]  # Start with the specified project manager
     
-    num_additional_consultants = min(len(lower_level_consultants), target_team_size - 1)
-    assigned_consultants.extend(random.sample(lower_level_consultants, num_additional_consultants))
+    # Separate consultants by title
+    high_level_consultants = []
+    low_level_consultants = []
+    
+    for consultant in available_consultants:
+        if consultant.ConsultantID == project_manager.ConsultantID:
+            continue  # Skip the project manager as they're already assigned
+        
+        current_title = get_current_title(session, consultant.ConsultantID, current_date)
+        if current_title.TitleID in [4, 5, 6]:
+            high_level_consultants.append(consultant)
+        elif current_title.TitleID in [1, 2, 3]:
+            low_level_consultants.append(consultant)
+    
+    # Assign a second manager if available (50% chance)
+    if high_level_consultants and random.random() < 0.5:
+        second_manager = random.choice(high_level_consultants)
+        assigned_consultants.append(second_manager)
+        high_level_consultants.remove(second_manager)
+    
+    # Assign team members (titles 1, 2, or 3)
+    target_team_size = random.randint(5, 10)
+    num_additional_consultants = min(len(low_level_consultants), target_team_size - len(assigned_consultants))
+    assigned_consultants.extend(random.sample(low_level_consultants, num_additional_consultants))
 
     return assigned_consultants
 
-def set_project_dates(project, current_date, assigned_consultants, session):
+def set_project_dates(project, current_date, assigned_consultants, session, simulation_start_date):
     if project.Type == 'Fixed':
         duration_months = random.randint(*project_settings.FIXED_PROJECT_DURATION_RANGE)
     else:  # Time and Material
         duration_months = random.randint(*project_settings.TIME_MATERIAL_PROJECT_DURATION_RANGE)
     
     project_manager = next(c for c in assigned_consultants if get_current_title(session, c.ConsultantID, current_date).TitleID >= 4)
-    pm_availability = get_consultant_availability(session, project_manager.ConsultantID, current_date)
+    pm_availability = max(get_consultant_availability(session, project_manager.ConsultantID, current_date), simulation_start_date)
     
     planned_start = pm_availability + timedelta(days=random.randint(0, 15))
     actual_start_variance = timedelta(days=random.randint(-7, 14))
     
     project.PlannedStartDate = planned_start
-    project.ActualStartDate = planned_start + actual_start_variance
-    project.PlannedEndDate = project.PlannedStartDate + timedelta(days=duration_months * 30)
+    project.ActualStartDate = max(planned_start + actual_start_variance, simulation_start_date)
     
-    return duration_months
+    # Set initial status based on start date
+    if project.ActualStartDate <= current_date:
+        project.Status = 'In Progress'
+    
+    # Calculate end date based on working days
+    working_days = duration_months * 21  # Assuming 21 working days per month
+    project.PlannedEndDate = project.PlannedStartDate
+    days_added = 0
+    while days_added < working_days:
+        project.PlannedEndDate += timedelta(days=1)
+        if project.PlannedEndDate.weekday() < 5:  # Monday = 0, Friday = 4
+            days_added += 1
+    
+    return len(assigned_consultants)
 
 def get_consultant_availability(session, consultant_id, current_date):
     latest_project = session.query(func.max(ProjectTeam.EndDate)).filter(
@@ -288,31 +351,21 @@ def generate_project_expenses(project, estimated_total_cost, deliverables):
 
     return expenses
 
-def update_project_and_deliverable_status(project, deliverables, simulation_end_date):
-    all_deliverables_completed = True
-    for deliverable in deliverables:
-        if deliverable.ActualHours > 0:
-            deliverable.Status = 'Completed' if deliverable.ActualHours >= deliverable.PlannedHours else 'In Progress'
-            deliverable.Progress = min(100, int((deliverable.ActualHours / deliverable.PlannedHours) * 100))
-            
-            if project.ActualStartDate is None or deliverable.ActualStartDate < project.ActualStartDate:
-                project.ActualStartDate = deliverable.ActualStartDate
-            
-            if deliverable.Status == 'Completed':
-                if project.ActualEndDate is None or deliverable.SubmissionDate > project.ActualEndDate:
-                    project.ActualEndDate = deliverable.SubmissionDate
-            else:
-                all_deliverables_completed = False
-        else:
-            all_deliverables_completed = False
+def update_project_team(session, project, available_consultants, current_team, current_date):
+    target_team_size = random.randint(5, 10)
+    
+    if len(current_team) < target_team_size:
+        potential_new_members = [c for c in available_consultants if c.ConsultantID not in current_team and get_current_title(session, c.ConsultantID, current_date).TitleID <= 3]
+        new_members_count = min(target_team_size - len(current_team), len(potential_new_members))
+        
+        for new_member in random.sample(potential_new_members, new_members_count):
+            team_member = ProjectTeam(
+                ProjectID=project.ProjectID,
+                ConsultantID=new_member.ConsultantID,
+                Role='Team Member',
+                StartDate=current_date
+            )
+            session.add(team_member)
+            current_team.append(new_member.ConsultantID)
 
-    calculate_project_progress(project, deliverables)
 
-    if project.Progress > 0:
-        project.Status = 'In Progress'
-        if all_deliverables_completed and project.PlannedEndDate <= simulation_end_date:
-            project.Status = 'Completed'
-        else:
-            project.ActualEndDate = None
-
-    return project, deliverables
