@@ -1,6 +1,7 @@
 from decimal import Decimal, ROUND_HALF_UP
 import random
-from datetime import timedelta
+from datetime import timedelta, date
+from dateutil.relativedelta import relativedelta
 from config import project_settings
 from sqlalchemy import func
 
@@ -50,5 +51,14 @@ def calculate_project_progress(project, deliverables):
         weighted_progress += weight * Decimal(deliverable.Progress)
 
     project.Progress = int(weighted_progress.quantize(Decimal('1.'), rounding=ROUND_HALF_UP))
+
+def get_working_days(year, month):
+    start_date = date(year, month, 1)
+    end_date = start_date + relativedelta(months=1) - timedelta(days=1)
+    return [d for d in daterange(start_date, end_date) if d.weekday() < 5]  # Monday = 0, Friday = 4
+
+def daterange(start_date, end_date):
+    for n in range(int((end_date - start_date).days) + 1):
+        yield start_date + timedelta(n)
 
 

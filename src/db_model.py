@@ -86,6 +86,17 @@ class Project(Base):
     BusinessUnit = relationship("BusinessUnit")
     Deliverables = relationship("Deliverable", back_populates="Project")
 
+class ProjectTeam(Base):
+    __tablename__ = 'ProjectTeam'
+    ID = Column(Integer, primary_key=True)
+    ProjectID = Column(Integer, ForeignKey('Project.ProjectID'))
+    ConsultantID = Column(String, ForeignKey('Consultant.ConsultantID'))
+    Role = Column(String)
+    StartDate = Column(Date)
+    EndDate = Column(Date, nullable=True)
+    Project = relationship("Project")
+    Consultant = relationship("Consultant")
+
 class Deliverable(Base):
     __tablename__ = 'Deliverable'
     DeliverableID = Column(Integer, primary_key=True)

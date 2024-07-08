@@ -4,9 +4,10 @@ from decimal import Decimal
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import func, or_, and_
 from collections import Counter, defaultdict
+from dateutil.relativedelta import relativedelta
 from decimal import Decimal, ROUND_HALF_UP
 from ...db_model import (Project, Consultant, BusinessUnit, Client, ProjectBillingRate, 
-                         ProjectExpense, Deliverable, ConsultantDeliverable, ConsultantTitleHistory, 
+                         ProjectExpense, ProjectTeam, Deliverable, ConsultantDeliverable, ConsultantTitleHistory, 
                          Payroll, engine)
 from ..utils.project_utils import (round_to_nearest_thousand, adjust_hours, calculate_hourly_cost, 
                                  determine_project_count, calculate_project_progress)

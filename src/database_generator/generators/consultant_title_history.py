@@ -180,12 +180,13 @@ def perform_layoffs(active_consultants, growth_rate, year, title_history_data, c
     return num_layoffs, title_history_data, consultant_data
 
 # Main generation logic
-def generate_consultant_data(initial_num_titles, start_year, end_year):
+# Main generation logic
+def generate_consultant_data(initial_num_consultants, start_year, end_year):
     consultant_data = []
     title_history_data = []
     consultant_id_counter = 1
 
-    def create_consultant(unit_id, title_id, year):
+    def create_consultant(unit_id, title_id, hire_date):
         nonlocal consultant_id_counter
         faker = get_faker_for_unit(unit_id)
         consultant_id = f"C{consultant_id_counter:04d}"
@@ -205,29 +206,29 @@ def generate_consultant_data(initial_num_titles, start_year, end_year):
 
         phone = faker.phone_number()
         consultant = Consultant(ConsultantID=consultant_id, FirstName=first_name, LastName=last_name, 
-                                Email=email, Contact=phone, BusinessUnitID=unit_id, HireYear=year)
+                                Email=email, Contact=phone, BusinessUnitID=unit_id, HireYear=hire_date.year)
         consultant_id_counter += 1
 
-        start_date = get_hire_date(year)
         salary = get_new_salary(title_id)
         title_history = ConsultantTitleHistory(
             ConsultantID=consultant_id, TitleID=title_id, 
-            StartDate=start_date, EventType='Hire', Salary=salary
+            StartDate=hire_date, EventType='Hire', Salary=salary
         )
         return consultant, title_history
-    
+
     # Initialize consultants for the start year
-    title_slots = generate_title_slots(initial_num_titles)
+    start_date = date(start_year, 1, 1)
+    title_slots = generate_title_slots(initial_num_consultants)
     for title_id in sorted(title_slots.keys(), reverse=True):
         num_slots = title_slots[title_id]
         for _ in range(num_slots):
-            consultant, title_history = create_consultant(1, title_id, start_year)  # Start with North America (unit_id 1)
+            consultant, title_history = create_consultant(1, title_id, start_date)  # Start with North America (unit_id 1)
             consultant_data.append(consultant)
             title_history_data.append(title_history)
 
-    for year in range(start_year + 1, end_year + 1):
+    for year in range(start_year, end_year + 1):
         growth_rate = get_growth_rate(year)
-        target_consultants = calculate_target_consultants(year, initial_num_titles, start_year)
+        target_consultants = calculate_target_consultants(year, initial_num_consultants, start_year)
         title_slots = generate_title_slots(target_consultants)
 
         active_consultants = defaultdict(list)
@@ -251,6 +252,7 @@ def generate_consultant_data(initial_num_titles, start_year, end_year):
                     StartDate=date(year, 1, 1), EndDate=leave_date, 
                     EventType='Attrition', Salary=current_title_history.Salary
                 ))
+                consultant_data.remove(consultant)
             else:
                 active_consultants[current_title_id].append((consultant, years_in_role, total_years))
 
@@ -291,7 +293,8 @@ def generate_consultant_data(initial_num_titles, start_year, end_year):
             while len(active_consultants[title_id]) < title_slots[title_id]:
                 region = random.choices(list(BUSINESS_UNIT_DISTRIBUTION.keys()), 
                                         weights=list(BUSINESS_UNIT_DISTRIBUTION.values()))[0]
-                new_consultant, new_title_history = create_consultant(region, title_id, year)
+                hire_date = get_hire_date(year)
+                new_consultant, new_title_history = create_consultant(region, title_id, hire_date)
                 consultant_data.append(new_consultant)
                 title_history_data.append(new_title_history)
                 active_consultants[title_id].append((new_consultant, 0, 0))
@@ -359,9 +362,9 @@ def simulate_global_expansion(consultant_data, start_year, end_year):
 
     return active_units
 
-def main(initial_num_titles, start_year, end_year):
+def main(initial_num_consultants, start_year, end_year):
     print("Generating consultant data...")
-    consultant_data, title_history_data = generate_consultant_data(initial_num_titles, start_year, end_year)
+    consultant_data, title_history_data = generate_consultant_data(initial_num_consultants, start_year, end_year)
     
     print("\nSimulating global expansion...")
     final_units = simulate_global_expansion(consultant_data, start_year, end_year)

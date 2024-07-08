@@ -16,6 +16,8 @@ EXPENSE_CATEGORIES = {
     'Miscellaneous': 0.05
 }
 
+PROJECT_GROWTH_RATE = 0.1  # 10% growth rate
+
 # Title Based Billing Rates
 BASE_BILLING_RATES = {1: 100, 2: 150, 3: 200, 4: 250, 5: 300, 6: 400}
 
