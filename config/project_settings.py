@@ -2,11 +2,13 @@ from decimal import Decimal
 import random
 
 # Project Deliverable Constants
-MIN_DAILY_HOURS = 4.0
+MIN_DAILY_HOURS = 2.0
 MAX_DAILY_HOURS = 8.0
-WORK_PROBABILITY = 0.9  # 90% chance of working on any given day
-
-AVERAGE_WORKING_HOURS_PER_DAY = 8.0
+WORK_PROBABILITY = 1.0# 90% chance of working on any given day
+WORKING_DAYES = 21
+AVERAGE_WORKING_HOURS_PER_DAY = 6.0
+MAX_PROJECTS_PER_CONSULTANT = 5
+HIGHER_LEVEL_TITLE_THRESHOLD = 4
 
 # Expense Categories and Percentages
 EXPENSE_CATEGORIES = {
@@ -17,7 +19,8 @@ EXPENSE_CATEGORIES = {
     'Miscellaneous': 0.05
 }
 
-TARGET_TEAM_SIZE = random.randint(10, 15)
+MAX_TEAM_SIZE = 8
+MIN_TEAM_SIZE = 3
 
 PROJECT_GROWTH_RATE = 0.1  # 10% growth rate
 
