@@ -17,7 +17,7 @@ EXPENSE_CATEGORIES = {
     'Miscellaneous': 0.05
 }
 
-TARGET_TEAM_SIZE = random.randint(5, 10)
+TARGET_TEAM_SIZE = random.randint(10, 15)
 
 PROJECT_GROWTH_RATE = 0.1  # 10% growth rate
 

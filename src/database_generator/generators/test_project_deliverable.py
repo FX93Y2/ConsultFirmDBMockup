@@ -10,7 +10,7 @@ from ...db_model import *
 from ..utils.test_project_utils import *
 from config import project_settings
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def generate_projects(start_year, end_year):
     Session = sessionmaker(bind=engine)
@@ -35,9 +35,8 @@ def generate_projects(start_year, end_year):
                 if current_date > simulation_end_date:
                     break
 
-                print(f"Processing {current_date.strftime('%B %Y')}...")
+                logging.info(f"Processing {current_date.strftime('%B %Y')}...")
 
-                cleanup_old_assignments(session, current_date)
                 available_consultants = get_available_consultants(session, current_date)
                 active_units = session.query(BusinessUnit).all()
 
@@ -46,11 +45,13 @@ def generate_projects(start_year, end_year):
                 generate_monthly_consultant_deliverables(session, current_date, project_meta)
                 update_project_statuses(session, current_date, project_meta)
 
+                log_consultant_projects(session, current_date)  # Add this line
+
                 session.commit()
 
-        generate_project_expenses(session, project_meta, simulation_end_date)
-        session.commit()
-        print("Project generation completed successfully.")
+            generate_project_expenses(session, project_meta, simulation_end_date)
+            session.commit()
+            print("Project generation completed successfully.")
 
     except Exception as e:
         print(f"An error occurred while processing projects: {str(e)}")
@@ -60,43 +61,29 @@ def generate_projects(start_year, end_year):
     finally:
         session.close()
 
-def cleanup_old_assignments(session, current_date):
-    three_months_ago = current_date - timedelta(days=90)
-    old_assignments = session.query(ProjectTeam).filter(
-        ProjectTeam.EndDate.is_(None),
-        ProjectTeam.StartDate < three_months_ago
-    ).join(Project).filter(
-        Project.Status.in_(['Completed', 'Cancelled'])
-    ).all()
-
-    for assignment in old_assignments:
-        assignment.EndDate = min(current_date, assignment.Project.ActualEndDate or current_date)
-        #logging.info(f"Cleaned up old assignment: Consultant {assignment.ConsultantID} on Project {assignment.ProjectID}, ended on {assignment.EndDate}")
-
-    session.commit()
 
 def create_new_projects_if_needed(session, current_date, available_consultants, active_units, project_meta, simulation_start_date):
-    # Sort consultants by TitleID, highest first
     sorted_consultants = sorted(available_consultants, key=lambda c: c[1], reverse=True)
     
-    projects_created = 0
-    max_projects = min(len(sorted_consultants) // 3, 5)  # Limit number of new projects
-
-    while projects_created < max_projects and sorted_consultants:
-        if random.random() < 0.9:  # 90% chance to start a new project
-            project, new_project_meta, target_hours = create_new_project(session, current_date, sorted_consultants, active_units, simulation_start_date)
-            if project:
-                project_meta[project.ProjectID] = new_project_meta
-                project_meta[project.ProjectID]['target_hours'] = target_hours
-                projects_created += 1
-                
-                # Remove assigned consultants from the available pool
-                assigned_consultant_ids = set(new_project_meta['team'])
-                sorted_consultants = [c for c in sorted_consultants if c[0].ConsultantID not in assigned_consultant_ids]
-            else:
-                break  # If we couldn't create a project, stop trying
+    active_projects = session.query(Project).filter(Project.Status.in_(['Not Started', 'In Progress'])).count()
+    total_consultants = session.query(Consultant).count()
+    target_projects = max(total_consultants // 4, 10)
+    projects_to_create = max(0, target_projects - active_projects)
+    
+    logging.info(f"Date: {current_date}, Active Projects: {active_projects}, Target Projects: {target_projects}, Projects to Create: {projects_to_create}")
+    
+    for i in range(projects_to_create):
+        project, new_project_meta, target_hours = create_new_project(session, current_date, sorted_consultants, active_units, simulation_start_date)
+        if project:
+            project_meta[project.ProjectID] = new_project_meta
+            project_meta[project.ProjectID]['target_hours'] = target_hours
+            logging.info(f"Created new project: ProjectID {project.ProjectID}, Start Date: {project.PlannedStartDate}, Team Size: {len(new_project_meta['team'])}")
+            
+            assigned_consultant_ids = set(new_project_meta['team'])
+            sorted_consultants = [c for c in sorted_consultants if c[0].ConsultantID not in assigned_consultant_ids]
         else:
-            break  # 10% chance to stop creating projects
+            logging.warning(f"Failed to create project {i+1} out of {projects_to_create}")
+            break
 
     return project_meta
 
@@ -183,21 +170,32 @@ def generate_monthly_consultant_deliverables(session, current_date, project_meta
     
     for project_id, meta in project_meta.items():
         project = session.query(Project).get(project_id)
-        if project.Status != 'In Progress':
+        if project.Status not in ['Not Started', 'In Progress']:
             continue
 
+        if project.Status == 'Not Started' and project.PlannedStartDate <= current_date:
+            project.Status = 'In Progress'
+            project.ActualStartDate = current_date
+
         project_actual_hours = 0
+        all_deliverables_completed = True
 
         for deliverable_id, deliverable_meta in meta['deliverables'].items():
             deliverable = session.query(Deliverable).get(deliverable_id)
             if deliverable.Status == 'Completed':
                 continue
 
-            remaining_hours = deliverable_meta['remaining_hours']
+            all_deliverables_completed = False
+            remaining_hours = deliverable_meta['target_hours'] - deliverable.ActualHours
 
             for day in working_days:
-                if remaining_hours <= 0 or day > min(deliverable.DueDate, project.PlannedEndDate):
+                if remaining_hours <= 0:
+                    deliverable.Status = 'Completed'
+                    deliverable.SubmissionDate = day
                     break
+
+                if day > project.PlannedEndDate:
+                    project.PlannedEndDate = day  # Extend project end date if work is still ongoing
 
                 for consultant_id in meta['team']:
                     consultant_hours_today = consultant_daily_hours[consultant_id][day]
@@ -220,11 +218,17 @@ def generate_monthly_consultant_deliverables(session, current_date, project_meta
                     project_actual_hours += hours
                     consultant_daily_hours[consultant_id][day] += hours
 
-            deliverable_meta['remaining_hours'] = remaining_hours
             deliverable.Progress = min(100, int((deliverable.ActualHours / deliverable_meta['target_hours']) * 100))
 
         project.ActualHours += project_actual_hours
         project.Progress = min(100, int((project.ActualHours / meta['target_hours']) * 100))
+
+        if all_deliverables_completed:
+            project.Status = 'Completed'
+            project.ActualEndDate = current_date
+
+    logging.info(f"Date: {current_date}, Projects processed: {len(project_meta)}")
+    logging.info(f"Consultant daily hours: {dict(consultant_daily_hours)}")
 
 
 def update_project_statuses(session, current_date, project_meta):
@@ -262,7 +266,7 @@ def update_project_statuses(session, current_date, project_meta):
 
         project.Progress = min(100, int(weighted_progress))
 
-        if all_deliverables_completed:
+        if all_deliverables_completed or current_date > project.PlannedEndDate:
             project.Status = 'Completed'
             project.ActualEndDate = current_date
             session.query(ProjectTeam).filter(
@@ -271,6 +275,8 @@ def update_project_statuses(session, current_date, project_meta):
             ).update({ProjectTeam.EndDate: current_date})
         elif project.Progress > 0:
             project.Status = 'In Progress'
+
+    logging.info(f"Date: {current_date}, Updated project statuses")
 
 def generate_project_expenses(session, project_meta, simulation_end_date):
     for project_id, meta in project_meta.items():

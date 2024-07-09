@@ -18,22 +18,14 @@ def initialize_project_meta(project, target_hours):
     
     for deliverable in project.Deliverables:
         meta['deliverables'][deliverable.DeliverableID] = {
-            'remaining_hours': deliverable.PlannedHours,
-            'consultant_deliverables': [],
-            'target_hours': deliverable.PlannedHours
+            'target_hours': deliverable.PlannedHours * (target_hours / project.PlannedHours),
+            'consultant_deliverables': []
         }
     
     return meta
 
 def round_to_nearest_thousand(value):
     return Decimal(value).quantize(Decimal('1000'), rounding=ROUND_HALF_UP)
-
-def adjust_hours(planned_hours):
-    if random.random() < 0.1:  # 10% chance of finishing early
-        actual_hours = Decimal(planned_hours) * Decimal(random.uniform(0.8, 0.95))
-    else:  # 90% chance of overrunning
-        actual_hours = Decimal(planned_hours) * Decimal(random.uniform(1.05, 1.3))
-    return actual_hours.quantize(Decimal('0.1'), rounding=ROUND_HALF_UP)
 
 def calculate_planned_hours(project, team_size):
     duration_days = (project.PlannedEndDate - project.PlannedStartDate).days
@@ -45,7 +37,6 @@ def calculate_planned_hours(project, team_size):
     return round(total_planned_hours)
 
 def calculate_target_hours(planned_hours):
-    # Simulate project overrun or early completion
     if random.random() < 0.1:  # 10% chance of finishing early
         factor = random.uniform(0.8, 0.95)
     else:  # 90% chance of overrunning
@@ -68,6 +59,7 @@ def calculate_hourly_cost(session, consultant_id, year):
     return hourly_cost * (1 + project_settings.OVERHEAD_PERCENTAGE)
 
 def assign_project_team(session, project, assigned_consultants):
+    logging.info(f"Assigning team for ProjectID: {project.ProjectID}")
     for consultant, title_id in assigned_consultants:
         role = 'Project Manager' if title_id >= 4 else 'Team Member'
         
@@ -76,9 +68,10 @@ def assign_project_team(session, project, assigned_consultants):
             ConsultantID=consultant.ConsultantID,
             Role=role,
             StartDate=project.ActualStartDate,
-            EndDate=None  # Initialize to None
+            EndDate=None
         )
         session.add(team_member)
+        logging.info(f"Assigned ConsultantID: {consultant.ConsultantID}, Role: {role} to ProjectID: {project.ProjectID}")
 
 def calculate_project_progress(project, deliverables):
     total_planned_hours = sum(d.PlannedHours for d in deliverables)
@@ -126,6 +119,10 @@ def get_available_consultants(session, current_date):
         ((ProjectTeam.EndDate.is_(None)) | (ProjectTeam.EndDate >= two_months_ago))
     ).group_by(Consultant.ConsultantID, ConsultantTitleHistory.TitleID).having(func.count(ProjectTeam.ID) < 3).all()
 
+    logging.info(f"Date: {current_date}, Available Consultants: {len(available_consultants)}")
+    for consultant, title_id in available_consultants:
+        logging.debug(f"Available Consultant: {consultant.ConsultantID}, Title: {title_id}")
+
     return available_consultants
 
 def is_consultant_available(session, consultant_id, current_date):
@@ -138,21 +135,6 @@ def is_consultant_available(session, consultant_id, current_date):
         (ProjectTeam.EndDate.is_(None) | (ProjectTeam.EndDate >= two_months_ago)),
         Project.Status.in_(['In Progress', 'Not Started'])  # Only consider active projects
     ).join(Project).scalar()
-    
-    if active_projects >= 3:
-        #logging.info(f"Consultant {consultant_id} is assigned to {active_projects} active projects on {current_date}")
-        # Log the details of these projects
-        projects = session.query(Project).join(ProjectTeam).filter(
-            ProjectTeam.ConsultantID == consultant_id,
-            ProjectTeam.StartDate <= current_date,
-            (ProjectTeam.EndDate.is_(None) | (ProjectTeam.EndDate >= two_months_ago)),
-            Project.Status.in_(['In Progress', 'Not Started'])
-        ).all()
-        #for project in projects:
-            #logging.info(f"  Project {project.ProjectID}: Status {project.Status}, Start Date {project.ActualStartDate}")
-    else:
-        #logging.info(f"Consultant {consultant_id} is assigned to {active_projects} active projects on {current_date}")
-        pass
     
     return active_projects < 5
 
@@ -360,4 +342,16 @@ def update_project_team(session, project, available_consultants, current_team, c
             session.add(team_member)
             current_team.append(consultant.ConsultantID)
 
-
+def log_consultant_projects(session, current_date):
+    consultants = session.query(Consultant).all()
+    for consultant in consultants:
+        active_projects = session.query(Project).join(ProjectTeam).filter(
+            ProjectTeam.ConsultantID == consultant.ConsultantID,
+            ProjectTeam.StartDate <= current_date,
+            (ProjectTeam.EndDate.is_(None) | (ProjectTeam.EndDate >= current_date)),
+            Project.Status.in_(['Not Started', 'In Progress'])
+        ).all()
+        
+        logging.info(f"Date: {current_date}, ConsultantID: {consultant.ConsultantID}, Active Projects: {len(active_projects)}")
+        for project in active_projects:
+            logging.debug(f"  ProjectID: {project.ProjectID}, Status: {project.Status}, Start Date: {project.ActualStartDate}")
