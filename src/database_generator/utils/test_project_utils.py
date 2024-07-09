@@ -2,12 +2,28 @@ from decimal import Decimal, ROUND_HALF_UP
 import random
 from datetime import timedelta, date
 from dateutil.relativedelta import relativedelta
-from sqlalchemy import func
+from sqlalchemy import func, and_, select
 from collections import Counter, defaultdict
 from ...db_model import *
 from config import project_settings
 import math
 import logging
+
+def initialize_project_meta(project, target_hours):
+    meta = {
+        'team': [pt.ConsultantID for pt in project.Team],
+        'deliverables': {},
+        'target_hours': target_hours
+    }
+    
+    for deliverable in project.Deliverables:
+        meta['deliverables'][deliverable.DeliverableID] = {
+            'remaining_hours': deliverable.PlannedHours,
+            'consultant_deliverables': [],
+            'target_hours': deliverable.PlannedHours
+        }
+    
+    return meta
 
 def round_to_nearest_thousand(value):
     return Decimal(value).quantize(Decimal('1000'), rounding=ROUND_HALF_UP)
@@ -28,6 +44,14 @@ def calculate_planned_hours(project, team_size):
     
     return round(total_planned_hours)
 
+def calculate_target_hours(planned_hours):
+    # Simulate project overrun or early completion
+    if random.random() < 0.1:  # 10% chance of finishing early
+        factor = random.uniform(0.8, 0.95)
+    else:  # 90% chance of overrunning
+        factor = random.uniform(1.05, 1.3)
+    return round(planned_hours * factor)
+
 def calculate_hourly_cost(session, consultant_id, year):
     from ...db_model import ConsultantTitleHistory
     from sqlalchemy import func
@@ -44,19 +68,8 @@ def calculate_hourly_cost(session, consultant_id, year):
     return hourly_cost * (1 + project_settings.OVERHEAD_PERCENTAGE)
 
 def assign_project_team(session, project, assigned_consultants):
-    for consultant in assigned_consultants:
-        current_title = get_current_title(session, consultant.ConsultantID, project.ActualStartDate)
-        if current_title is None:
-            logging.warning(f"No current title found for consultant {consultant.ConsultantID} on {project.ActualStartDate}. Skipping assignment.")
-            continue
-        
-        if current_title.TitleID in [4, 5, 6]:
-            role = 'Project Manager'
-        elif current_title.TitleID in [1, 2, 3]:
-            role = 'Team Member'
-        else:
-            logging.warning(f"Unexpected title ID {current_title.TitleID} for consultant {consultant.ConsultantID}. Skipping assignment.")
-            continue
+    for consultant, title_id in assigned_consultants:
+        role = 'Project Manager' if title_id >= 4 else 'Team Member'
         
         team_member = ProjectTeam(
             ProjectID=project.ProjectID,
@@ -66,7 +79,6 @@ def assign_project_team(session, project, assigned_consultants):
             EndDate=None  # Initialize to None
         )
         session.add(team_member)
-        logging.info(f"Assigned consultant {consultant.ConsultantID} (Title {current_title.TitleID}) to project {project.ProjectID} as {role}")
 
 def calculate_project_progress(project, deliverables):
     total_planned_hours = sum(d.PlannedHours for d in deliverables)
@@ -96,56 +108,58 @@ def get_current_title(session, consultant_id, current_date):
     
     if current_title is None:
         logging.warning(f"No current title found for consultant {consultant_id} on {current_date}")
+        return None
     
     return current_title
 
 def get_available_consultants(session, current_date):
-    available_consultants = session.query(Consultant).join(ConsultantTitleHistory).filter(
-        ConsultantTitleHistory.StartDate <= current_date,
-        (ConsultantTitleHistory.EndDate.is_(None) | (ConsultantTitleHistory.EndDate >= current_date)),
-        ConsultantTitleHistory.EventType.notin_(['Layoff', 'Attrition'])
-    ).all()
+    two_months_ago = current_date - timedelta(days=60)
+    
+    available_consultants = session.query(Consultant, ConsultantTitleHistory.TitleID).join(
+        ConsultantTitleHistory,
+        (Consultant.ConsultantID == ConsultantTitleHistory.ConsultantID) &
+        (ConsultantTitleHistory.StartDate <= current_date) &
+        ((ConsultantTitleHistory.EndDate.is_(None)) | (ConsultantTitleHistory.EndDate > current_date))
+    ).outerjoin(
+        ProjectTeam,
+        (Consultant.ConsultantID == ProjectTeam.ConsultantID) &
+        ((ProjectTeam.EndDate.is_(None)) | (ProjectTeam.EndDate >= two_months_ago))
+    ).group_by(Consultant.ConsultantID, ConsultantTitleHistory.TitleID).having(func.count(ProjectTeam.ID) < 3).all()
 
-    truly_available = []
-    for consultant in available_consultants:
-        if is_consultant_available(session, consultant.ConsultantID, current_date):
-            truly_available.append(consultant)
-        else:
-            logging.info(f"Consultant {consultant.ConsultantID} is not available on {current_date}")
-
-    return truly_available
+    return available_consultants
 
 def is_consultant_available(session, consultant_id, current_date):
-    # Consider only projects that have been active in the last 3 months
-    three_months_ago = current_date - timedelta(days=90)
+    # Consider only projects that have been active in the last 2 months
+    two_months_ago = current_date - timedelta(days=60)
     
     active_projects = session.query(func.count(ProjectTeam.ProjectID)).filter(
         ProjectTeam.ConsultantID == consultant_id,
         ProjectTeam.StartDate <= current_date,
-        (ProjectTeam.EndDate.is_(None) | (ProjectTeam.EndDate >= three_months_ago)),
+        (ProjectTeam.EndDate.is_(None) | (ProjectTeam.EndDate >= two_months_ago)),
         Project.Status.in_(['In Progress', 'Not Started'])  # Only consider active projects
     ).join(Project).scalar()
     
     if active_projects >= 3:
-        logging.info(f"Consultant {consultant_id} is assigned to {active_projects} active projects on {current_date}")
+        #logging.info(f"Consultant {consultant_id} is assigned to {active_projects} active projects on {current_date}")
         # Log the details of these projects
         projects = session.query(Project).join(ProjectTeam).filter(
             ProjectTeam.ConsultantID == consultant_id,
             ProjectTeam.StartDate <= current_date,
-            (ProjectTeam.EndDate.is_(None) | (ProjectTeam.EndDate >= three_months_ago)),
+            (ProjectTeam.EndDate.is_(None) | (ProjectTeam.EndDate >= two_months_ago)),
             Project.Status.in_(['In Progress', 'Not Started'])
         ).all()
-        for project in projects:
-            logging.info(f"  Project {project.ProjectID}: Status {project.Status}, Start Date {project.ActualStartDate}")
+        #for project in projects:
+            #logging.info(f"  Project {project.ProjectID}: Status {project.Status}, Start Date {project.ActualStartDate}")
     else:
-        logging.info(f"Consultant {consultant_id} is assigned to {active_projects} active projects on {current_date}")
+        #logging.info(f"Consultant {consultant_id} is assigned to {active_projects} active projects on {current_date}")
+        pass
     
     return active_projects < 5
 
 def assign_project_to_business_unit(session, assigned_consultants, active_units, current_year):
     from ...db_model import Project
     
-    consultant_unit_counts = Counter(consultant.BusinessUnitID for consultant in assigned_consultants)
+    consultant_unit_counts = Counter(consultant[0].BusinessUnitID for consultant in assigned_consultants)
     
     project_counts = dict(session.query(
         Project.UnitID, func.count(Project.ProjectID)
@@ -170,33 +184,22 @@ def assign_project_to_business_unit(session, assigned_consultants, active_units,
                                for unit_id in project_counts.keys()}
     return max(distribution_difference, key=distribution_difference.get)
 
-def assign_consultants_to_project(session, available_consultants, current_date, project_manager):
-    assigned_consultants = [project_manager]  # Start with the specified project manager
+def assign_consultants_to_project(available_consultants, project_manager):
+    assigned_consultants = [project_manager]
+    other_consultants = [c for c in available_consultants if c != project_manager]
     
-    # Separate consultants by title
-    high_level_consultants = []
-    low_level_consultants = []
-    
-    for consultant in available_consultants:
-        if consultant.ConsultantID == project_manager.ConsultantID:
-            continue  # Skip the project manager as they're already assigned
-        
-        current_title = get_current_title(session, consultant.ConsultantID, current_date)
-        if current_title.TitleID in [4, 5, 6]:
-            high_level_consultants.append(consultant)
-        elif current_title.TitleID in [1, 2, 3]:
-            low_level_consultants.append(consultant)
-    
-    # Assign a second manager if available (50% chance)
+    # Possibly assign a second manager
+    high_level_consultants = [c for c in other_consultants if c.TitleID >= 4]
     if high_level_consultants and random.random() < 0.5:
         second_manager = random.choice(high_level_consultants)
         assigned_consultants.append(second_manager)
-        high_level_consultants.remove(second_manager)
+        other_consultants.remove(second_manager)
     
-    # Assign team members (titles 1, 2, or 3)
-    target_team_size = random.randint(5, 10)
-    num_additional_consultants = min(len(low_level_consultants), target_team_size - len(assigned_consultants))
-    assigned_consultants.extend(random.sample(low_level_consultants, num_additional_consultants))
+    # Assign team members
+    low_level_consultants = [c for c in other_consultants if c.TitleID < 4]
+    team_size = random.randint(3, 8)  # Adjust as needed
+    team_members = random.sample(low_level_consultants, min(len(low_level_consultants), team_size))
+    assigned_consultants.extend(team_members)
 
     return assigned_consultants
 
@@ -206,11 +209,12 @@ def set_project_dates(project, current_date, assigned_consultants, session, simu
     else:  # Time and Material
         duration_months = random.randint(*project_settings.TIME_MATERIAL_PROJECT_DURATION_RANGE)
     
-    project_manager = next(c for c in assigned_consultants if get_current_title(session, c.ConsultantID, current_date).TitleID >= 4)
+    project_manager = next(c for c, title_id in assigned_consultants if title_id >= 4)
     pm_availability = max(get_consultant_availability(session, project_manager.ConsultantID, current_date), simulation_start_date)
     
-    planned_start = pm_availability + timedelta(days=random.randint(0, 15))
-    actual_start_variance = timedelta(days=random.randint(-7, 14))
+    # Add more variance to the start date
+    planned_start = pm_availability + timedelta(days=random.randint(0, 30))
+    actual_start_variance = timedelta(days=random.randint(-14, 14))
     
     project.PlannedStartDate = planned_start
     project.ActualStartDate = max(planned_start + actual_start_variance, simulation_start_date)
@@ -238,49 +242,35 @@ def get_consultant_availability(session, consultant_id, current_date):
     
     return max(current_date, latest_project + timedelta(days=1)) if latest_project else current_date
 
-import math
-
-def generate_deliverables(project):
-    from ...db_model import Deliverable
-    
+def generate_deliverables(project, target_hours):
     num_deliverables = random.randint(*project_settings.DELIVERABLE_COUNT_RANGE)
     deliverables = []
-    remaining_hours = project.PlannedHours
+    remaining_target_hours = target_hours
     project_duration = (project.PlannedEndDate - project.PlannedStartDate).days
 
     for i in range(num_deliverables):
         is_last_deliverable = (i == num_deliverables - 1)
         
         if is_last_deliverable:
-            planned_hours = remaining_hours
+            deliverable_target_hours = remaining_target_hours
         else:
             min_hours = 10
-            max_hours = max(min_hours, math.floor(remaining_hours - (num_deliverables - i - 1) * min_hours))
-            planned_hours = random.randint(math.floor(min_hours), math.floor(max_hours))
-            remaining_hours -= planned_hours
+            max_hours = max(min_hours, math.floor(remaining_target_hours - (num_deliverables - i - 1) * min_hours))
+            deliverable_target_hours = random.randint(math.floor(min_hours), math.floor(max_hours))
+            remaining_target_hours -= deliverable_target_hours
 
         start_date = project.PlannedStartDate if i == 0 else deliverables[-1].DueDate + timedelta(days=1)
-        deliverable_duration = max(1, int((planned_hours / project.PlannedHours) * project_duration))
+        deliverable_duration = max(1, int((deliverable_target_hours / target_hours) * project_duration))
         due_date = min(start_date + timedelta(days=deliverable_duration), project.PlannedEndDate)
-
-        actual_start_variance = timedelta(days=random.randint(-3, 7))
-        actual_start_date = start_date + actual_start_variance
-
-        price = None
-        if project.Type == 'Fixed' and project.Price is not None:
-            price = round_to_nearest_thousand((Decimal(planned_hours) / Decimal(project.PlannedHours) * Decimal(project.Price)))
 
         deliverable = Deliverable(
             ProjectID=project.ProjectID,
             Name=f"Deliverable {i+1}",
             PlannedStartDate=start_date,
-            ActualStartDate=actual_start_date,
-            Status='Not Started',
             DueDate=due_date,
-            PlannedHours=planned_hours,
+            PlannedHours=round(deliverable_target_hours * (project.PlannedHours / target_hours)),
             ActualHours=0,
-            Progress=0,
-            Price=price
+            Progress=0
         )
         deliverables.append(deliverable)
 
@@ -289,22 +279,13 @@ def generate_deliverables(project):
 def calculate_project_financials(session, project, assigned_consultants, current_date, deliverables):
     # Calculate average hourly cost for each title
     title_hourly_costs = {}
-    for consultant in assigned_consultants:
-        # Ensure we're working with Consultant objects
-        if isinstance(consultant, BusinessUnit):
-            # If we have a BusinessUnit, we need to get its consultants
-            consultants = consultant.Consultants
-        else:
-            consultants = [consultant]
-        
-        for c in consultants:
-            current_title = get_current_title(session, c.ConsultantID, current_date)
-            if current_title and current_title.TitleID not in title_hourly_costs:
-                title_hourly_costs[current_title.TitleID] = calculate_hourly_cost(session, c.ConsultantID, current_date.year)
+    for consultant, title_id in assigned_consultants:
+        if title_id not in title_hourly_costs:
+            title_hourly_costs[title_id] = calculate_hourly_cost(session, consultant.ConsultantID, current_date.year)
 
     # Calculate estimated total cost
-    estimated_total_cost = sum(Decimal(title_hourly_costs[get_current_title(session, c.ConsultantID, current_date).TitleID]) * Decimal(project.PlannedHours) 
-                               for c in assigned_consultants if isinstance(c, Consultant))
+    estimated_total_cost = sum(Decimal(title_hourly_costs[title_id]) * Decimal(project.PlannedHours) 
+                               for consultant, title_id in assigned_consultants)
 
     if project.Type == 'Fixed':
         profit_margin = Decimal(random.uniform(*project_settings.PROFIT_MARGIN_RANGE))
@@ -312,10 +293,12 @@ def calculate_project_financials(session, project, assigned_consultants, current
     else:  # Time and Material
         project.EstimatedBudget = float(round_to_nearest_thousand(estimated_total_cost * project_settings.ESTIMATED_BUDGET_FACTORS))
         
-        # Generate Project Billing Rates
+        # Generate Project Billing Rates with variance
         billing_rates = []
         for title_id, hourly_cost in title_hourly_costs.items():
-            billing_rate = Decimal(hourly_cost) * (Decimal('1') + Decimal(random.uniform(*project_settings.PROFIT_MARGIN_RANGE)))
+            base_billing_rate = Decimal(hourly_cost) * (Decimal('1') + Decimal(random.uniform(*project_settings.PROFIT_MARGIN_RANGE)))
+            variance = Decimal(random.uniform(-0.1, 0.1))  # Add up to 10% variance
+            billing_rate = base_billing_rate * (Decimal('1') + variance)
             billing_rate = round(billing_rate / Decimal('5')) * Decimal('5')  # Round to nearest $5
             billing_rates.append(ProjectBillingRate(
                 ProjectID=project.ProjectID,
@@ -326,6 +309,12 @@ def calculate_project_financials(session, project, assigned_consultants, current
 
     project.pre_generated_expenses = generate_project_expenses(project, float(estimated_total_cost), deliverables)
 
+    # Distribute price to deliverables for fixed contracts
+    if project.Type == 'Fixed':
+        total_planned_hours = sum(d.PlannedHours for d in deliverables)
+        for deliverable in deliverables:
+            deliverable.Price = round(project.Price * (deliverable.PlannedHours / total_planned_hours))
+            
 def generate_project_expenses(project, estimated_total_cost, deliverables):
     expenses = []
     total_planned_hours = sum(d.PlannedHours for d in deliverables)
@@ -355,17 +344,20 @@ def update_project_team(session, project, available_consultants, current_team, c
     target_team_size = random.randint(5, 10)
     
     if len(current_team) < target_team_size:
-        potential_new_members = [c for c in available_consultants if c.ConsultantID not in current_team and get_current_title(session, c.ConsultantID, current_date).TitleID <= 3]
+        potential_new_members = [
+            (c, title_id) for c, title_id in available_consultants 
+            if c.ConsultantID not in current_team and title_id <= 3
+        ]
         new_members_count = min(target_team_size - len(current_team), len(potential_new_members))
         
-        for new_member in random.sample(potential_new_members, new_members_count):
+        for consultant, title_id in random.sample(potential_new_members, new_members_count):
             team_member = ProjectTeam(
                 ProjectID=project.ProjectID,
-                ConsultantID=new_member.ConsultantID,
+                ConsultantID=consultant.ConsultantID,
                 Role='Team Member',
                 StartDate=current_date
             )
             session.add(team_member)
-            current_team.append(new_member.ConsultantID)
+            current_team.append(consultant.ConsultantID)
 
 

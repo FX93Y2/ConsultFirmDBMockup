@@ -85,6 +85,7 @@ class Project(Base):
     Client = relationship("Client")
     BusinessUnit = relationship("BusinessUnit")
     Deliverables = relationship("Deliverable", back_populates="Project")
+    Team = relationship("ProjectTeam", back_populates="Project")
 
 class ProjectTeam(Base):
     __tablename__ = 'ProjectTeam'
@@ -94,7 +95,7 @@ class ProjectTeam(Base):
     Role = Column(String)
     StartDate = Column(Date)
     EndDate = Column(Date, nullable=True)
-    Project = relationship("Project")
+    Project = relationship("Project", back_populates="Team")
     Consultant = relationship("Consultant")
 
 class Deliverable(Base):
