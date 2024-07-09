@@ -7,39 +7,10 @@ from datetime import timedelta, date
 from sqlalchemy.orm import sessionmaker
 from collections import defaultdict
 from ...db_model import Consultant, Title, BusinessUnit, ConsultantTitleHistory, engine
-
-# Constants and Distributions
-HIRING_SEASON_PROB = {'Spring': 0.4, 'Fall': 0.4, 'Other': 0.2}
-ATTRITION_RATE = {1: 0.01, 2: 0.005, 3: 0.005, 4: 0.005, 5: 0.005, 6: 0.005}
-SALARY_RANGE = {
-    1: (60000, 80000), 2: (80000, 100000), 3: (100000, 120000),
-    4: (120000, 150000), 5: (150000, 200000), 6: (200000, 250000)
-}
-TITLE_DISTRIBUTION = {1: 0.35, 2: 0.3, 3: 0.2, 4: 0.10, 5: 0.04, 6: 0.01}
-BUSINESS_UNIT_DISTRIBUTION = {
-    1: 0.6,
-    2: 0.1,
-    3: 0.2,
-    4: 0.1
-}
-UNIT_LOCALE_MAPPING = {
-    1: ["en_US", "en_CA"],
-    2: ["es_MX", "pt_BR", "es_CO"],
-    3: ["en_GB", "de_DE", "fr_FR"],
-    4: ["zh_CN", "ja_JP", "ko_KR", "en_AU"]
-}
-EXPANSION_THRESHOLDS = {
-    400: 3, #EMEA
-    800: 4, # AP
-    1500: 2 # Central and South America
-}
-MIN_PROMOTION_YEARS = {
-    1: 0.5, 2: 2, 3: 2, 4: 3, 5: 3, 6: 0
-}
-PROMOTION_CHANCE = 0.5
+from config import consultant_settings
 
 fake = Faker()
-faker_instances = {locale: Faker(locale) for unit_id in UNIT_LOCALE_MAPPING for locale in UNIT_LOCALE_MAPPING[unit_id]}
+faker_instances = {locale: Faker(locale) for unit_id in consultant_settings.UNIT_LOCALE_MAPPING for locale in consultant_settings.UNIT_LOCALE_MAPPING[unit_id]}
 
 # Basic Helper functions
 def get_growth_rate(year):
@@ -53,8 +24,8 @@ def get_growth_rate(year):
     return yearly_growth_rates.get(year, default_rate) + variation
 
 def get_faker_for_unit(unit_id):
-    if unit_id in UNIT_LOCALE_MAPPING:
-        locale = random.choice(UNIT_LOCALE_MAPPING[unit_id])
+    if unit_id in consultant_settings.UNIT_LOCALE_MAPPING:
+        locale = random.choice(consultant_settings.UNIT_LOCALE_MAPPING[unit_id])
         return faker_instances[locale]
     else:
         return faker_instances["en_US"]
@@ -65,7 +36,7 @@ def is_latin(text):
     return bool(re.match(r'^[a-zA-Z\s]+$', text))
 
 def get_hire_date(year):
-    season = random.choices(list(HIRING_SEASON_PROB.keys()), weights=list(HIRING_SEASON_PROB.values()))[0]
+    season = random.choices(list(consultant_settings.HIRING_SEASON_PROB.keys()), weights=list(consultant_settings.HIRING_SEASON_PROB.values()))[0]
     if season == 'Spring':
         month = random.randint(3, 5)
     elif season == 'Fall':
@@ -82,7 +53,7 @@ def calculate_target_consultants(year, initial_num, start_year):
     return current_num
 
 def generate_title_slots(num_consultants):
-    slots = {title: max(1, int(num_consultants * percentage)) for title, percentage in TITLE_DISTRIBUTION.items()}
+    slots = {title: max(1, int(num_consultants * percentage)) for title, percentage in consultant_settings.TITLE_DISTRIBUTION.items()}
     
     # Ensure there are always some slots available for higher titles
     for title in range(2, 7):
@@ -96,7 +67,7 @@ def generate_title_slots(num_consultants):
 # Functions for attrition
 
 def should_leave_company(title_id):
-    return random.random() < ATTRITION_RATE[title_id]
+    return random.random() < consultant_settings.ATTRITION_RATE[title_id]
 
 # Functions for promotion
 
@@ -104,11 +75,11 @@ def should_be_promoted(current_title_id, years_in_role, total_years_in_company):
     if current_title_id == 6:  # Highest title, can't be promoted
         return False
     
-    min_years = MIN_PROMOTION_YEARS[current_title_id]
+    min_years = consultant_settings.MIN_PROMOTION_YEARS[current_title_id]
     if years_in_role < min_years:
         return False
     
-    base_promotion_chance = PROMOTION_CHANCE
+    base_promotion_chance = consultant_settings.PROMOTION_CHANCE
     # Increase base promotion chance for higher titles
     base_promotion_chance += (current_title_id - 1) * 0.05
     
@@ -134,7 +105,7 @@ def get_years_in_current_role(consultant_id, current_title_id, current_year, tit
 # Salary adjustment
 
 def get_new_salary(title_id):
-    return random.randint(SALARY_RANGE[title_id][0], SALARY_RANGE[title_id][1])
+    return random.randint(consultant_settings.SALARY_RANGE[title_id][0], consultant_settings.SALARY_RANGE[title_id][1])
 
 def get_yearly_salary_adjustment():
     return random.uniform(0.02, 0.05)
@@ -291,8 +262,8 @@ def generate_consultant_data(initial_num_consultants, start_year, end_year):
         new_hires = 0
         for title_id in range(1, 7):
             while len(active_consultants[title_id]) < title_slots[title_id]:
-                region = random.choices(list(BUSINESS_UNIT_DISTRIBUTION.keys()), 
-                                        weights=list(BUSINESS_UNIT_DISTRIBUTION.values()))[0]
+                region = random.choices(list(consultant_settings.BUSINESS_UNIT_DISTRIBUTION.keys()), 
+                                        weights=list(consultant_settings.BUSINESS_UNIT_DISTRIBUTION.values()))[0]
                 hire_date = get_hire_date(year)
                 new_consultant, new_title_history = create_consultant(region, title_id, hire_date)
                 consultant_data.append(new_consultant)
@@ -341,13 +312,13 @@ def assign_business_units(consultant_data, session):
     return consultant_data
 
 def simulate_global_expansion(consultant_data, start_year, end_year):
-    unit_ids = list(BUSINESS_UNIT_DISTRIBUTION.keys())
+    unit_ids = list(consultant_settings.BUSINESS_UNIT_DISTRIBUTION.keys())
     active_units = [1]  # Start with North America
     
     for year in range(start_year, end_year + 1):
         total_consultants = len([c for c in consultant_data if c.HireYear <= year])
         
-        for threshold, new_unit in EXPANSION_THRESHOLDS.items():
+        for threshold, new_unit in consultant_settings.EXPANSION_THRESHOLDS.items():
             if total_consultants >= threshold and new_unit not in active_units:
                 active_units.append(new_unit)
                 print(f"Year {year}: Expanded to unit ID {new_unit}")
@@ -357,7 +328,7 @@ def simulate_global_expansion(consultant_data, start_year, end_year):
         for consultant in new_consultants:
             consultant.BusinessUnitID = random.choices(
                 active_units,
-                weights=[BUSINESS_UNIT_DISTRIBUTION[u] for u in active_units]
+                weights=[consultant_settings.BUSINESS_UNIT_DISTRIBUTION[u] for u in active_units]
             )[0]
 
     return active_units

@@ -2,10 +2,10 @@ from decimal import Decimal
 import random
 
 # Project Deliverable Constants
-MIN_DAILY_HOURS = 1.0
+MIN_DAILY_HOURS = 4.0
 MAX_DAILY_HOURS = 8.0
 WORK_PROBABILITY = 0.9  # 90% chance of working on any given day
-MAX_DAILY_CONSULTANT_HOURS = 10.0
+
 AVERAGE_WORKING_HOURS_PER_DAY = 8.0
 
 # Expense Categories and Percentages

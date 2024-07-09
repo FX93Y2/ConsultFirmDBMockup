@@ -88,7 +88,7 @@ def create_new_projects_if_needed(session, current_date, available_consultants, 
     return project_meta
 
 def create_new_project(session, current_date, available_consultants, active_units, simulation_start_date):
-    project_manager = next((c for c in available_consultants if c.TitleID >= 4), None)
+    project_manager = next((c for c in available_consultants if c[1] >= 4), None)
     if not project_manager:
         return None, None, None
 
@@ -227,8 +227,6 @@ def generate_monthly_consultant_deliverables(session, current_date, project_meta
             project.Status = 'Completed'
             project.ActualEndDate = current_date
 
-    logging.info(f"Date: {current_date}, Projects processed: {len(project_meta)}")
-    logging.info(f"Consultant daily hours: {dict(consultant_daily_hours)}")
 
 
 def update_project_statuses(session, current_date, project_meta):
@@ -276,7 +274,6 @@ def update_project_statuses(session, current_date, project_meta):
         elif project.Progress > 0:
             project.Status = 'In Progress'
 
-    logging.info(f"Date: {current_date}, Updated project statuses")
 
 def generate_project_expenses(session, project_meta, simulation_end_date):
     for project_id, meta in project_meta.items():
