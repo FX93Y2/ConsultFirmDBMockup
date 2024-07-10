@@ -23,6 +23,15 @@ EXPENSE_CATEGORIES = {
     'Miscellaneous': 0.05
 }
 
+HOURLY_RATE_RANGES = {
+    1: (100, 200),  # Junior Consultant
+    2: (150, 300),  # Consultant
+    3: (200, 400),  # Senior Consultant
+    4: (250, 500),  # Lead Consultant
+    5: (300, 600),  # Project Manager
+    6: (400, 800)   # Vice President
+}
+
 MAX_TEAM_SIZE = 8
 MIN_TEAM_SIZE = 3
 

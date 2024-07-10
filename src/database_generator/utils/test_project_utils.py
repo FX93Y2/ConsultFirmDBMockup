@@ -17,6 +17,8 @@ class ConsultantInfo:
     last_project_date: date
     active_project_count: int
 
+
+
 def initialize_project_meta(project, target_hours):
     meta = {
         'team': [pt.ConsultantID for pt in project.Team],
@@ -31,9 +33,6 @@ def initialize_project_meta(project, target_hours):
         }
     
     return meta
-
-def round_to_nearest_thousand(value):
-    return Decimal(value).quantize(Decimal('1000'), rounding=ROUND_HALF_UP)
 
 def calculate_planned_hours(project, team_size):
     duration_days = (project.PlannedEndDate - project.PlannedStartDate).days
@@ -51,20 +50,6 @@ def calculate_target_hours(planned_hours):
         factor = random.uniform(1.05, 1.3)
     return round(planned_hours * factor)
 
-def calculate_hourly_cost(session, consultant_id, year):
-    from ...db_model import ConsultantTitleHistory
-    from sqlalchemy import func
-    
-    avg_salary = session.query(func.avg(ConsultantTitleHistory.Salary)).filter(
-        ConsultantTitleHistory.ConsultantID == consultant_id,
-        func.extract('year', ConsultantTitleHistory.StartDate) == year
-    ).scalar()
-    
-    if not avg_salary:
-        return 0
-    
-    hourly_cost = (avg_salary / 12) / (52 * 40)  # Assuming 52 weeks and 40 hours per week
-    return hourly_cost * (1 + project_settings.OVERHEAD_PERCENTAGE)
 
 def assign_project_team(session, project, assigned_consultants):
     for consultant_info in assigned_consultants:
@@ -102,28 +87,6 @@ def handle_project_completion(session, project, current_date, project_meta, avai
 
     logging.info(f"Project {project.ProjectID} completed on {current_date}. Consultants released.")
 
-def get_working_days(year, month):
-    start_date = date(year, month, 1)
-    end_date = start_date + relativedelta(months=1) - timedelta(days=1)
-    return [d for d in daterange(start_date, end_date) if d.weekday() < 5]  # Monday = 0, Friday = 4
-
-def daterange(start_date, end_date):
-    for n in range(int((end_date - start_date).days) + 1):
-        yield start_date + timedelta(n)
-
-def get_current_title(session, consultant_id, current_date):
-    current_title = session.query(ConsultantTitleHistory).filter(
-        ConsultantTitleHistory.ConsultantID == consultant_id,
-        ConsultantTitleHistory.StartDate <= current_date,
-        (ConsultantTitleHistory.EndDate.is_(None) | (ConsultantTitleHistory.EndDate >= current_date))
-    ).order_by(ConsultantTitleHistory.StartDate.desc()).first()
-    
-    if current_title is None:
-        logging.warning(f"No current title found for consultant {consultant_id} on {current_date}")
-        return None
-    
-    return current_title
-
 def get_available_consultants(session, current_date):
     two_months_ago = current_date - timedelta(days=60)
     
@@ -154,23 +117,6 @@ def get_available_consultants(session, current_date):
                              for consultant, title_id, last_project_date, active_project_count in results]
 
     return available_consultants
-
-def is_consultant_available(session, consultant_id, current_date):
-    # Consider only projects that have been active in the last 2 months
-    two_months_ago = current_date - timedelta(days=60)
-    
-    active_projects = session.query(func.count(ProjectTeam.ProjectID)).filter(
-        ProjectTeam.ConsultantID == consultant_id,
-        ProjectTeam.StartDate <= current_date,
-        (ProjectTeam.EndDate.is_(None) | (ProjectTeam.EndDate >= two_months_ago)),
-        Project.Status.in_(['In Progress', 'Not Started'])  # Only consider active projects
-    ).join(Project).scalar()
-    
-    return active_projects < project_settings.MAX_PROJECTS_PER_CONSULTANT
-
-
-def is_consultant_available_for_work(consultant_daily_hours, consultant_id):
-    return consultant_daily_hours[consultant_id] < project_settings.MAX_DAILY_HOURS
 
 
 def assign_project_to_business_unit(session, assigned_consultants, active_units, current_year):
@@ -262,7 +208,7 @@ def get_consultant_availability(session, consultant_id, current_date):
 def generate_deliverables(project, target_hours):
     num_deliverables = random.randint(*project_settings.DELIVERABLE_COUNT_RANGE)
     deliverables = []
-    remaining_target_hours = target_hours
+    remaining_target_hours = Decimal(str(target_hours))
     project_duration = (project.PlannedEndDate - project.PlannedStartDate).days
 
     for i in range(num_deliverables):
@@ -271,91 +217,34 @@ def generate_deliverables(project, target_hours):
         if is_last_deliverable:
             deliverable_target_hours = remaining_target_hours
         else:
-            min_hours = 10
-            max_hours = max(min_hours, math.floor(remaining_target_hours - (num_deliverables - i - 1) * min_hours))
-            deliverable_target_hours = random.randint(math.floor(min_hours), math.floor(max_hours))
+            min_hours = Decimal('10')
+            max_hours = max(min_hours, (remaining_target_hours - (num_deliverables - i - 1) * min_hours))
+            deliverable_target_hours = Decimal(str(random.uniform(float(min_hours), float(max_hours))))
             remaining_target_hours -= deliverable_target_hours
 
         start_date = project.PlannedStartDate if i == 0 else deliverables[-1].DueDate + timedelta(days=1)
-        deliverable_duration = max(1, int((deliverable_target_hours / target_hours) * project_duration))
+        deliverable_duration = max(1, int((deliverable_target_hours / Decimal(str(target_hours))) * project_duration))
         due_date = min(start_date + timedelta(days=deliverable_duration), project.PlannedEndDate)
 
+        planned_hours = round_decimal(deliverable_target_hours * (Decimal(str(project.PlannedHours)) / Decimal(str(target_hours))), 1)
+        
         deliverable = Deliverable(
             ProjectID=project.ProjectID,
             Name=f"Deliverable {i+1}",
             PlannedStartDate=start_date,
+            ActualStartDate=None,  # This will be set when work actually starts on the deliverable
             DueDate=due_date,
-            PlannedHours=round(deliverable_target_hours * (project.PlannedHours / target_hours)),
-            ActualHours=0,
-            Progress=0
+            PlannedHours=float(planned_hours),  # Convert to float for database storage
+            ActualHours=0.0,
+            Progress=0,
+            Status='Not Started'
         )
         deliverables.append(deliverable)
 
     return deliverables
 
-def calculate_project_financials(session, project, assigned_consultants, current_date, deliverables):
-    # Calculate average hourly cost for each title
-    title_hourly_costs = {}
-    for consultant_info in assigned_consultants:
-        if consultant_info.title_id not in title_hourly_costs:
-            title_hourly_costs[consultant_info.title_id] = calculate_hourly_cost(session, consultant_info.consultant.ConsultantID, current_date.year)
-
-    # Calculate estimated total cost
-    estimated_total_cost = sum(Decimal(title_hourly_costs[consultant_info.title_id]) * Decimal(project.PlannedHours) 
-                               for consultant_info in assigned_consultants)
-
-    if project.Type == 'Fixed':
-        profit_margin = Decimal(random.uniform(*project_settings.PROFIT_MARGIN_RANGE))
-        project.Price = float(round_to_nearest_thousand(estimated_total_cost * (Decimal('1') + profit_margin)))
-    else:  # Time and Material
-        project.EstimatedBudget = float(round_to_nearest_thousand(estimated_total_cost * project_settings.ESTIMATED_BUDGET_FACTORS))
-        
-        # Generate Project Billing Rates with variance
-        billing_rates = []
-        for title_id, hourly_cost in title_hourly_costs.items():
-            base_billing_rate = Decimal(hourly_cost) * (Decimal('1') + Decimal(random.uniform(*project_settings.PROFIT_MARGIN_RANGE)))
-            variance = Decimal(random.uniform(-0.1, 0.1))  # Add up to 10% variance
-            billing_rate = base_billing_rate * (Decimal('1') + variance)
-            billing_rate = round(billing_rate / Decimal('5')) * Decimal('5')  # Round to nearest $5
-            billing_rates.append(ProjectBillingRate(
-                ProjectID=project.ProjectID,
-                TitleID=title_id,
-                Rate=float(billing_rate)
-            ))
-        session.add_all(billing_rates)
-
-    project.pre_generated_expenses = generate_project_expenses(project, float(estimated_total_cost), deliverables)
-
-    # Distribute price to deliverables for fixed contracts
-    if project.Type == 'Fixed':
-        total_planned_hours = sum(d.PlannedHours for d in deliverables)
-        for deliverable in deliverables:
-            deliverable.Price = round(project.Price * (deliverable.PlannedHours / total_planned_hours))
-            
-def generate_project_expenses(project, estimated_total_cost, deliverables):
-    expenses = []
-    total_planned_hours = sum(d.PlannedHours for d in deliverables)
-
-    for deliverable in deliverables:
-        deliverable_cost_ratio = deliverable.PlannedHours / total_planned_hours
-        deliverable_estimated_cost = estimated_total_cost * deliverable_cost_ratio
-
-        for category, percentage in project_settings.EXPENSE_CATEGORIES.items():
-            is_billable = random.choice([True, False])
-            amount = Decimal(deliverable_estimated_cost) * Decimal(percentage) * Decimal(random.uniform(0.8, 1.2))
-            amount = round(amount, -2)  # Round to nearest hundred
-
-            if amount > 0:
-                expense = {
-                    'DeliverableID': deliverable.DeliverableID,
-                    'Amount': float(amount),
-                    'Description': f"{category} expense for {deliverable.Name}",
-                    'Category': category,
-                    'IsBillable': is_billable
-                }
-                expenses.append(expense)
-
-    return expenses
+def round_decimal(value, decimal_places=1):
+    return value.quantize(Decimal(10) ** -decimal_places, rounding=ROUND_HALF_UP)
 
 def update_project_team(session, project, available_consultants, current_team, current_date):
     target_team_size = random.randint(6, 12)
@@ -393,12 +282,4 @@ def log_consultant_projects(session, current_date):
             (ProjectTeam.EndDate.is_(None) | (ProjectTeam.EndDate >= current_date)),
             Project.Status.in_(['Not Started', 'In Progress'])
         ).all()
-
-
-# Helper Function for generate_daily_consultant_deliverables
-def project_has_remaining_work(project_meta):
-    return any(
-        deliverable_meta['target_hours'] - deliverable_meta.get('actual_hours', 0) > 0
-        for deliverable_meta in project_meta['deliverables'].values()
-    )
 

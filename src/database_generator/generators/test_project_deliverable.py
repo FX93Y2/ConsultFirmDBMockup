@@ -9,7 +9,7 @@ from collections import defaultdict
 from decimal import Decimal
 from ...db_model import *
 from ..utils.test_project_utils import *
-from ..utils.consultant_deliverable_utils import *
+from ..utils.project_financial_utils import *
 from config import project_settings, consultant_settings
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -66,7 +66,7 @@ def generate_projects(start_year, end_year, initial_consultants):
 
                 session.commit()
 
-            generate_project_expenses(session, project_meta, simulation_end_date)
+            generate_project_expenses_for_year(session, project_meta, simulation_end_date)
             session.commit()
             print(f"Project generation for year {current_year} completed successfully.")
 
@@ -248,25 +248,61 @@ def update_existing_projects(session, current_date, available_consultants, proje
 def generate_daily_consultant_deliverables(session, current_date, project_meta):
     consultant_daily_hours = defaultdict(float)
     
-    # Get list of active projects
     active_projects = [
         (project_id, meta) for project_id, meta in project_meta.items()
         if session.query(Project).get(project_id).Status == 'In Progress'
     ]
     
-    # Shuffle the active projects to ensure fair allocation
     random.shuffle(active_projects)
     
     for project_id, meta in active_projects:
         project = session.query(Project).get(project_id)
         
-        allocated_hours = allocate_work_for_project(session, meta, current_date, consultant_daily_hours)
-        
-        if allocated_hours > 0:
-            project.ActualHours += allocated_hours
-            project.Progress = min(100, int((project.ActualHours / meta['target_hours']) * 100))
-            #logging.info(f"Allocated {allocated_hours} hours to ProjectID {project_id} on {current_date}")
-    
+        project_actual_hours = Decimal('0.0')
+
+        for deliverable_id, deliverable_meta in meta['deliverables'].items():
+            deliverable = session.query(Deliverable).get(deliverable_id)
+            if deliverable.Status == 'Completed' or deliverable.PlannedStartDate > current_date:
+                continue
+
+            if deliverable.Status == 'Not Started':
+                deliverable.ActualStartDate = current_date
+                deliverable.Status = 'In Progress'
+
+            remaining_hours = Decimal(str(deliverable_meta['target_hours'])) - Decimal(str(deliverable.ActualHours))
+
+            if remaining_hours <= Decimal('0.0'):
+                continue
+
+            for consultant_id in meta['team']:
+                if consultant_daily_hours[consultant_id] >= project_settings.MAX_DAILY_HOURS:
+                    continue
+
+                consultant_hours_today = Decimal(str(consultant_daily_hours[consultant_id]))
+                available_hours = min(Decimal(str(project_settings.MAX_DAILY_HOURS)) - consultant_hours_today, remaining_hours)
+
+                if available_hours <= Decimal('0.0'):
+                    continue
+
+                hours = round_decimal(Decimal(str(random.uniform(float(project_settings.MIN_DAILY_HOURS), float(available_hours)))), 1)
+                consultant_deliverable = ConsultantDeliverable(
+                    ConsultantID=consultant_id,
+                    DeliverableID=deliverable_id,
+                    Date=current_date,
+                    Hours=float(hours)
+                )
+                session.add(consultant_deliverable)
+                deliverable_meta['consultant_deliverables'].append(consultant_deliverable)
+                remaining_hours -= hours
+                deliverable.ActualHours = float(round_decimal(Decimal(str(deliverable.ActualHours)) + hours, 1))
+                project_actual_hours += hours
+                consultant_daily_hours[consultant_id] += float(hours)
+
+            deliverable.Progress = min(100, int((Decimal(str(deliverable.ActualHours)) / Decimal(str(deliverable_meta['target_hours']))) * 100))
+
+        project.ActualHours = float(round_decimal(Decimal(str(project.ActualHours)) + project_actual_hours, 1))
+        project.Progress = min(100, int((Decimal(str(project.ActualHours)) / Decimal(str(meta['target_hours']))) * 100))
+
     session.commit()
 
 def update_project_statuses(session, current_date, project_meta, available_consultants):
@@ -281,32 +317,32 @@ def update_project_statuses(session, current_date, project_meta, available_consu
 
         if project.Status == 'In Progress':
             all_deliverables_completed = True
-            total_target_hours = meta['target_hours']
-            weighted_progress = 0
+            total_target_hours = Decimal(meta['target_hours'])
+            weighted_progress = Decimal('0.0')
 
             for deliverable_id, deliverable_meta in meta['deliverables'].items():
                 deliverable = session.query(Deliverable).get(deliverable_id)
 
-                if deliverable.ActualHours >= deliverable_meta['target_hours']:
+                if Decimal(deliverable.ActualHours) >= Decimal(deliverable_meta['target_hours']):
                     deliverable.Status = 'Completed'
                     deliverable.SubmissionDate = current_date
                     if project.Type == 'Fixed':
                         deliverable.InvoicedDate = current_date + timedelta(days=random.randint(1, 7))
-                elif deliverable.ActualHours > 0:
+                elif Decimal(deliverable.ActualHours) > Decimal('0.0'):
                     deliverable.Status = 'In Progress'
                     all_deliverables_completed = False
                 else:
                     deliverable.Status = 'Not Started'
                     all_deliverables_completed = False
 
-                deliverable_progress = (deliverable.ActualHours / deliverable_meta['target_hours']) * 100
-                deliverable_weight = deliverable_meta['target_hours'] / total_target_hours
+                deliverable_progress = (Decimal(deliverable.ActualHours) / Decimal(deliverable_meta['target_hours'])) * 100
+                deliverable_weight = Decimal(deliverable_meta['target_hours']) / total_target_hours
                 weighted_progress += deliverable_progress * deliverable_weight
                 deliverable.Progress = min(100, int(deliverable_progress))
 
             project.Progress = min(100, int(weighted_progress))
 
-            if project.ActualHours == 0 and current_date > project.ActualStartDate + timedelta(days=120):
+            if Decimal(project.ActualHours) == Decimal('0.0') and current_date > project.ActualStartDate + timedelta(days=120):
                 project.Status = 'Cancelled'
                 logging.warning(f"Project {project.ProjectID} cancelled due to inactivity")
             elif all_deliverables_completed:
@@ -327,7 +363,7 @@ def update_project_statuses(session, current_date, project_meta, available_consu
     session.commit()
 
 
-def generate_project_expenses(session, project_meta, simulation_end_date):
+def generate_project_expenses_for_year(session, project_meta, simulation_end_date):
     for project_id, meta in project_meta.items():
         project = session.query(Project).get(project_id)
         if project.Status not in ['In Progress', 'Completed']:
@@ -349,31 +385,28 @@ def generate_project_expenses(session, project_meta, simulation_end_date):
             if expense_start_date >= expense_end_date:
                 continue
 
-            for category, percentage in project_settings.EXPENSE_CATEGORIES.items():
-                is_billable = random.choice([True, False])
-                amount = Decimal(total_consultant_cost) * Decimal(percentage) * Decimal(random.uniform(0.8, 1.2))
-                amount = round(amount, -2)  # Round to nearest hundred
-
-                if amount > 0:
-                    consultant_deliverable_dates = [cd.Date for cd in deliverable_meta['consultant_deliverables']
-                                                    if expense_start_date <= cd.Date <= expense_end_date]
-                    
-                    if consultant_deliverable_dates:
-                        expense_date = random.choice(consultant_deliverable_dates)
-                    else:
-                        # Fallback: use the middle date between start and end
-                        expense_date = expense_start_date + (expense_end_date - expense_start_date) / 2
-                    
-                    expense = ProjectExpense(
-                        ProjectID=project.ProjectID,
-                        DeliverableID=deliverable.DeliverableID,
-                        Date=expense_date,
-                        Amount=float(amount),
-                        Description=f"{category} expense for {deliverable.Name}",
-                        Category=category,
-                        IsBillable=is_billable
-                    )
-                    expenses.append(expense)
+            deliverable_expenses = generate_project_expenses(project, total_consultant_cost, [deliverable])
+            
+            for expense_data in deliverable_expenses:
+                consultant_deliverable_dates = [cd.Date for cd in deliverable_meta['consultant_deliverables']
+                                                if expense_start_date <= cd.Date <= expense_end_date]
+                
+                if consultant_deliverable_dates:
+                    expense_date = random.choice(consultant_deliverable_dates)
+                else:
+                    # Fallback: use the middle date between start and end
+                    expense_date = expense_start_date + (expense_end_date - expense_start_date) / 2
+                
+                expense = ProjectExpense(
+                    ProjectID=project.ProjectID,
+                    DeliverableID=deliverable.DeliverableID,
+                    Date=expense_date,
+                    Amount=expense_data['Amount'],
+                    Description=expense_data['Description'],
+                    Category=expense_data['Category'],
+                    IsBillable=expense_data['IsBillable']
+                )
+                expenses.append(expense)
 
         session.add_all(expenses)
 
