@@ -8,7 +8,7 @@ from src.database_generator.generators.title import generate_titles
 from src.database_generator.generators.business_unit import generate_business_units
 from src.database_generator.generators.consultant_title_history import main as generate_consultant_title_history
 from src.database_generator.generators.payroll import generate_payroll
-from src.database_generator.generators.test_project_deliverable import generate_projects
+from database_generator.generators.project_deliverable import generate_projects
 from src.spreadsheet_generator.indirect_cost import generate_indirect_costs
 from src.spreadsheet_generator.non_billable_time import generate_non_billable_time_report
 
