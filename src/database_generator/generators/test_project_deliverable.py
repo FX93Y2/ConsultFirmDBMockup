@@ -1,5 +1,6 @@
 import random
 import logging
+from scipy.stats import norm
 from datetime import date, timedelta
 from dateutil.relativedelta import relativedelta
 from sqlalchemy.orm import sessionmaker
@@ -98,9 +99,7 @@ def distribute_monthly_targets(yearly_target):
     extra_projects = yearly_target % 12
     
     monthly_targets = [base_monthly_target] * 12
-    
-    # Distribute extra projects, favoring middle months
-    middle_months = [3, 4, 5, 6, 7, 8]
+    middle_months = project_settings.PROJECT_MONTH_DISTRIBUTION
     for i in range(extra_projects):
         month = random.choice(middle_months)
         monthly_targets[month] += 1
@@ -151,8 +150,12 @@ def create_new_projects_if_needed(session, current_date, available_consultants, 
     )
 
     target_for_month = monthly_targets[current_date.month - 1]
+    
+    std_dev = target_for_month * 0.2
+    projects_to_create = max(0, round(norm.rvs(loc=target_for_month, scale=std_dev)))
+
     projects_this_month = len([p for p in project_meta.values() if p['start_date'].month == current_date.month])
-    projects_to_create = max(0, target_for_month - projects_this_month)
+    projects_to_create = max(0, projects_to_create - projects_this_month)
 
     projects_created = 0
     for consultant in higher_level_consultants:
@@ -168,6 +171,7 @@ def create_new_projects_if_needed(session, current_date, available_consultants, 
             project_meta[project.ProjectID]['target_hours'] = target_hours
             project_meta[project.ProjectID]['start_date'] = project.PlannedStartDate
             projects_created += 1
+
             '''
             logging.info(f"Created new project: ProjectID {project.ProjectID}, "
                          f"Start Date: {project.PlannedStartDate}, "
