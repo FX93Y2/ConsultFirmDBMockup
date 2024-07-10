@@ -168,16 +168,12 @@ def is_consultant_available(session, consultant_id, current_date):
         Project.Status.in_(['In Progress', 'Not Started'])  # Only consider active projects
     ).join(Project).scalar()
     
-    return active_projects < 5
+    return active_projects < project_settings.MAX_PROJECTS_PER_CONSULTANT
 
-def is_consultant_available_for_work(session, consultant_id, date):
-    # Check if the consultant has less than MAX_DAILY_HOURS allocated for this day
-    daily_hours = session.query(func.sum(ConsultantDeliverable.Hours)).filter(
-        ConsultantDeliverable.ConsultantID == consultant_id,
-        ConsultantDeliverable.Date == date
-    ).scalar() or 0
 
-    return daily_hours < project_settings.MAX_DAILY_HOURS
+def is_consultant_available_for_work(consultant_daily_hours, consultant_id):
+    return consultant_daily_hours[consultant_id] < project_settings.MAX_DAILY_HOURS
+
 
 def assign_project_to_business_unit(session, assigned_consultants, active_units, current_year):
     from ...db_model import Project
@@ -235,7 +231,7 @@ def set_project_dates(project, current_date, assigned_consultants, session, simu
     else:  # Time and Material
         duration_months = random.randint(*project_settings.TIME_MATERIAL_PROJECT_DURATION_RANGE)
     
-    project_manager = next(c for c in assigned_consultants if c.title_id >= 4)
+    project_manager = next(c for c in assigned_consultants if c.title_id >= project_settings.HIGHER_LEVEL_TITLE_THRESHOLD)
     pm_availability = max(get_consultant_availability(session, project_manager.consultant.ConsultantID, current_date), simulation_start_date)
     
     # Maintain variance between PlannedStartDate and ActualStartDate
@@ -399,3 +395,12 @@ def log_consultant_projects(session, current_date):
             (ProjectTeam.EndDate.is_(None) | (ProjectTeam.EndDate >= current_date)),
             Project.Status.in_(['Not Started', 'In Progress'])
         ).all()
+
+
+# Helper Function for generate_daily_consultant_deliverables
+def project_has_remaining_work(project_meta):
+    return any(
+        deliverable_meta['target_hours'] - deliverable_meta.get('actual_hours', 0) > 0
+        for deliverable_meta in project_meta['deliverables'].values()
+    )
+

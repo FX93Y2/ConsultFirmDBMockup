@@ -8,6 +8,7 @@ from collections import defaultdict
 from decimal import Decimal
 from ...db_model import *
 from ..utils.test_project_utils import *
+from ..utils.consultant_deliverable_utils import *
 from config import project_settings, consultant_settings
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -26,7 +27,8 @@ def generate_projects(start_year, end_year, initial_consultants):
             'team': [],
             'deliverables': defaultdict(lambda: {
                 'remaining_hours': 0,
-                'consultant_deliverables': []
+                'consultant_deliverables': [],
+                'actual_hours': 0
             }),
             'target_hours': 0,
             'start_date': None
@@ -50,7 +52,7 @@ def generate_projects(start_year, end_year, initial_consultants):
                 # Daily simulation within the month
                 current_date = month_start
                 while current_date.month == current_month:
-                    start_due_projects(session, current_date)
+                    project_meta = start_due_projects(session, current_date, project_meta)
                     if current_date.weekday() < 5:  # Weekday
                         generate_daily_consultant_deliverables(session, current_date, project_meta)
                     update_project_statuses(session, current_date, project_meta, available_consultants)
@@ -87,8 +89,7 @@ def calculate_yearly_project_targets(start_year, end_year, initial_consultants):
         growth_rate = consultant_settings.CONSULTANT_YEARLY_GROWTHRATE.get(year, 0.05)  # Default growth rate of 5%
         consultant_count *= (1 + growth_rate)
         
-        # Assuming each project requires about 5 consultants on average
-        yearly_targets[year] = math.ceil(consultant_count / 5)
+        yearly_targets[year] = math.ceil(consultant_count / 2)
     
     return yearly_targets
 
@@ -107,7 +108,7 @@ def distribute_monthly_targets(yearly_target):
     return monthly_targets
 
 
-def start_due_projects(session, current_date):
+def start_due_projects(session, current_date, project_meta):
     due_projects = session.query(Project).filter(
         Project.Status == 'Not Started',
         Project.ActualStartDate <= current_date
@@ -117,7 +118,31 @@ def start_due_projects(session, current_date):
         project.Status = 'In Progress'
         logging.info(f"Starting project {project.ProjectID} on {current_date}")
 
-    session.commit()        
+        # Ensure the project team is assigned
+        if project.ProjectID in project_meta:
+            team_members = project_meta[project.ProjectID]['team']
+            for consultant_id in team_members:
+                # Check if the consultant is already assigned to the project
+                existing_assignment = session.query(ProjectTeam).filter(
+                    ProjectTeam.ProjectID == project.ProjectID,
+                    ProjectTeam.ConsultantID == consultant_id
+                ).first()
+
+                if not existing_assignment:
+                    team_member = ProjectTeam(
+                        ProjectID=project.ProjectID,
+                        ConsultantID=consultant_id,
+                        Role='Team Member',
+                        StartDate=current_date
+                    )
+                    session.add(team_member)
+                    logging.info(f"Assigned consultant {consultant_id} to project {project.ProjectID}")
+
+        else:
+            logging.warning(f"Project {project.ProjectID} not found in project_meta")
+
+    session.commit()
+    return project_meta        
 
 def create_new_projects_if_needed(session, current_date, available_consultants, active_units, project_meta, simulation_start_date, monthly_targets):
     higher_level_consultants = sorted(
@@ -218,54 +243,26 @@ def update_existing_projects(session, current_date, available_consultants, proje
 def generate_daily_consultant_deliverables(session, current_date, project_meta):
     consultant_daily_hours = defaultdict(float)
     
-    for project_id, meta in project_meta.items():
+    # Get list of active projects
+    active_projects = [
+        (project_id, meta) for project_id, meta in project_meta.items()
+        if session.query(Project).get(project_id).Status == 'In Progress'
+    ]
+    
+    # Shuffle the active projects to ensure fair allocation
+    random.shuffle(active_projects)
+    
+    for project_id, meta in active_projects:
         project = session.query(Project).get(project_id)
-        if project.Status != 'In Progress':
-            continue
-
-        project_actual_hours = 0
-
-        for deliverable_id, deliverable_meta in meta['deliverables'].items():
-            deliverable = session.query(Deliverable).get(deliverable_id)
-            if deliverable.Status == 'Completed':
-                continue
-
-            remaining_hours = deliverable_meta['target_hours'] - deliverable.ActualHours
-
-            if remaining_hours <= 0:
-                continue
-
-            for consultant_id in meta['team']:
-                if not is_consultant_available_for_work(session, consultant_id, current_date):
-                    continue
-
-                consultant_hours_today = consultant_daily_hours[consultant_id]
-                available_hours = min(project_settings.MAX_DAILY_HOURS - consultant_hours_today, remaining_hours)
-
-                if available_hours <= 0:
-                    continue
-
-                hours = round(random.uniform(project_settings.MIN_DAILY_HOURS, available_hours), 1)
-                consultant_deliverable = ConsultantDeliverable(
-                    ConsultantID=consultant_id,
-                    DeliverableID=deliverable_id,
-                    Date=current_date,
-                    Hours=hours
-                )
-                session.add(consultant_deliverable)
-                deliverable_meta['consultant_deliverables'].append(consultant_deliverable)
-                remaining_hours -= hours
-                deliverable.ActualHours += hours
-                project_actual_hours += hours
-                consultant_daily_hours[consultant_id] += hours
-
-            deliverable.Progress = min(100, int((deliverable.ActualHours / deliverable_meta['target_hours']) * 100))
-
-        project.ActualHours += project_actual_hours
-        project.Progress = min(100, int((project.ActualHours / meta['target_hours']) * 100))
-
+        
+        allocated_hours = allocate_work_for_project(session, meta, current_date, consultant_daily_hours)
+        
+        if allocated_hours > 0:
+            project.ActualHours += allocated_hours
+            project.Progress = min(100, int((project.ActualHours / meta['target_hours']) * 100))
+            logging.info(f"Allocated {allocated_hours} hours to ProjectID {project_id} on {current_date}")
+    
     session.commit()
-
 
 def update_project_statuses(session, current_date, project_meta, available_consultants):
     for project_id, meta in project_meta.items():
