@@ -11,6 +11,7 @@ from src.spreadsheet_generator.non_billable_time import generate_non_billable_ti
 
 START_YEAR = 2015
 END_YEAR = 2015
+INITIAL_CONSULTANTS = 100
 
 def main():
     # Initialize DB
@@ -21,9 +22,9 @@ def main():
     generate_business_units()
     generate_clients(358)
     generate_titles()
-    generate_consultant_title_history(100, start_year=START_YEAR, end_year=END_YEAR)
+    generate_consultant_title_history(INITIAL_CONSULTANTS, start_year=START_YEAR, end_year=END_YEAR)
     generate_payroll(END_YEAR)
-    generate_projects(START_YEAR, END_YEAR)
+    generate_projects(START_YEAR, END_YEAR, INITIAL_CONSULTANTS)
     
     # Generate Spreadsheet
     generate_indirect_costs()

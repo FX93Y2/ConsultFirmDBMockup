@@ -14,11 +14,7 @@ faker_instances = {locale: Faker(locale) for unit_id in consultant_settings.UNIT
 
 # Basic Helper functions
 def get_growth_rate(year):
-    yearly_growth_rates = {
-        2015: 0.2, 2016: 0.20, 2017: 0.10, 2018: 0.10,
-        2019: 0.10, 2020: 0.05, 2021: 0.04, 2022: 0.02, 
-        2023: -0.05, 2024: -0.06
-    }
+    yearly_growth_rates = consultant_settings.CONSULTANT_YEARLY_GROWTHRATE
     default_rate = 0.25
     variation = random.uniform(-0.05, 0.05)
     return yearly_growth_rates.get(year, default_rate) + variation

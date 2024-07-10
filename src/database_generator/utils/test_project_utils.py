@@ -91,6 +91,19 @@ def calculate_project_progress(project, deliverables):
     weighted_progress = sum((d.ActualHours / d.PlannedHours) * (d.PlannedHours / total_planned_hours) * 100 for d in deliverables)
     project.Progress = min(100, int(round(weighted_progress)))
 
+def handle_project_completion(session, project, current_date, project_meta, available_consultants):
+    session.query(ProjectTeam).filter(
+        ProjectTeam.ProjectID == project.ProjectID,
+        ProjectTeam.EndDate.is_(None)
+    ).update({ProjectTeam.EndDate: current_date})
+
+    for consultant_id in project_meta[project.ProjectID]['team']:
+        consultant_info = next((c for c in available_consultants if c.consultant.ConsultantID == consultant_id), None)
+        if consultant_info:
+            consultant_info.active_project_count = max(0, consultant_info.active_project_count - 1)
+
+    logging.info(f"Project {project.ProjectID} completed on {current_date}. Consultants released.")
+
 def get_working_days(year, month):
     start_date = date(year, month, 1)
     end_date = start_date + relativedelta(months=1) - timedelta(days=1)
@@ -157,6 +170,15 @@ def is_consultant_available(session, consultant_id, current_date):
     
     return active_projects < 5
 
+def is_consultant_available_for_work(session, consultant_id, date):
+    # Check if the consultant has less than MAX_DAILY_HOURS allocated for this day
+    daily_hours = session.query(func.sum(ConsultantDeliverable.Hours)).filter(
+        ConsultantDeliverable.ConsultantID == consultant_id,
+        ConsultantDeliverable.Date == date
+    ).scalar() or 0
+
+    return daily_hours < project_settings.MAX_DAILY_HOURS
+
 def assign_project_to_business_unit(session, assigned_consultants, active_units, current_year):
     from ...db_model import Project
     
@@ -216,18 +238,13 @@ def set_project_dates(project, current_date, assigned_consultants, session, simu
     project_manager = next(c for c in assigned_consultants if c.title_id >= 4)
     pm_availability = max(get_consultant_availability(session, project_manager.consultant.ConsultantID, current_date), simulation_start_date)
     
-    # Add more variance to the start date
-    planned_start = pm_availability + timedelta(days=random.randint(0, 30))
-    actual_start_variance = timedelta(days=random.randint(-14, 14))
-    
-    project.PlannedStartDate = planned_start
-    project.ActualStartDate = max(planned_start + actual_start_variance, simulation_start_date)
-    
-    # Set initial status based on start date
-    if project.ActualStartDate <= current_date:
-        project.Status = 'In Progress'
-    else:
-        project.Status = 'Not Started'
+    # Maintain variance between PlannedStartDate and ActualStartDate
+    project.PlannedStartDate = pm_availability + timedelta(days=random.randint(0, 14))
+    actual_start_variance = timedelta(days=random.randint(0, 7))
+    project.ActualStartDate = project.PlannedStartDate + actual_start_variance
+
+    # Set initial status
+    project.Status = 'Not Started'
     
     # Calculate end date based on working days
     working_days = duration_months * 21  # Assuming 21 working days per month
