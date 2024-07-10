@@ -67,9 +67,8 @@ def calculate_hourly_cost(session, consultant_id, year):
     return hourly_cost * (1 + project_settings.OVERHEAD_PERCENTAGE)
 
 def assign_project_team(session, project, assigned_consultants):
-    logging.info(f"Assigning team for ProjectID: {project.ProjectID}")
     for consultant_info in assigned_consultants:
-        role = 'Project Manager' if consultant_info.title_id >= 4 else 'Team Member'
+        role = 'Project Manager' if consultant_info.title_id >= project_settings.HIGHER_LEVEL_TITLE_THRESHOLD else 'Team Member'
         
         team_member = ProjectTeam(
             ProjectID=project.ProjectID,
@@ -79,7 +78,6 @@ def assign_project_team(session, project, assigned_consultants):
             EndDate=None
         )
         session.add(team_member)
-        logging.info(f"Assigned ConsultantID: {consultant_info.consultant.ConsultantID}, Role: {role} to ProjectID: {project.ProjectID}")
 
 def calculate_project_progress(project, deliverables):
     total_planned_hours = sum(d.PlannedHours for d in deliverables)
@@ -219,7 +217,7 @@ def assign_consultants_to_project(available_consultants, project_manager):
     
     # Assign mix of junior and mid-level consultants, prioritizing those with fewer projects
     remaining_slots = random.randint(project_settings.MIN_TEAM_SIZE - len(assigned_consultants), project_settings.MAX_TEAM_SIZE - len(assigned_consultants))
-    junior_mid_consultants = [c for c in other_consultants if c.title_id <= 2]
+    junior_mid_consultants = [c for c in other_consultants if c.title_id <= project_settings.HIGHER_LEVEL_TITLE_THRESHOLD]
     team_members = junior_mid_consultants[:remaining_slots]
     assigned_consultants.extend(team_members)
 
@@ -382,9 +380,9 @@ def update_project_team(session, project, available_consultants, current_team, c
             session.add(team_member)
             current_team.append(consultant_info.consultant.ConsultantID)
             consultant_info.active_project_count += 1
-            logging.info(f"Added consultant {consultant_info.consultant.ConsultantID} to project {project.ProjectID} team")
+            #logging.info(f"Added consultant {consultant_info.consultant.ConsultantID} to project {project.ProjectID} team")
 
-    logging.info(f"Updated team size for project {project.ProjectID}: {len(current_team)} members")
+    #logging.info(f"Updated team size for project {project.ProjectID}: {len(current_team)} members")
 
 def log_consultant_projects(session, current_date):
     consultants = session.query(Consultant).all()

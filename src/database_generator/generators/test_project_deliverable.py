@@ -116,7 +116,7 @@ def start_due_projects(session, current_date, project_meta):
 
     for project in due_projects:
         project.Status = 'In Progress'
-        logging.info(f"Starting project {project.ProjectID} on {current_date}")
+        #logging.info(f"Starting project {project.ProjectID} on {current_date}")
 
         # Ensure the project team is assigned
         if project.ProjectID in project_meta:
@@ -136,7 +136,7 @@ def start_due_projects(session, current_date, project_meta):
                         StartDate=current_date
                     )
                     session.add(team_member)
-                    logging.info(f"Assigned consultant {consultant_id} to project {project.ProjectID}")
+                    #logging.info(f"Assigned consultant {consultant_id} to project {project.ProjectID}")
 
         else:
             logging.warning(f"Project {project.ProjectID} not found in project_meta")
@@ -168,11 +168,12 @@ def create_new_projects_if_needed(session, current_date, available_consultants, 
             project_meta[project.ProjectID]['target_hours'] = target_hours
             project_meta[project.ProjectID]['start_date'] = project.PlannedStartDate
             projects_created += 1
-
+            '''
             logging.info(f"Created new project: ProjectID {project.ProjectID}, "
                          f"Start Date: {project.PlannedStartDate}, "
                          f"Team Size: {len(new_project_meta['team'])}, "
                          f"Project Manager: {consultant.consultant.ConsultantID}")
+            '''
 
             # Update consultant project counts
             for consultant_id in new_project_meta['team']:
@@ -260,7 +261,7 @@ def generate_daily_consultant_deliverables(session, current_date, project_meta):
         if allocated_hours > 0:
             project.ActualHours += allocated_hours
             project.Progress = min(100, int((project.ActualHours / meta['target_hours']) * 100))
-            logging.info(f"Allocated {allocated_hours} hours to ProjectID {project_id} on {current_date}")
+            #logging.info(f"Allocated {allocated_hours} hours to ProjectID {project_id} on {current_date}")
     
     session.commit()
 
@@ -272,7 +273,7 @@ def update_project_statuses(session, current_date, project_meta, available_consu
 
         if project.Status == 'Not Started' and current_date >= project.ActualStartDate:
             project.Status = 'In Progress'
-            logging.info(f"Starting project {project.ProjectID} on {current_date}")
+            #logging.info(f"Starting project {project.ProjectID} on {current_date}")
 
         if project.Status == 'In Progress':
             all_deliverables_completed = True
@@ -309,14 +310,15 @@ def update_project_statuses(session, current_date, project_meta, available_consu
                 project.ActualEndDate = current_date
                 handle_project_completion(session, project, current_date, project_meta, available_consultants)
             elif current_date > project.PlannedEndDate:
-                if project.Progress >= 95:  # Allow completion if very close to finish
+                if project.Progress >= 99:  # Allow completion if very close to finish
                     project.Status = 'Completed'
                     project.ActualEndDate = current_date
                     handle_project_completion(session, project, current_date, project_meta, available_consultants)
                 else:
-                    logging.warning(f"Project {project.ProjectID} has exceeded its planned end date but is only {project.Progress}% complete")
+                    pass
+                    #logging.warning(f"Project {project.ProjectID} has exceeded its planned end date but is only {project.Progress}% complete")
 
-        logging.info(f"Updated status for ProjectID {project.ProjectID}: Status {project.Status}, Progress {project.Progress}%, ActualHours {project.ActualHours}")
+        #logging.info(f"Updated status for ProjectID {project.ProjectID}: Status {project.Status}, Progress {project.Progress}%, ActualHours {project.ActualHours}")
 
     session.commit()
 
