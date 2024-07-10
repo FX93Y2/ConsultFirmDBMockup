@@ -84,6 +84,7 @@ def handle_project_completion(session, project, current_date, project_meta, avai
         consultant_info = next((c for c in available_consultants if c.consultant.ConsultantID == consultant_id), None)
         if consultant_info:
             consultant_info.active_project_count = max(0, consultant_info.active_project_count - 1)
+            consultant_info.last_project_date = current_date
 
     logging.info(f"Project {project.ProjectID} completed on {current_date}. Consultants released.")
 

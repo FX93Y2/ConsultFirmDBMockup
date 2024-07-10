@@ -3,12 +3,12 @@ import random
 
 # Project Deliverable Constants
 MIN_DAILY_HOURS = 2.0
-MAX_DAILY_HOURS = 8.0
+MAX_DAILY_HOURS = 7.0
 MAX_DAILY_HOURS_PER_PROJECT = 4.0
 WORK_PROBABILITY = 1.0# 90% chance of working on any given day
 WORKING_DAYES = 21
 AVERAGE_WORKING_HOURS_PER_DAY = 6.0
-MAX_PROJECTS_PER_CONSULTANT = 5
+MAX_PROJECTS_PER_CONSULTANT = 10
 HIGHER_LEVEL_TITLE_THRESHOLD = 3
 LOWER_LEVEL_TITLE_THRESHOLD = 2
 
@@ -35,8 +35,6 @@ HOURLY_RATE_RANGES = {
 MAX_TEAM_SIZE = 8
 MIN_TEAM_SIZE = 3
 
-PROJECT_GROWTH_RATE = 0.1  # 10% growth rate
-
 # Title Based Billing Rates
 BASE_BILLING_RATES = {1: 100, 2: 150, 3: 200, 4: 250, 5: 300, 6: 400}
 
@@ -45,7 +43,7 @@ PROJECT_TYPES = ['Fixed', 'Time and Material']
 PROJECT_TYPE_WEIGHTS = [0.5, 0.5]  # Equal probability for this example
 
 # Project Duration Ranges (in months)
-FIXED_PROJECT_DURATION_RANGE = (3, 24)
+FIXED_PROJECT_DURATION_RANGE = (3, 12)
 TIME_MATERIAL_PROJECT_DURATION_RANGE = (1, 12)
 
 # Deliverable Count Range

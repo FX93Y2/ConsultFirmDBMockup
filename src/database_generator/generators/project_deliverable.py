@@ -48,7 +48,7 @@ def generate_projects(start_year, end_year, initial_consultants):
                 available_consultants = get_available_consultants(session, month_start)
                 active_units = session.query(BusinessUnit).all()
 
-                project_meta = create_new_projects_if_needed(session, month_start, available_consultants, active_units, project_meta, simulation_start_date, monthly_targets)
+                project_meta, available_consultants = create_new_projects_if_needed(session, month_start, available_consultants, active_units, project_meta, simulation_start_date, monthly_targets)
                 
                 # Daily simulation within the month
                 current_date = month_start
@@ -63,6 +63,10 @@ def generate_projects(start_year, end_year, initial_consultants):
                 month_end = current_date - timedelta(days=1)
                 update_existing_projects(session, month_end, available_consultants, project_meta)
                 log_consultant_projects(session, month_end)
+
+                # Log consultant workload
+                #for consultant in available_consultants:
+                    #logging.info(f"Consultant {consultant.consultant.ConsultantID} (Title {consultant.title_id}): Active Projects: {consultant.active_project_count}, Last Project Date: {consultant.last_project_date}")
 
                 session.commit()
 
@@ -151,10 +155,13 @@ def create_new_projects_if_needed(session, current_date, available_consultants, 
 
     target_for_month = monthly_targets[current_date.month - 1]
     
-    std_dev = target_for_month * 0.2
-    projects_to_create = max(0, round(norm.rvs(loc=target_for_month, scale=std_dev)))
+    # Adjust target based on available higher-level consultants
+    adjusted_target = min(target_for_month, sum(project_settings.MAX_PROJECTS_PER_CONSULTANT - c.active_project_count for c in higher_level_consultants))
+    
+    std_dev = adjusted_target * 0.2
+    projects_to_create = max(0, round(norm.rvs(loc=adjusted_target, scale=std_dev)))
 
-    projects_this_month = len([p for p in project_meta.values() if p['start_date'].month == current_date.month])
+    projects_this_month = len([p for p in project_meta.values() if p['start_date'].month == current_date.month and p['start_date'].year == current_date.year])
     projects_to_create = max(0, projects_to_create - projects_this_month)
 
     projects_created = 0
@@ -172,23 +179,18 @@ def create_new_projects_if_needed(session, current_date, available_consultants, 
             project_meta[project.ProjectID]['start_date'] = project.PlannedStartDate
             projects_created += 1
 
-            '''
-            logging.info(f"Created new project: ProjectID {project.ProjectID}, "
-                         f"Start Date: {project.PlannedStartDate}, "
-                         f"Team Size: {len(new_project_meta['team'])}, "
-                         f"Project Manager: {consultant.consultant.ConsultantID}")
-            '''
-
             # Update consultant project counts
             for consultant_id in new_project_meta['team']:
                 consultant_info = next(c for c in available_consultants if c.consultant.ConsultantID == consultant_id)
                 consultant_info.active_project_count += 1
+                consultant_info.last_project_date = current_date
 
             # Re-sort available_consultants
-            available_consultants = sorted(available_consultants, key=lambda c: (c.active_project_count, -c.title_id))
+            available_consultants.sort(key=lambda c: (c.active_project_count, -c.title_id))
 
-    logging.info(f"Date: {current_date}, New Projects Created: {projects_created}")
-    return project_meta
+    logging.info(f"Date: {current_date}, New Projects Created: {projects_created}, Target: {adjusted_target}, Available Higher-Level Consultants: {len(higher_level_consultants)}")
+    return project_meta, available_consultants
+
 
 def create_new_project(session, current_date, available_consultants, active_units, simulation_start_date, project_manager):
     assigned_consultants = assign_consultants_to_project(available_consultants, project_manager)
@@ -247,6 +249,8 @@ def update_existing_projects(session, current_date, available_consultants, proje
 
 def generate_daily_consultant_deliverables(session, current_date, project_meta):
     consultant_daily_hours = defaultdict(float)
+    MIN_DAILY_HOURS = Decimal(str(project_settings.MIN_DAILY_HOURS))
+    MAX_DAILY_HOURS = Decimal(str(project_settings.MAX_DAILY_HOURS))
     
     active_projects = [
         (project_id, meta) for project_id, meta in project_meta.items()
@@ -275,16 +279,16 @@ def generate_daily_consultant_deliverables(session, current_date, project_meta):
                 continue
 
             for consultant_id in meta['team']:
-                if consultant_daily_hours[consultant_id] >= project_settings.MAX_DAILY_HOURS:
+                if consultant_daily_hours[consultant_id] >= MAX_DAILY_HOURS:
                     continue
 
                 consultant_hours_today = Decimal(str(consultant_daily_hours[consultant_id]))
-                available_hours = min(Decimal(str(project_settings.MAX_DAILY_HOURS)) - consultant_hours_today, remaining_hours)
+                available_hours = min(Decimal(str(MAX_DAILY_HOURS)) - consultant_hours_today, remaining_hours)
 
                 if available_hours <= Decimal('0.0'):
                     continue
 
-                hours = round_decimal(Decimal(str(random.uniform(float(project_settings.MIN_DAILY_HOURS), float(available_hours)))), 1)
+                hours = round_decimal(Decimal(str(random.uniform(float(MIN_DAILY_HOURS), float(available_hours)))), 1)
                 consultant_deliverable = ConsultantDeliverable(
                     ConsultantID=consultant_id,
                     DeliverableID=deliverable_id,
