@@ -1,6 +1,10 @@
 from decimal import Decimal
 import random
 
+'''
+Adjust a bigger team size and smaller concurrent active project per consultant
+to get less nonbillable time
+'''
 # Project Deliverable Constants
 MIN_DAILY_HOURS = 2.0
 MAX_DAILY_HOURS = 7.0
@@ -8,7 +12,7 @@ MAX_DAILY_HOURS_PER_PROJECT = 4.0
 WORK_PROBABILITY = 1.0# 90% chance of working on any given day
 WORKING_DAYES = 21
 AVERAGE_WORKING_HOURS_PER_DAY = 6.0
-MAX_PROJECTS_PER_CONSULTANT = 10
+MAX_PROJECTS_PER_CONSULTANT = 5
 HIGHER_LEVEL_TITLE_THRESHOLD = 3
 LOWER_LEVEL_TITLE_THRESHOLD = 2
 
@@ -32,8 +36,8 @@ HOURLY_RATE_RANGES = {
     6: (400, 800)   # Vice President
 }
 
-MAX_TEAM_SIZE = 8
-MIN_TEAM_SIZE = 3
+MAX_TEAM_SIZE = 20
+MIN_TEAM_SIZE = 10 
 
 # Title Based Billing Rates
 BASE_BILLING_RATES = {1: 100, 2: 150, 3: 200, 4: 250, 5: 300, 6: 400}

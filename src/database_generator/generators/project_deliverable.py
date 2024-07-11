@@ -147,33 +147,47 @@ def start_due_projects(session, current_date, project_meta):
     session.commit()
     return project_meta        
 
+# In project_deliverable.py
+
 def create_new_projects_if_needed(session, current_date, available_consultants, active_units, project_meta, simulation_start_date, monthly_targets):
-    higher_level_consultants = sorted(
-        [c for c in available_consultants if c.title_id >= project_settings.HIGHER_LEVEL_TITLE_THRESHOLD],
-        key=lambda c: (c.active_project_count, -c.title_id)
-    )
+    # Select consultants with title_id 4, 5, or 6 as potential project managers
+    project_manager_consultants = [c for c in available_consultants if c.title_id >= 4]
+    
+    # Sort potential project managers by active project count (ascending), then by title_id (descending)
+    project_manager_consultants.sort(key=lambda c: (c.active_project_count, -c.title_id))
+    
+    logging.info(f"Available project managers: {len(project_manager_consultants)}")
+    logging.info(f"Top 5 PM candidates: {[(c.consultant.ConsultantID, c.title_id, c.active_project_count) for c in project_manager_consultants[:5]]}")
 
     target_for_month = monthly_targets[current_date.month - 1]
     
-    # Adjust target based on available higher-level consultants
-    adjusted_target = min(target_for_month, sum(project_settings.MAX_PROJECTS_PER_CONSULTANT - c.active_project_count for c in higher_level_consultants))
+    # Adjust target based on available project managers
+    adjusted_target = min(target_for_month, sum(project_settings.MAX_PROJECTS_PER_CONSULTANT - c.active_project_count for c in project_manager_consultants))
     
-    std_dev = adjusted_target * 0.2
-    projects_to_create = max(0, round(norm.rvs(loc=adjusted_target, scale=std_dev)))
+    logging.info(f"Target for month: {target_for_month}, Adjusted target: {adjusted_target}")
+
+    if adjusted_target > 0:
+        std_dev = max(0.1, adjusted_target * 0.2)  # Ensure std_dev is at least 0.1
+        projects_to_create = max(0, round(norm.rvs(loc=adjusted_target, scale=std_dev)))
+    else:
+        projects_to_create = 0
 
     projects_this_month = len([p for p in project_meta.values() if p['start_date'].month == current_date.month and p['start_date'].year == current_date.year])
     projects_to_create = max(0, projects_to_create - projects_this_month)
 
+    logging.info(f"Target projects to create: {projects_to_create}")
+
     projects_created = 0
-    for consultant in higher_level_consultants:
+    for consultant in project_manager_consultants:
         if projects_created >= projects_to_create:
             break
         
         if consultant.active_project_count >= project_settings.MAX_PROJECTS_PER_CONSULTANT:
             continue
 
+        logging.info(f"Attempting to create project with PM: {consultant.consultant.ConsultantID} (Title: {consultant.title_id}, Active Projects: {consultant.active_project_count})")
         project, new_project_meta, target_hours = create_new_project(session, current_date, available_consultants, active_units, simulation_start_date, project_manager=consultant)
-        if project:
+        if project and new_project_meta and target_hours:
             project_meta[project.ProjectID] = new_project_meta
             project_meta[project.ProjectID]['target_hours'] = target_hours
             project_meta[project.ProjectID]['start_date'] = project.PlannedStartDate
@@ -187,47 +201,72 @@ def create_new_projects_if_needed(session, current_date, available_consultants, 
 
             # Re-sort available_consultants
             available_consultants.sort(key=lambda c: (c.active_project_count, -c.title_id))
+            logging.info(f"Successfully created project: ProjectID {project.ProjectID}")
+        else:
+            logging.warning(f"Failed to create new project with Project Manager: {consultant.consultant.ConsultantID}")
 
-    logging.info(f"Date: {current_date}, New Projects Created: {projects_created}, Target: {adjusted_target}, Available Higher-Level Consultants: {len(higher_level_consultants)}")
+    logging.info(f"Date: {current_date}, New Projects Created: {projects_created}, Target: {adjusted_target}, Available Project Managers: {len(project_manager_consultants)}")
     return project_meta, available_consultants
 
 
 def create_new_project(session, current_date, available_consultants, active_units, simulation_start_date, project_manager):
-    assigned_consultants = assign_consultants_to_project(available_consultants, project_manager)
-
-    assigned_unit_id = assign_project_to_business_unit(session, assigned_consultants, active_units, current_date.year)
+    #logging.info(f"Attempting to create new project with Project Manager: {project_manager.consultant.ConsultantID}")
     
-    project = Project(
-        ClientID=random.choice(session.query(Client.ClientID).all())[0],
-        UnitID=assigned_unit_id,
-        Name=f"Project_{current_date.year}_{random.randint(1000, 9999)}",
-        Type=random.choices(project_settings.PROJECT_TYPES, weights=project_settings.PROJECT_TYPE_WEIGHTS)[0],
-        Status='Not Started',
-        Progress=0,
-        EstimatedBudget=None,
-        Price=None
-    )
-    
-    session.add(project)
-    session.flush()
+    try:
+        # Filter available consultants to only include those with equal or lower title than the project manager
+        eligible_consultants = [c for c in available_consultants if c.title_id <= project_manager.title_id]
+        assigned_consultants = assign_consultants_to_project(eligible_consultants, project_manager)
+        #logging.info(f"Assigned consultants: {[c.consultant.ConsultantID for c in assigned_consultants]}")
 
-    team_size = set_project_dates(project, current_date, assigned_consultants, session, simulation_start_date)
-    project.PlannedHours = calculate_planned_hours(project, team_size)
-    target_hours = calculate_target_hours(project.PlannedHours)
-    project.ActualHours = 0
-    
-    deliverables = generate_deliverables(project, target_hours)
-    session.add_all(deliverables)
-    session.flush()
+        assigned_unit_id = assign_project_to_business_unit(session, assigned_consultants, active_units, current_date.year)
+        #logging.info(f"Assigned Business Unit ID: {assigned_unit_id}")
+        
+        project = Project(
+            ClientID=random.choice(session.query(Client.ClientID).all())[0],
+            UnitID=assigned_unit_id,
+            Name=f"Project_{current_date.year}_{random.randint(1000, 9999)}",
+            Type=random.choices(project_settings.PROJECT_TYPES, weights=project_settings.PROJECT_TYPE_WEIGHTS)[0],
+            Status='Not Started',
+            Progress=0,
+            EstimatedBudget=None,
+            Price=None
+        )
+        
+        session.add(project)
+        session.flush()
+        logging.info(f"Created project: ProjectID {project.ProjectID}")
 
-    calculate_project_financials(session, project, assigned_consultants, current_date, deliverables)
-    
-    assign_project_team(session, project, assigned_consultants)
-    session.flush()
+        team_size = set_project_dates(project, current_date, assigned_consultants, session, simulation_start_date)
+        #logging.info(f"Set project dates. Team size: {team_size}")
 
-    project_meta = initialize_project_meta(project, target_hours)
+        project.PlannedHours = calculate_planned_hours(project, team_size)
+        target_hours = calculate_target_hours(project.PlannedHours)
+        project.ActualHours = 0
+        #logging.info(f"Calculated hours. Planned: {project.PlannedHours}, Target: {target_hours}")
+        
+        deliverables = generate_deliverables(project, target_hours)
+        session.add_all(deliverables)
+        session.flush()
+        #logging.info(f"Generated {len(deliverables)} deliverables")
 
-    return project, project_meta, target_hours
+        calculate_project_financials(session, project, assigned_consultants, current_date, deliverables)
+        #logging.info("Calculated project financials")
+        
+        assign_project_team(session, project, assigned_consultants)
+        session.flush()
+        #logging.info("Assigned project team")
+
+        project_meta = initialize_project_meta(project, target_hours)
+        #logging.info("Initialized project meta")
+
+        return project, project_meta, target_hours
+    except Exception as e:
+        logging.error(f"Error creating new project: {str(e)}")
+        import traceback
+        print(traceback.format_exc())
+        session.rollback()
+        return None, None, None
+
 
 def update_existing_projects(session, current_date, available_consultants, project_meta):
     active_projects = session.query(Project).filter(

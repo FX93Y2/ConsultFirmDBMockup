@@ -2,7 +2,6 @@ from decimal import Decimal, ROUND_HALF_UP
 from dataclasses import dataclass
 import random
 from datetime import timedelta, date
-from dateutil.relativedelta import relativedelta
 from sqlalchemy import func, case
 from collections import Counter
 from ...db_model import *
@@ -52,18 +51,47 @@ def calculate_target_hours(planned_hours):
 
 
 def assign_project_team(session, project, assigned_consultants):
-    for consultant_info in assigned_consultants:
-        role = 'Project Manager' if consultant_info.title_id >= project_settings.HIGHER_LEVEL_TITLE_THRESHOLD else 'Team Member'
-        
+    project_manager = assigned_consultants[0]
+    team_leads = assigned_consultants[1:4]  # Next 3 consultants are team leads
+    team_members = assigned_consultants[4:]  # Remaining consultants are team members
+
+    # Assign Project Manager
+    team_member = ProjectTeam(
+        ProjectID=project.ProjectID,
+        ConsultantID=project_manager.consultant.ConsultantID,
+        Role='Project Manager',
+        StartDate=project.ActualStartDate,
+        EndDate=None
+    )
+    session.add(team_member)
+    logging.info(f"Assigned Project Manager: {project_manager.consultant.ConsultantID} (Title: {project_manager.title_id}) to ProjectID: {project.ProjectID}")
+
+    # Assign Team Leads
+    for consultant in team_leads:
         team_member = ProjectTeam(
             ProjectID=project.ProjectID,
-            ConsultantID=consultant_info.consultant.ConsultantID,
-            Role=role,
+            ConsultantID=consultant.consultant.ConsultantID,
+            Role='Team Lead',
             StartDate=project.ActualStartDate,
             EndDate=None
         )
         session.add(team_member)
+        logging.info(f"Assigned Team Lead: {consultant.consultant.ConsultantID} (Title: {consultant.title_id}) to ProjectID: {project.ProjectID}")
 
+    # Assign Team Members
+    for consultant in team_members:
+        team_member = ProjectTeam(
+            ProjectID=project.ProjectID,
+            ConsultantID=consultant.consultant.ConsultantID,
+            Role='Team Member',
+            StartDate=project.ActualStartDate,
+            EndDate=None
+        )
+        session.add(team_member)
+        logging.info(f"Assigned Team Member: {consultant.consultant.ConsultantID} (Title: {consultant.title_id}) to ProjectID: {project.ProjectID}")
+
+    session.flush()
+    
 def calculate_project_progress(project, deliverables):
     total_planned_hours = sum(d.PlannedHours for d in deliverables)
     
@@ -149,24 +177,42 @@ def assign_project_to_business_unit(session, assigned_consultants, active_units,
     return max(distribution_difference, key=distribution_difference.get)
 
 def assign_consultants_to_project(available_consultants, project_manager):
- 
-
     assigned_consultants = [project_manager]
-    other_consultants = sorted([c for c in available_consultants if c != project_manager and c.active_project_count < project_settings.MAX_PROJECTS_PER_CONSULTANT], 
-                               key=lambda x: (x.active_project_count, -x.title_id))
     
-    # Ensure at least one senior consultant (level 3 or 4) if available
-    senior_consultants = [c for c in other_consultants if 3 <= c.title_id <= 4]
-    if senior_consultants:
-        senior_consultant = senior_consultants[0]
-        assigned_consultants.append(senior_consultant)
-        other_consultants.remove(senior_consultant)
-    
-    # Assign mix of junior and mid-level consultants, prioritizing those with fewer projects
-    remaining_slots = random.randint(project_settings.MIN_TEAM_SIZE - len(assigned_consultants), project_settings.MAX_TEAM_SIZE - len(assigned_consultants))
-    junior_mid_consultants = [c for c in other_consultants if c.title_id <= project_settings.HIGHER_LEVEL_TITLE_THRESHOLD]
-    team_members = junior_mid_consultants[:remaining_slots]
-    assigned_consultants.extend(team_members)
+    # Separate consultants by title
+    high_level_consultants = [c for c in available_consultants if c != project_manager and c.title_id in [4, 5, 6]]
+    senior_consultants = [c for c in available_consultants if c != project_manager and c.title_id == 3]
+    junior_consultants = [c for c in available_consultants if c != project_manager and c.title_id in [1, 2]]
+
+    # Sort consultants by active project count (ascending) and then by title_id (descending)
+    for consultant_list in [high_level_consultants, senior_consultants, junior_consultants]:
+        consultant_list.sort(key=lambda c: (c.active_project_count, -c.title_id))
+
+    # Assign team leads
+    team_leads = []
+    # First, assign high-level consultants as team leads (maximum 2)
+    team_leads.extend(high_level_consultants[:min(2, len(high_level_consultants))])
+    # Then, add senior consultants as team leads (maximum 1)
+    if len(team_leads) < 3 and senior_consultants:
+        team_leads.append(senior_consultants.pop(0))
+
+    assigned_consultants.extend(team_leads)
+
+    # Calculate remaining slots
+    remaining_slots = random.randint(
+        max(project_settings.MIN_TEAM_SIZE - len(assigned_consultants), 0),
+        max(project_settings.MAX_TEAM_SIZE - len(assigned_consultants), 0)
+    )
+
+    # Fill remaining slots with a mix of senior and junior consultants
+    available_team_members = senior_consultants + junior_consultants
+    available_team_members.sort(key=lambda c: (c.active_project_count, -c.title_id))
+
+    assigned_consultants.extend(available_team_members[:remaining_slots])
+
+    logging.info(f"Assigned team: PM={project_manager.consultant.ConsultantID}, "
+                 f"Team Leads={[c.consultant.ConsultantID for c in team_leads]}, "
+                 f"Team Members={[c.consultant.ConsultantID for c in assigned_consultants if c not in [project_manager] + team_leads]}")
 
     return assigned_consultants
 

@@ -1,12 +1,8 @@
 from decimal import Decimal, ROUND_HALF_UP
-from dataclasses import dataclass
 import random
-from datetime import timedelta, date
-from dateutil.relativedelta import relativedelta
-from sqlalchemy import func, case
 from ...db_model import *
 from config import project_settings
-import logging
+
 
 def round_to_nearest_thousand(value):
     return Decimal(value).quantize(Decimal('1000'), rounding=ROUND_HALF_UP)
