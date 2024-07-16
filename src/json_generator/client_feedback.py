@@ -9,11 +9,12 @@ import torch
 from ..db_model import Project, engine
 from config.path_config import json_path
 import re
+import random
 
 def generate_client_feedback():
     # Initialize the model and tokenizer
     model_id = "meta-llama/Meta-Llama-3-8B-Instruct"
-    access_token = "token"
+    access_token = "your_huggingface_token"
 
     tokenizer = AutoTokenizer.from_pretrained(model_id, use_auth_token=access_token)
     model = AutoModelForCausalLM.from_pretrained(model_id, use_auth_token=access_token, torch_dtype=torch.bfloat16)
@@ -52,13 +53,37 @@ def generate_client_feedback():
         q2_response = get_scaled_response()
         overall_satisfaction = (q1_response + q2_response) / 2
 
+        tones = [
+            "Formal: Respond in a formal and professional manner.",
+            "Casual: Respond in a casual and friendly manner.",
+            "Enthusiastic: Respond with enthusiasm and excitement.",
+            "Sympathetic: Respond with sympathy and understanding.",
+            "Direct: Respond in a direct and concise manner.",
+            "Inquisitive: Respond with curiosity, asking questions.",
+            "Supportive: Respond in a supportive and encouraging manner.",
+            "Humorous: Respond with humor and a light-hearted tone.",
+            "Skeptical: Respond with skepticism and caution.",
+            "Empathetic: Respond with empathy and reassurance.",
+            "Optimistic: Respond with optimism and positivity.",
+            "Pessimistic: Respond with caution and a hint of doubt.",
+            "Authoritative: Respond with confidence and authority.",
+            "Reflective: Respond with thoughtfulness and introspection.",
+            "Nostalgic: Respond with a sense of nostalgia and fond memories.",
+            "Grateful: Respond with gratitude and appreciation.",
+            "Urgent: Respond with a sense of urgency and importance.",
+            "Encouraging: Respond with encouragement and motivation.",
+            "Apologetic: Respond with an apology and a willingness to make amends.",
+            "Neutral: Respond in a neutral and unbiased manner."
+        ]
+        selected_tone = random.choice(tones)
+
         # Generate responses for Q3 and Q4 considering both Q1 and Q2 scores
         q3_prompt = [
-            {"role": "system", "content": f"Assume you are a client (you represent your company so use 'we' sometimes instead of 'I') of a completed consulting project, please generate a short sentence of feedbck based on scores {q1_response} for satisfaction and {q2_response} for communication."},
+            {"role": "system", "content": f"{selected_tone} Assume you are a client (you represent your company so use 'we' sometimes instead of 'I') of a completed consulting project, please generate a short sentence of feedbck based on scores {q1_response} for satisfaction and {q2_response} for communication."},
             {"role": "user", "content": "What did you like best about working with us?"},
         ]
         q4_prompt = [
-            {"role": "system", "content": f"Assume you are a client (you represent your company so use 'we' sometimes instead of 'I') of a completed consulting project, please generate a short sentence of feedbck based on scores {q1_response} for satisfaction and {q2_response} for communication."},
+            {"role": "system", "content": f"{selected_tone} Assume you are a client (you represent your company so use 'we' sometimes instead of 'I') of a completed consulting project, please generate a short sentence of feedbck based on scores {q1_response} for satisfaction and {q2_response} for communication."},
             {"role": "user", "content": "What could we improve on?"},
         ]
         q3_response = generate_feedback_response(q3_prompt)
