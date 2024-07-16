@@ -13,7 +13,7 @@ import re
 def generate_client_feedback():
     # Initialize the model and tokenizer
     model_id = "meta-llama/Meta-Llama-3-8B-Instruct"
-    access_token = "your_token_here"
+    access_token = "token"
 
     tokenizer = AutoTokenizer.from_pretrained(model_id, use_auth_token=access_token)
     model = AutoModelForCausalLM.from_pretrained(model_id, use_auth_token=access_token, torch_dtype=torch.bfloat16)
@@ -33,10 +33,10 @@ def generate_client_feedback():
         """ Generate a feedback response using the model. """
         response = text_gen_pipeline(
             prompt,
-            max_new_tokens=100,  # Limit to 20 tokens (approx. 20 words)
+            max_new_tokens=100, 
             eos_token_id=tokenizer.eos_token_id,
             do_sample=True,
-            temperature=0.6,
+            temperature=1.0,
             top_p=0.9,
         )
         # Extract the assistant's content
@@ -54,11 +54,11 @@ def generate_client_feedback():
 
         # Generate responses for Q3 and Q4 considering both Q1 and Q2 scores
         q3_prompt = [
-            {"role": "system", "content": f"Assume you are a client of a completed consulting project, please generate a short sentence of feedbck based on scores {q1_response} for satisfaction and {q2_response} for communication."},
+            {"role": "system", "content": f"Assume you are a client (you represent your company so use 'we' sometimes instead of 'I') of a completed consulting project, please generate a short sentence of feedbck based on scores {q1_response} for satisfaction and {q2_response} for communication."},
             {"role": "user", "content": "What did you like best about working with us?"},
         ]
         q4_prompt = [
-            {"role": "system", "content": f"Assume you are a client of a completed consulting project, please generate a short sentence of feedbck based on scores {q1_response} for satisfaction and {q2_response} for communication."},
+            {"role": "system", "content": f"Assume you are a client (you represent your company so use 'we' sometimes instead of 'I') of a completed consulting project, please generate a short sentence of feedbck based on scores {q1_response} for satisfaction and {q2_response} for communication."},
             {"role": "user", "content": "What could we improve on?"},
         ]
         q3_response = generate_feedback_response(q3_prompt)
