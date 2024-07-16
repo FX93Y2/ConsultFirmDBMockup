@@ -2,8 +2,8 @@
     {
         "responseID": "51245",
         "projectID": 1,
-        "clientID": 341,
-        "surveyDate": "2016-01-11",
+        "clientID": 15,
+        "surveyDate": "2015-12-07",
         "responses": [
             {
                 "questionID": "Q1",
@@ -21,13 +21,13 @@
                 "questionID": "Q3",
                 "questionText": "What did you like best about working with us?",
                 "responseType": "text",
-                "responseValue": "To be honest, we were a bit disappointed with the outcome of our collaboration, and we apologize if we didn't quite meet your expectations. Your scores of 3 for satisfaction and 3 for communication indicate that we fell short in some areas, and for that, we are truly sorry. We understand the importance of delivering high-quality work and maintaining effective communication throughout the project. We're willing to work with you to identify the gaps and make things right. What specifically would you like us to do to"
+                "responseValue": "I appreciate the efforts of your team to understand our unique needs and provide valuable insights, however, we fell short in delivering the expected level of satisfaction and communication. We're truly sorry for not meeting your expectations and would like to make it right by offering a complimentary follow-up consultation to ensure we're better equipped to meet your future needs."
             },
             {
                 "questionID": "Q4",
                 "questionText": "What could we improve on?",
                 "responseType": "text",
-                "responseValue": "I want to start by apologizing for the lack of clarity in our communication during the project. We understand that our scores of 3 for communication indicate that we fell short of your expectations, and for that, we are truly sorry. We appreciate your feedback and acknowledge that we could have done better in keeping you informed throughout the process. We are committed to making amends and would like to discuss ways in which we can improve our communication for future projects to ensure your complete satisfaction."
+                "responseValue": "We appreciate your feedback and apologize if our performance fell short of your expectations. We recognize that our communication and satisfaction scores were lower than desired, and we're willing to revisit the project and provide additional support to ensure your needs were fully met."
             }
         ],
         "overallSatisfaction": "3.0"
@@ -35,8 +35,8 @@
     {
         "responseID": "28726",
         "projectID": 2,
-        "clientID": 73,
-        "surveyDate": "2015-05-19",
+        "clientID": 125,
+        "surveyDate": "2015-11-04",
         "responses": [
             {
                 "questionID": "Q1",
@@ -54,13 +54,13 @@
                 "questionID": "Q3",
                 "questionText": "What did you like best about working with us?",
                 "responseType": "text",
-                "responseValue": "Ah, it's hard to put my finger on just one thing, but I'll never forget the way your team went above and beyond to understand our unique needs and tailor their approach to help us achieve our goals. Those late nights and early mornings spent brainstorming and collaborating with your experts will always be etched in my memory as a true highlight of our partnership - it was a real privilege to work with such a talented and dedicated group of professionals!"
+                "responseValue": "We thoroughly enjoyed our experience with your team - the expert guidance and timely communication brought back memories of our own company's early days, and we're thrilled with the positive impact on our operations."
             },
             {
                 "questionID": "Q4",
                 "questionText": "What could we improve on?",
                 "responseType": "text",
-                "responseValue": "It's been a true pleasure working with your team - we're still reminiscing about those long meetings and brainstorming sessions. While we'd love to see even more proactive communication from your side (4/5, after all), we're thoroughly satisfied with the project outcome (3.5/5) and would highly recommend your services to others."
+                "responseValue": "The project was a wonderful journey, and we were thrilled with the outcome - the only thing we could've wished for was more regular check-ins, but overall, the final product exceeded our expectations."
             }
         ],
         "overallSatisfaction": "3.5"
@@ -68,8 +68,8 @@
     {
         "responseID": "80644",
         "projectID": 3,
-        "clientID": 53,
-        "surveyDate": "2016-01-08",
+        "clientID": 71,
+        "surveyDate": "2015-03-02",
         "responses": [
             {
                 "questionID": "Q1",
@@ -87,13 +87,13 @@
                 "questionID": "Q3",
                 "questionText": "What did you like best about working with us?",
                 "responseType": "text",
-                "responseValue": "We were really impressed with the thoughtfulness and dedication you brought to our project, and the high-quality results you delivered. Your hard work and attention to detail truly made a significant impact on our business, and we're thrilled with the outcome. Your professionalism and responsiveness throughout the project were also top-notch, making it a pleasure to collaborate with you. Your 3's in satisfaction and communication scores accurately reflect our positive experience working with you - thank you again for your exceptional work!"
+                "responseValue": "We appreciated the thoroughness and expertise you brought to the project, and the way you effectively managed our expectations throughout the process. Your professionalism and dedication to delivering a high-quality outcome made it a pleasure to work with you!"
             },
             {
                 "questionID": "Q4",
                 "questionText": "What could we improve on?",
                 "responseType": "text",
-                "responseValue": "We're really pleased with the results of your consulting project, and while there were some minor areas where we could improve on communication and overall satisfaction, we're still thrilled with the final product and appreciate your hard work and dedication to delivering high-quality results."
+                "responseValue": "Well done! While we're thrilled with the overall outcome, we'd love to see even more proactive communication and a slightly higher level of satisfaction with the project's execution - we're confident that with these tweaks, we'll be even more impressed in the future!"
             }
         ],
         "overallSatisfaction": "3.0"
@@ -101,7 +101,568 @@
     {
         "responseID": "62350",
         "projectID": 4,
-        "clientID": 71,
+        "clientID": 58,
+        "surveyDate": "2015-05-06",
+        "responses": [
+            {
+                "questionID": "Q1",
+                "questionText": "How satisfied are you with the project outcome?",
+                "responseType": "scale",
+                "responseValue": "3"
+            },
+            {
+                "questionID": "Q2",
+                "questionText": "Please rate the communication from our team.",
+                "responseType": "scale",
+                "responseValue": "4"
+            },
+            {
+                "questionID": "Q3",
+                "questionText": "What did you like best about working with us?",
+                "responseType": "text",
+                "responseValue": "I'm sorry to say that our project didn't quite meet your expectations, but we appreciate the feedback you provided, specifically the 3 out of 5 satisfaction score. We take responsibility for any shortcomings and are committed to improving our services. Can we discuss specific areas where we fell short and explore ways to make it right?"
+            },
+            {
+                "questionID": "Q4",
+                "questionText": "What could we improve on?",
+                "responseType": "text",
+                "responseValue": "We're truly sorry to hear that we didn't quite meet your expectations on this project. While we're grateful for the feedback, we acknowledge that our communication could have been more timely and transparent. We're committed to learning from this experience and making improvements to ensure a better outcome in our future collaborations."
+            }
+        ],
+        "overallSatisfaction": "3.5"
+    },
+    {
+        "responseID": "76784",
+        "projectID": 5,
+        "clientID": 46,
+        "surveyDate": "2015-06-15",
+        "responses": [
+            {
+                "questionID": "Q1",
+                "questionText": "How satisfied are you with the project outcome?",
+                "responseType": "scale",
+                "responseValue": "4"
+            },
+            {
+                "questionID": "Q2",
+                "questionText": "Please rate the communication from our team.",
+                "responseType": "scale",
+                "responseValue": "5"
+            },
+            {
+                "questionID": "Q3",
+                "questionText": "What did you like best about working with us?",
+                "responseType": "text",
+                "responseValue": "We appreciated the exceptional communication throughout the project, which allowed us to stay informed and aligned at all times, leading to a high level of satisfaction with the final outcome."
+            },
+            {
+                "questionID": "Q4",
+                "questionText": "What could we improve on?",
+                "responseType": "text",
+                "responseValue": "We're extremely satisfied with the project's outcome, but could explore more proactive communication to ensure seamless execution and timely updates."
+            }
+        ],
+        "overallSatisfaction": "4.5"
+    },
+    {
+        "responseID": "30033",
+        "projectID": 6,
+        "clientID": 265,
+        "surveyDate": "2015-06-25",
+        "responses": [
+            {
+                "questionID": "Q1",
+                "questionText": "How satisfied are you with the project outcome?",
+                "responseType": "scale",
+                "responseValue": "4"
+            },
+            {
+                "questionID": "Q2",
+                "questionText": "Please rate the communication from our team.",
+                "responseType": "scale",
+                "responseValue": "5"
+            },
+            {
+                "questionID": "Q3",
+                "questionText": "What did you like best about working with us?",
+                "responseType": "text",
+                "responseValue": "We really appreciated the exceptional communication and proactive updates throughout the project, which kept us well-informed and confident in the team's abilities to deliver high-quality results."
+            },
+            {
+                "questionID": "Q4",
+                "questionText": "What could we improve on?",
+                "responseType": "text",
+                "responseValue": "Overall, we're extremely pleased with the outcome, but would appreciate even more detailed explanations and updates throughout the project to have felt even more informed and included."
+            }
+        ],
+        "overallSatisfaction": "4.5"
+    },
+    {
+        "responseID": "88172",
+        "projectID": 7,
+        "clientID": 219,
+        "surveyDate": "2015-04-16",
+        "responses": [
+            {
+                "questionID": "Q1",
+                "questionText": "How satisfied are you with the project outcome?",
+                "responseType": "scale",
+                "responseValue": "4"
+            },
+            {
+                "questionID": "Q2",
+                "questionText": "Please rate the communication from our team.",
+                "responseType": "scale",
+                "responseValue": "5"
+            },
+            {
+                "questionID": "Q3",
+                "questionText": "What did you like best about working with us?",
+                "responseType": "text",
+                "responseValue": "We appreciated the exceptional communication throughout the project, which allowed us to feel informed and empowered throughout the process. The clarity and responsiveness of your team was truly impressive."
+            },
+            {
+                "questionID": "Q4",
+                "questionText": "What could we improve on?",
+                "responseType": "text",
+                "responseValue": "While we were extremely satisfied with the final outcome, we could benefit from even more proactive communication from your team to ensure we're aligned on project scope and timeline."
+            }
+        ],
+        "overallSatisfaction": "4.5"
+    },
+    {
+        "responseID": "79352",
+        "projectID": 8,
+        "clientID": 74,
+        "surveyDate": "2015-11-20",
+        "responses": [
+            {
+                "questionID": "Q1",
+                "questionText": "How satisfied are you with the project outcome?",
+                "responseType": "scale",
+                "responseValue": "2"
+            },
+            {
+                "questionID": "Q2",
+                "questionText": "Please rate the communication from our team.",
+                "responseType": "scale",
+                "responseValue": "4"
+            },
+            {
+                "questionID": "Q3",
+                "questionText": "What did you like best about working with us?",
+                "responseType": "text",
+                "responseValue": "We were truly impressed with the quality of work and attention to detail your team brought to our project, it's a testament to the strong foundation laid during the early days of our partnership, which made all the difference in the end."
+            },
+            {
+                "questionID": "Q4",
+                "questionText": "What could we improve on?",
+                "responseType": "text",
+                "responseValue": "As I reflect on our partnership, I'm filled with warm memories of your dedication and expertise. While we were completely satisfied with the end result (2/2), I wish we could've had more regular check-ins to ensure seamless collaboration (4/4, perhaps a bit more frequent communication would've made all the difference)."
+            }
+        ],
+        "overallSatisfaction": "3.0"
+    },
+    {
+        "responseID": "99166",
+        "projectID": 9,
+        "clientID": 342,
+        "surveyDate": "2015-10-08",
+        "responses": [
+            {
+                "questionID": "Q1",
+                "questionText": "How satisfied are you with the project outcome?",
+                "responseType": "scale",
+                "responseValue": "3"
+            },
+            {
+                "questionID": "Q2",
+                "questionText": "Please rate the communication from our team.",
+                "responseType": "scale",
+                "responseValue": "4"
+            },
+            {
+                "questionID": "Q3",
+                "questionText": "What did you like best about working with us?",
+                "responseType": "text",
+                "responseValue": "We appreciated the thoroughness and expertise of the consulting team, which resulted in a comprehensive and effective solution that exceeded our expectations."
+            },
+            {
+                "questionID": "Q4",
+                "questionText": "What could we improve on?",
+                "responseType": "text",
+                "responseValue": "While we were satisfied with the overall quality of work, we believe that further refining the project's scope and timeline clarity would have enhanced the overall effectiveness of the project, and we appreciate the consultant's prompt and responsive communication."
+            }
+        ],
+        "overallSatisfaction": "3.5"
+    },
+    {
+        "responseID": "44973",
+        "projectID": 10,
+        "clientID": 162,
+        "surveyDate": "2015-05-14",
+        "responses": [
+            {
+                "questionID": "Q1",
+                "questionText": "How satisfied are you with the project outcome?",
+                "responseType": "scale",
+                "responseValue": "5"
+            },
+            {
+                "questionID": "Q2",
+                "questionText": "Please rate the communication from our team.",
+                "responseType": "scale",
+                "responseValue": "4"
+            },
+            {
+                "questionID": "Q3",
+                "questionText": "What did you like best about working with us?",
+                "responseType": "text",
+                "responseValue": "We truly appreciated the outstanding quality of work and the significant impact it had on our business, making it a fantastic outcome for our project."
+            },
+            {
+                "questionID": "Q4",
+                "questionText": "What could we improve on?",
+                "responseType": "text",
+                "responseValue": "Great work on the project! We're thrilled with the outcome, and while communication was excellent overall, we'd love to see even more proactive updates and transparency throughout the process."
+            }
+        ],
+        "overallSatisfaction": "4.5"
+    },
+    {
+        "responseID": "66985",
+        "projectID": 11,
+        "clientID": 291,
+        "surveyDate": "2016-01-26",
+        "responses": [
+            {
+                "questionID": "Q1",
+                "questionText": "How satisfied are you with the project outcome?",
+                "responseType": "scale",
+                "responseValue": "5"
+            },
+            {
+                "questionID": "Q2",
+                "questionText": "Please rate the communication from our team.",
+                "responseType": "scale",
+                "responseValue": "4"
+            },
+            {
+                "questionID": "Q3",
+                "questionText": "What did you like best about working with us?",
+                "responseType": "text",
+                "responseValue": "We truly appreciated the personalized attention and expertise you brought to the project, which resulted in a tailored solution that met our unique needs and exceeded our expectations."
+            },
+            {
+                "questionID": "Q4",
+                "questionText": "What could we improve on?",
+                "responseType": "text",
+                "responseValue": "While we're thrilled with the final product, we felt that the communication could have been more frequent and transparent, especially during the implementation phase, to ensure we were always on the same page."
+            }
+        ],
+        "overallSatisfaction": "4.5"
+    },
+    {
+        "responseID": "75612",
+        "projectID": 12,
+        "clientID": 205,
+        "surveyDate": "2015-09-23",
+        "responses": [
+            {
+                "questionID": "Q1",
+                "questionText": "How satisfied are you with the project outcome?",
+                "responseType": "scale",
+                "responseValue": "3"
+            },
+            {
+                "questionID": "Q2",
+                "questionText": "Please rate the communication from our team.",
+                "responseType": "scale",
+                "responseValue": "1"
+            },
+            {
+                "questionID": "Q3",
+                "questionText": "What did you like best about working with us?",
+                "responseType": "text",
+                "responseValue": "While we appreciate the final product, we have some concerns about the lack of transparency and communication throughout the project, which ultimately impacted our overall satisfaction with the outcome."
+            },
+            {
+                "questionID": "Q4",
+                "questionText": "What could we improve on?",
+                "responseType": "text",
+                "responseValue": "We're concerned about the limited communication throughout the project, which led to unclear expectations and delays; we need to see more proactive updates and clearer project management going forward."
+            }
+        ],
+        "overallSatisfaction": "2.0"
+    },
+    {
+        "responseID": "91959",
+        "projectID": 13,
+        "clientID": 151,
+        "surveyDate": "2015-07-10",
+        "responses": [
+            {
+                "questionID": "Q1",
+                "questionText": "How satisfied are you with the project outcome?",
+                "responseType": "scale",
+                "responseValue": "5"
+            },
+            {
+                "questionID": "Q2",
+                "questionText": "Please rate the communication from our team.",
+                "responseType": "scale",
+                "responseValue": "4"
+            },
+            {
+                "questionID": "Q3",
+                "questionText": "What did you like best about working with us?",
+                "responseType": "text",
+                "responseValue": "We appreciated the exceptional expertise and dedication your team brought to our project, which led to outstanding results that exceeded our expectations."
+            },
+            {
+                "questionID": "Q4",
+                "questionText": "What could we improve on?",
+                "responseType": "text",
+                "responseValue": "We're thrilled with the overall results, and while communication was generally effective, we would appreciate more frequent project updates to ensure we're aligned throughout the process."
+            }
+        ],
+        "overallSatisfaction": "4.5"
+    },
+    {
+        "responseID": "36071",
+        "projectID": 14,
+        "clientID": 295,
+        "surveyDate": "2015-07-30",
+        "responses": [
+            {
+                "questionID": "Q1",
+                "questionText": "How satisfied are you with the project outcome?",
+                "responseType": "scale",
+                "responseValue": "3"
+            },
+            {
+                "questionID": "Q2",
+                "questionText": "Please rate the communication from our team.",
+                "responseType": "scale",
+                "responseValue": "4"
+            },
+            {
+                "questionID": "Q3",
+                "questionText": "What did you like best about working with us?",
+                "responseType": "text",
+                "responseValue": "We appreciated the consultant's high level of expertise, which was evident throughout the project, and their timely responses to our inquiries, which facilitated smooth communication."
+            },
+            {
+                "questionID": "Q4",
+                "questionText": "What could we improve on?",
+                "responseType": "text",
+                "responseValue": "We were generally satisfied with the project outcome, but would like to see further improvement in communication to ensure all our needs are fully understood and addressed throughout the process."
+            }
+        ],
+        "overallSatisfaction": "3.5"
+    },
+    {
+        "responseID": "79514",
+        "projectID": 15,
+        "clientID": 246,
+        "surveyDate": "2016-02-03",
+        "responses": [
+            {
+                "questionID": "Q1",
+                "questionText": "How satisfied are you with the project outcome?",
+                "responseType": "scale",
+                "responseValue": "3"
+            },
+            {
+                "questionID": "Q2",
+                "questionText": "Please rate the communication from our team.",
+                "responseType": "scale",
+                "responseValue": "5"
+            },
+            {
+                "questionID": "Q3",
+                "questionText": "What did you like best about working with us?",
+                "responseType": "text",
+                "responseValue": "We appreciated the outstanding communication throughout the project, which kept us informed and aligned. Your dedication to understanding our needs and delivering results was truly impressive!"
+            },
+            {
+                "questionID": "Q4",
+                "questionText": "What could we improve on?",
+                "responseType": "text",
+                "responseValue": "We're thrilled with the results! While there's always room for growth, your strong communication (5/5) kept us informed and engaged throughout the project. For future improvements, let's focus on refining our expectations to ensure seamless delivery, building on your already high satisfaction score of 3/5."
+            }
+        ],
+        "overallSatisfaction": "4.0"
+    },
+    {
+        "responseID": "12552",
+        "projectID": 16,
+        "clientID": 163,
+        "surveyDate": "2016-03-19",
+        "responses": [
+            {
+                "questionID": "Q1",
+                "questionText": "How satisfied are you with the project outcome?",
+                "responseType": "scale",
+                "responseValue": "5"
+            },
+            {
+                "questionID": "Q2",
+                "questionText": "Please rate the communication from our team.",
+                "responseType": "scale",
+                "responseValue": "4"
+            },
+            {
+                "questionID": "Q3",
+                "questionText": "What did you like best about working with us?",
+                "responseType": "text",
+                "responseValue": "We truly appreciated the expertise and innovative solutions you brought to our project, which exceeded our expectations and significantly improved our business operations."
+            },
+            {
+                "questionID": "Q4",
+                "questionText": "What could we improve on?",
+                "responseType": "text",
+                "responseValue": "We're thrilled with the overall outcome and appreciate the expertise, but we'd love to see even more frequent updates during the project timeline to stay fully informed."
+            }
+        ],
+        "overallSatisfaction": "4.5"
+    },
+    {
+        "responseID": "41385",
+        "projectID": 17,
+        "clientID": 141,
+        "surveyDate": "2015-11-17",
+        "responses": [
+            {
+                "questionID": "Q1",
+                "questionText": "How satisfied are you with the project outcome?",
+                "responseType": "scale",
+                "responseValue": "3"
+            },
+            {
+                "questionID": "Q2",
+                "questionText": "Please rate the communication from our team.",
+                "responseType": "scale",
+                "responseValue": "4"
+            },
+            {
+                "questionID": "Q3",
+                "questionText": "What did you like best about working with us?",
+                "responseType": "text",
+                "responseValue": "I was impressed with the way your team took the time to understand our unique needs and concerns, which led to a thoughtful and effective solution that really improved our operations."
+            },
+            {
+                "questionID": "Q4",
+                "questionText": "What could we improve on?",
+                "responseType": "text",
+                "responseValue": "While we're thrilled with the project's outcome, we feel that some aspects of communication could have been clearer, leading to a minor misalignment on a few occasions."
+            }
+        ],
+        "overallSatisfaction": "3.5"
+    },
+    {
+        "responseID": "21226",
+        "projectID": 18,
+        "clientID": 162,
+        "surveyDate": "2015-12-08",
+        "responses": [
+            {
+                "questionID": "Q1",
+                "questionText": "How satisfied are you with the project outcome?",
+                "responseType": "scale",
+                "responseValue": "2"
+            },
+            {
+                "questionID": "Q2",
+                "questionText": "Please rate the communication from our team.",
+                "responseType": "scale",
+                "responseValue": "5"
+            },
+            {
+                "questionID": "Q3",
+                "questionText": "What did you like best about working with us?",
+                "responseType": "text",
+                "responseValue": "We were thoroughly impressed with your outstanding communication skills - your regular updates and transparent approach kept us informed every step of the way, making the entire process seamless and stress-free!"
+            },
+            {
+                "questionID": "Q4",
+                "questionText": "What could we improve on?",
+                "responseType": "text",
+                "responseValue": "While we were thoroughly impressed with the project's outcome, we feel that there's room for growth in terms of communication - scoring a 5 would've made it even more seamless and collaborative!"
+            }
+        ],
+        "overallSatisfaction": "3.5"
+    },
+    {
+        "responseID": "26483",
+        "projectID": 19,
+        "clientID": 277,
+        "surveyDate": "2015-09-05",
+        "responses": [
+            {
+                "questionID": "Q1",
+                "questionText": "How satisfied are you with the project outcome?",
+                "responseType": "scale",
+                "responseValue": "5"
+            },
+            {
+                "questionID": "Q2",
+                "questionText": "Please rate the communication from our team.",
+                "responseType": "scale",
+                "responseValue": "5"
+            },
+            {
+                "questionID": "Q3",
+                "questionText": "What did you like best about working with us?",
+                "responseType": "text",
+                "responseValue": "We thoroughly enjoyed working with your team, and we appreciate the exceptional service, expertise, and clear communication that ensured a seamless project experience. Your dedication to delivering outstanding results exceeded our expectations, and we're grateful for the partnership!"
+            },
+            {
+                "questionID": "Q4",
+                "questionText": "What could we improve on?",
+                "responseType": "text",
+                "responseValue": "Wow, we're thoroughly impressed with the exceptional work and communication throughout this project! With scores of 5/5, it's clear that you've exceeded our expectations. We're grateful for your expertise and can't think of anything that stands out as needing improvement - job well done!"
+            }
+        ],
+        "overallSatisfaction": "5.0"
+    },
+    {
+        "responseID": "31643",
+        "projectID": 20,
+        "clientID": 131,
+        "surveyDate": "2015-07-10",
+        "responses": [
+            {
+                "questionID": "Q1",
+                "questionText": "How satisfied are you with the project outcome?",
+                "responseType": "scale",
+                "responseValue": "3"
+            },
+            {
+                "questionID": "Q2",
+                "questionText": "Please rate the communication from our team.",
+                "responseType": "scale",
+                "responseValue": "4"
+            },
+            {
+                "questionID": "Q3",
+                "questionText": "What did you like best about working with us?",
+                "responseType": "text",
+                "responseValue": "We appreciated your prompt communication and attention to detail, which helped us stay informed and on track throughout the project. Your efforts definitely paid off, as the results exceeded our expectations!"
+            },
+            {
+                "questionID": "Q4",
+                "questionText": "What could we improve on?",
+                "responseType": "text",
+                "responseValue": "Thank you for the great work, we're thrilled with the final outcome! Your communication was top-notch, always keeping us informed and on the same page. To take it to the next level, perhaps we could've had more opportunities for collaborative brainstorming and ideation during the project. Overall, we're extremely satisfied with the results and would recommend your services to others."
+            }
+        ],
+        "overallSatisfaction": "3.5"
+    },
+    {
+        "responseID": "37760",
+        "projectID": 21,
+        "clientID": 211,
         "surveyDate": "2015-10-23",
         "responses": [
             {
@@ -114,580 +675,19 @@
                 "questionID": "Q2",
                 "questionText": "Please rate the communication from our team.",
                 "responseType": "scale",
-                "responseValue": "4"
-            },
-            {
-                "questionID": "Q3",
-                "questionText": "What did you like best about working with us?",
-                "responseType": "text",
-                "responseValue": "I appreciate the opportunity to receive feedback from you, and I'm sorry to hear that we didn't quite meet your expectations on satisfaction. While we're glad you felt we communicated well throughout the project, it's clear we fell short on the overall outcome. We're taking your feedback seriously and would like to make amends by offering a complimentary review of the project to identify areas for improvement and ensure we deliver better results in the future."
-            },
-            {
-                "questionID": "Q4",
-                "questionText": "What could we improve on?",
-                "responseType": "text",
-                "responseValue": "We apologize for falling short of your expectations, and we're truly sorry to hear that our work didn't quite meet your satisfaction level of 3 out of 5. We also appreciate your feedback that our communication was good but not exceptional, scoring a 4 out of 5. We're committed to learning from this experience and would love the opportunity to discuss specific areas where we can improve to better serve you and your organization in the future."
-            }
-        ],
-        "overallSatisfaction": "3.5"
-    },
-    {
-        "responseID": "76784",
-        "projectID": 5,
-        "clientID": 197,
-        "surveyDate": "2016-01-07",
-        "responses": [
-            {
-                "questionID": "Q1",
-                "questionText": "How satisfied are you with the project outcome?",
-                "responseType": "scale",
-                "responseValue": "4"
-            },
-            {
-                "questionID": "Q2",
-                "questionText": "Please rate the communication from our team.",
-                "responseType": "scale",
                 "responseValue": "5"
             },
             {
                 "questionID": "Q3",
                 "questionText": "What did you like best about working with us?",
                 "responseType": "text",
-                "responseValue": "We appreciated the consultant's proactive communication style, which ensured that we were well-informed throughout the project and allowed us to make timely decisions. The high level of communication was particularly noteworthy, earning a score of 5 out of 5 from us."
+                "responseValue": "We appreciated the consultant's thorough understanding of our industry and effective communication style, which ensured we were always informed and aligned throughout the project."
             },
             {
                 "questionID": "Q4",
                 "questionText": "What could we improve on?",
                 "responseType": "text",
-                "responseValue": "We were extremely satisfied with the outcome and appreciate the thorough communication throughout the project, but we could improve on providing more concrete timelines for future projects."
-            }
-        ],
-        "overallSatisfaction": "4.5"
-    },
-    {
-        "responseID": "30033",
-        "projectID": 6,
-        "clientID": 82,
-        "surveyDate": "2016-04-15",
-        "responses": [
-            {
-                "questionID": "Q1",
-                "questionText": "How satisfied are you with the project outcome?",
-                "responseType": "scale",
-                "responseValue": "4"
-            },
-            {
-                "questionID": "Q2",
-                "questionText": "Please rate the communication from our team.",
-                "responseType": "scale",
-                "responseValue": "5"
-            },
-            {
-                "questionID": "Q3",
-                "questionText": "What did you like best about working with us?",
-                "responseType": "text",
-                "responseValue": "We were extremely pleased with the way your team understood our needs and consistently kept us informed throughout the project, which led to a seamless collaboration and outstanding results."
-            },
-            {
-                "questionID": "Q4",
-                "questionText": "What could we improve on?",
-                "responseType": "text",
-                "responseValue": "We were really pleased with the outcome of the project and appreciated the regular updates you provided - your communication was seamless and transparent, but perhaps some additional guidance on the project timeline would have been helpful to ensure we were fully aligned on expectations."
-            }
-        ],
-        "overallSatisfaction": "4.5"
-    },
-    {
-        "responseID": "88172",
-        "projectID": 7,
-        "clientID": 287,
-        "surveyDate": "2016-01-20",
-        "responses": [
-            {
-                "questionID": "Q1",
-                "questionText": "How satisfied are you with the project outcome?",
-                "responseType": "scale",
-                "responseValue": "4"
-            },
-            {
-                "questionID": "Q2",
-                "questionText": "Please rate the communication from our team.",
-                "responseType": "scale",
-                "responseValue": "5"
-            },
-            {
-                "questionID": "Q3",
-                "questionText": "What did you like best about working with us?",
-                "responseType": "text",
-                "responseValue": "We particularly appreciated the thoughtfulness and attentiveness shown by your team throughout the project, as evident in the seamless communication and expert guidance you provided, which significantly contributed to our high level of satisfaction with the final outcome."
-            },
-            {
-                "questionID": "Q4",
-                "questionText": "What could we improve on?",
-                "responseType": "text",
-                "responseValue": "As we reflect on the consulting project, we're pleased with the overall results, but we think that further customization of our specific business needs could have enhanced the implementation phase, leading to an even more seamless transition for our team."
-            }
-        ],
-        "overallSatisfaction": "4.5"
-    },
-    {
-        "responseID": "79352",
-        "projectID": 8,
-        "clientID": 301,
-        "surveyDate": "2016-01-18",
-        "responses": [
-            {
-                "questionID": "Q1",
-                "questionText": "How satisfied are you with the project outcome?",
-                "responseType": "scale",
-                "responseValue": "2"
-            },
-            {
-                "questionID": "Q2",
-                "questionText": "Please rate the communication from our team.",
-                "responseType": "scale",
-                "responseValue": "4"
-            },
-            {
-                "questionID": "Q3",
-                "questionText": "What did you like best about working with us?",
-                "responseType": "text",
-                "responseValue": "The memories we've created together still warm my heart! I have to say, it's the personalized attention and understanding we received from your team that truly stood out. Your ability to tailor your approach to our unique needs and pain points was invaluable, and it's a big reason why we were so satisfied with the project's outcome. The communication was also seamless - your team kept us informed every step of the way, which made the entire process feel like a collaborative effort."
-            },
-            {
-                "questionID": "Q4",
-                "questionText": "What could we improve on?",
-                "responseType": "text",
-                "responseValue": "We may have been a bit underwhelmed with the final product, but the memories of our working together still warm our hearts. While we gave a score of 2 for satisfaction, we appreciated the genuine effort and dedication you showed in understanding our needs and delivering on the project. As for communication, your frequent updates and transparent progress reports earned a score of 4 from us - it was great knowing exactly where we stood every step of the way. If there's one thing we could improve on,"
-            }
-        ],
-        "overallSatisfaction": "3.0"
-    },
-    {
-        "responseID": "99166",
-        "projectID": 9,
-        "clientID": 117,
-        "surveyDate": "2015-10-06",
-        "responses": [
-            {
-                "questionID": "Q1",
-                "questionText": "How satisfied are you with the project outcome?",
-                "responseType": "scale",
-                "responseValue": "3"
-            },
-            {
-                "questionID": "Q2",
-                "questionText": "Please rate the communication from our team.",
-                "responseType": "scale",
-                "responseValue": "4"
-            },
-            {
-                "questionID": "Q3",
-                "questionText": "What did you like best about working with us?",
-                "responseType": "text",
-                "responseValue": "We were pleased with the professionalism and expertise demonstrated by your team throughout the consulting project, which significantly contributed to our overall satisfaction rating of 3 out of 5. Additionally, we appreciated the clear and timely communication from your team, which earned a score of 4 out of 5, making our collaboration a productive and informative experience."
-            },
-            {
-                "questionID": "Q4",
-                "questionText": "What could we improve on?",
-                "responseType": "text",
-                "responseValue": "While we are generally satisfied with the project outcome, scoring 3 out of 5 for satisfaction, we would like to see some refinement in the communication process to ensure that our expectations are consistently met throughout the project lifecycle."
-            }
-        ],
-        "overallSatisfaction": "3.5"
-    },
-    {
-        "responseID": "44973",
-        "projectID": 10,
-        "clientID": 131,
-        "surveyDate": "2015-07-21",
-        "responses": [
-            {
-                "questionID": "Q1",
-                "questionText": "How satisfied are you with the project outcome?",
-                "responseType": "scale",
-                "responseValue": "5"
-            },
-            {
-                "questionID": "Q2",
-                "questionText": "Please rate the communication from our team.",
-                "responseType": "scale",
-                "responseValue": "4"
-            },
-            {
-                "questionID": "Q3",
-                "questionText": "What did you like best about working with us?",
-                "responseType": "text",
-                "responseValue": "We thoroughly appreciated the outstanding results and value we received from your consulting services - the high-quality solutions and expert guidance significantly improved our processes and productivity. Your exceptional expertise and dedication to our project's success were truly impressive, and we're thrilled with the outcome. Keep up the fantastic work!"
-            },
-            {
-                "questionID": "Q4",
-                "questionText": "What could we improve on?",
-                "responseType": "text",
-                "responseValue": "We're thrilled with the overall outcome of our consulting project and appreciate the exceptional results you delivered. While we did experience a slight hiccup with communication at times, your dedication to our project's success and ability to adapt to our needs was truly impressive. Keep up the fantastic work and we look forward to future collaborations!"
-            }
-        ],
-        "overallSatisfaction": "4.5"
-    },
-    {
-        "responseID": "66985",
-        "projectID": 11,
-        "clientID": 12,
-        "surveyDate": "2015-10-26",
-        "responses": [
-            {
-                "questionID": "Q1",
-                "questionText": "How satisfied are you with the project outcome?",
-                "responseType": "scale",
-                "responseValue": "5"
-            },
-            {
-                "questionID": "Q2",
-                "questionText": "Please rate the communication from our team.",
-                "responseType": "scale",
-                "responseValue": "4"
-            },
-            {
-                "questionID": "Q3",
-                "questionText": "What did you like best about working with us?",
-                "responseType": "text",
-                "responseValue": "We really appreciated the expertise and professionalism that your team brought to the project, and the solutions you provided exceeded our expectations - it's no surprise that we're thrilled with the final results and have achieved the desired outcomes!"
-            },
-            {
-                "questionID": "Q4",
-                "questionText": "What could we improve on?",
-                "responseType": "text",
-                "responseValue": "Overall, we're incredibly satisfied with the work you did for us, but we did feel that the communication could have been a bit more regular and proactive throughout the project - perhaps having a dedicated point of contact would have made us feel more connected and updated throughout the process."
-            }
-        ],
-        "overallSatisfaction": "4.5"
-    },
-    {
-        "responseID": "75612",
-        "projectID": 12,
-        "clientID": 279,
-        "surveyDate": "2015-11-09",
-        "responses": [
-            {
-                "questionID": "Q1",
-                "questionText": "How satisfied are you with the project outcome?",
-                "responseType": "scale",
-                "responseValue": "3"
-            },
-            {
-                "questionID": "Q2",
-                "questionText": "Please rate the communication from our team.",
-                "responseType": "scale",
-                "responseValue": "1"
-            },
-            {
-                "questionID": "Q3",
-                "questionText": "What did you like best about working with us?",
-                "responseType": "text",
-                "responseValue": "We appreciated the effort you put into delivering the project on time, but we can't help but feel that the quality of the final product was somewhat compromised by the limited communication and unclear updates we received throughout the process.\" (Score: 3/5 satisfaction, 1/5 communication)"
-            },
-            {
-                "questionID": "Q4",
-                "questionText": "What could we improve on?",
-                "responseType": "text",
-                "responseValue": "While we appreciate the effort, we're concerned that the project outcomes didn't quite meet our expectations, and the communication breakdowns we experienced led to unnecessary misunderstandings and delays - we'd like to see significant improvements in both areas."
-            }
-        ],
-        "overallSatisfaction": "2.0"
-    },
-    {
-        "responseID": "91959",
-        "projectID": 13,
-        "clientID": 81,
-        "surveyDate": "2015-05-19",
-        "responses": [
-            {
-                "questionID": "Q1",
-                "questionText": "How satisfied are you with the project outcome?",
-                "responseType": "scale",
-                "responseValue": "5"
-            },
-            {
-                "questionID": "Q2",
-                "questionText": "Please rate the communication from our team.",
-                "responseType": "scale",
-                "responseValue": "4"
-            },
-            {
-                "questionID": "Q3",
-                "questionText": "What did you like best about working with us?",
-                "responseType": "text",
-                "responseValue": "We were really impressed with the expert guidance and valuable insights you provided throughout the project, which greatly exceeded our expectations and contributed significantly to our overall satisfaction."
-            },
-            {
-                "questionID": "Q4",
-                "questionText": "What could we improve on?",
-                "responseType": "text",
-                "responseValue": "We appreciated the exceptional results you delivered, and your expertise was invaluable to us. However, we did feel that there was a slight delay in communication at times, which made it difficult for us to plan accordingly. Overall, we're extremely satisfied with the final outcome, but would appreciate more frequent updates to stay informed throughout the project."
-            }
-        ],
-        "overallSatisfaction": "4.5"
-    },
-    {
-        "responseID": "36071",
-        "projectID": 14,
-        "clientID": 30,
-        "surveyDate": "2016-04-08",
-        "responses": [
-            {
-                "questionID": "Q1",
-                "questionText": "How satisfied are you with the project outcome?",
-                "responseType": "scale",
-                "responseValue": "3"
-            },
-            {
-                "questionID": "Q2",
-                "questionText": "Please rate the communication from our team.",
-                "responseType": "scale",
-                "responseValue": "4"
-            },
-            {
-                "questionID": "Q3",
-                "questionText": "What did you like best about working with us?",
-                "responseType": "text",
-                "responseValue": "We appreciated the timeliness and effectiveness of the communication, which helped us stay informed throughout the project, and we were generally satisfied with the outcomes, although there were some areas where we felt the deliverables could have been more comprehensive."
-            },
-            {
-                "questionID": "Q4",
-                "questionText": "What could we improve on?",
-                "responseType": "text",
-                "responseValue": "While we were generally satisfied with the project's outcome, we noticed that the communication could have been more consistent and proactive, which would have helped us better understand the progress and timeline."
-            }
-        ],
-        "overallSatisfaction": "3.5"
-    },
-    {
-        "responseID": "79514",
-        "projectID": 15,
-        "clientID": 80,
-        "surveyDate": "2015-11-24",
-        "responses": [
-            {
-                "questionID": "Q1",
-                "questionText": "How satisfied are you with the project outcome?",
-                "responseType": "scale",
-                "responseValue": "3"
-            },
-            {
-                "questionID": "Q2",
-                "questionText": "Please rate the communication from our team.",
-                "responseType": "scale",
-                "responseValue": "5"
-            },
-            {
-                "questionID": "Q3",
-                "questionText": "What did you like best about working with us?",
-                "responseType": "text",
-                "responseValue": "We were extremely impressed with the level of communication and transparency throughout the project, it was seamless and we always felt informed and updated. The results exceeded our expectations, and we're thrilled to see the positive impact it's had on our business!"
-            },
-            {
-                "questionID": "Q4",
-                "questionText": "What could we improve on?",
-                "responseType": "text",
-                "responseValue": "I was extremely pleased with the outcome of our project, and while there's always room for growth, your excellent communication skills kept me informed and aligned throughout the process. One area where we could potentially improve is in the initial consultation, where we could have had a more in-depth understanding of our goals and objectives from the start. Nevertheless, your dedication and expertise were evident throughout, and we're thrilled with the final result!"
-            }
-        ],
-        "overallSatisfaction": "4.0"
-    },
-    {
-        "responseID": "12552",
-        "projectID": 16,
-        "clientID": 48,
-        "surveyDate": "2015-09-28",
-        "responses": [
-            {
-                "questionID": "Q1",
-                "questionText": "How satisfied are you with the project outcome?",
-                "responseType": "scale",
-                "responseValue": "5"
-            },
-            {
-                "questionID": "Q2",
-                "questionText": "Please rate the communication from our team.",
-                "responseType": "scale",
-                "responseValue": "4"
-            },
-            {
-                "questionID": "Q3",
-                "questionText": "What did you like best about working with us?",
-                "responseType": "text",
-                "responseValue": "We were thoroughly impressed with the exceptional results you delivered, and we're grateful for the expertise and professionalism you brought to the project, which far exceeded our expectations and helped us achieve our goals."
-            },
-            {
-                "questionID": "Q4",
-                "questionText": "What could we improve on?",
-                "responseType": "text",
-                "responseValue": "We are truly grateful for the exceptional service and expertise provided by your team, and while we were delighted with the project's outcome, we did feel that there were a few instances where we could have been better kept in the loop regarding updates and timelines."
-            }
-        ],
-        "overallSatisfaction": "4.5"
-    },
-    {
-        "responseID": "41385",
-        "projectID": 17,
-        "clientID": 201,
-        "surveyDate": "2016-04-13",
-        "responses": [
-            {
-                "questionID": "Q1",
-                "questionText": "How satisfied are you with the project outcome?",
-                "responseType": "scale",
-                "responseValue": "3"
-            },
-            {
-                "questionID": "Q2",
-                "questionText": "Please rate the communication from our team.",
-                "responseType": "scale",
-                "responseValue": "4"
-            },
-            {
-                "questionID": "Q3",
-                "questionText": "What did you like best about working with us?",
-                "responseType": "text",
-                "responseValue": "Although we didn't quite meet your expectations in terms of satisfaction, I was really impressed with the clarity and frequency of communication from your team. The way you kept me informed throughout the project really helped me feel confident in our partnership, and I appreciate the effort you put into making sure I was on the same page."
-            },
-            {
-                "questionID": "Q4",
-                "questionText": "What could we improve on?",
-                "responseType": "text",
-                "responseValue": "We appreciated the overall quality of the work and the value it brought to our organization, but we did feel that there were a few areas where communication could have been more timely and consistent. For instance, there were a few instances where we weren't kept in the loop on changes or updates, which caused some minor delays and misunderstandings. With a bit more proactive communication, we think the experience could have been even more seamless and stress-free for us."
-            }
-        ],
-        "overallSatisfaction": "3.5"
-    },
-    {
-        "responseID": "21226",
-        "projectID": 18,
-        "clientID": 318,
-        "surveyDate": "2016-02-24",
-        "responses": [
-            {
-                "questionID": "Q1",
-                "questionText": "How satisfied are you with the project outcome?",
-                "responseType": "scale",
-                "responseValue": "2"
-            },
-            {
-                "questionID": "Q2",
-                "questionText": "Please rate the communication from our team.",
-                "responseType": "scale",
-                "responseValue": "5"
-            },
-            {
-                "questionID": "Q3",
-                "questionText": "What did you like best about working with us?",
-                "responseType": "text",
-                "responseValue": "We absolutely loved the enthusiasm and dedication your team brought to the project! Their communication was top-notch, we felt informed every step of the way, and the end result exceeded our expectations!"
-            },
-            {
-                "questionID": "Q4",
-                "questionText": "What could we improve on?",
-                "responseType": "text",
-                "responseValue": "We're absolutely thrilled with the outcome of the project, and while we're completely satisfied with the final results, we'd love to see even more frequent check-ins to really drive home the value of regular communication - a 5-star experience would have truly set the project over the top!"
-            }
-        ],
-        "overallSatisfaction": "3.5"
-    },
-    {
-        "responseID": "26483",
-        "projectID": 19,
-        "clientID": 193,
-        "surveyDate": "2015-10-19",
-        "responses": [
-            {
-                "questionID": "Q1",
-                "questionText": "How satisfied are you with the project outcome?",
-                "responseType": "scale",
-                "responseValue": "5"
-            },
-            {
-                "questionID": "Q2",
-                "questionText": "Please rate the communication from our team.",
-                "responseType": "scale",
-                "responseValue": "5"
-            },
-            {
-                "questionID": "Q3",
-                "questionText": "What did you like best about working with us?",
-                "responseType": "text",
-                "responseValue": "We were thoroughly impressed with the exceptional expertise and dedication your team brought to the project, which resulted in a final product that exceeded our expectations. Your outstanding communication skills kept us informed and engaged throughout the entire process, making it a seamless and enjoyable collaboration!"
-            },
-            {
-                "questionID": "Q4",
-                "questionText": "What could we improve on?",
-                "responseType": "text",
-                "responseValue": "We're absolutely thrilled with the outstanding work you've done for us - your exceptional communication skills kept us informed every step of the way, and your expertise resulted in a project that exceeded our expectations. We're so grateful to have worked with you!"
-            }
-        ],
-        "overallSatisfaction": "5.0"
-    },
-    {
-        "responseID": "31643",
-        "projectID": 20,
-        "clientID": 212,
-        "surveyDate": "2016-10-17",
-        "responses": [
-            {
-                "questionID": "Q1",
-                "questionText": "How satisfied are you with the project outcome?",
-                "responseType": "scale",
-                "responseValue": "3"
-            },
-            {
-                "questionID": "Q2",
-                "questionText": "Please rate the communication from our team.",
-                "responseType": "scale",
-                "responseValue": "4"
-            },
-            {
-                "questionID": "Q3",
-                "questionText": "What did you like best about working with us?",
-                "responseType": "text",
-                "responseValue": "We were thoroughly impressed with the exceptional level of professionalism and expertise you brought to the project, and your timely communication kept us informed every step of the way. Your dedication to delivering high-quality results truly exceeded our expectations, and we're thrilled with the final outcome!"
-            },
-            {
-                "questionID": "Q4",
-                "questionText": "What could we improve on?",
-                "responseType": "text",
-                "responseValue": "We're thrilled with the outcome of the project and appreciate the professionalism and effective communication throughout the process. While we're very satisfied with the final result, we do think there's room for improvement in providing more tailored solutions to meet our unique needs - keep up the great work and we look forward to future collaborations!"
-            }
-        ],
-        "overallSatisfaction": "3.5"
-    },
-    {
-        "responseID": "37760",
-        "projectID": 21,
-        "clientID": 178,
-        "surveyDate": "2015-08-28",
-        "responses": [
-            {
-                "questionID": "Q1",
-                "questionText": "How satisfied are you with the project outcome?",
-                "responseType": "scale",
-                "responseValue": "3"
-            },
-            {
-                "questionID": "Q2",
-                "questionText": "Please rate the communication from our team.",
-                "responseType": "scale",
-                "responseValue": "5"
-            },
-            {
-                "questionID": "Q3",
-                "questionText": "What did you like best about working with us?",
-                "responseType": "text",
-                "responseValue": "We appreciated the thoughtful and considered approach the consultant took in understanding our needs, which ultimately led to a well-crafted solution that met our goals. However, we felt that there was room for improvement in terms of regular updates and proactive communication throughout the project, which is why we scored our satisfaction at a 3 out of 5."
-            },
-            {
-                "questionID": "Q4",
-                "questionText": "What could we improve on?",
-                "responseType": "text",
-                "responseValue": "While we were generally satisfied with the outcome, we noticed that there were some minor delays and misunderstandings during the communication process, which we would like to see improved upon in future projects to ensure seamless collaboration and efficient progress tracking."
+                "responseValue": "While we were generally satisfied with the project's outcome, we would appreciate more proactive communication from the consultants to keep us informed about timeline changes and updates throughout the process."
             }
         ],
         "overallSatisfaction": "4.0"
@@ -695,8 +695,8 @@
     {
         "responseID": "50857",
         "projectID": 22,
-        "clientID": 72,
-        "surveyDate": "2015-09-16",
+        "clientID": 40,
+        "surveyDate": "2015-08-19",
         "responses": [
             {
                 "questionID": "Q1",
@@ -714,13 +714,13 @@
                 "questionID": "Q3",
                 "questionText": "What did you like best about working with us?",
                 "responseType": "text",
-                "responseValue": "We were extremely pleased with the entire consulting process, from the initial consultation to the final presentation, and would like to express our sincere gratitude for the exceptional level of service and expertise you provided. Your professionalism, attention to detail, and open communication style made us feel confident and informed throughout the project, resulting in a highly successful outcome that exceeded our expectations."
+                "responseValue": "We were thoroughly impressed with your exceptional communication skills, which ensured seamless collaboration throughout the project. Your proactive approach and regular updates allowed us to stay informed and aligned, making the experience truly seamless and satisfying."
             },
             {
                 "questionID": "Q4",
                 "questionText": "What could we improve on?",
                 "responseType": "text",
-                "responseValue": "We're absolutely thrilled with the outstanding work you delivered! Your exceptional communication skills and prompt updates kept us informed and ensured a seamless collaboration. We're truly satisfied with the final product, and we're hard-pressed to think of any areas for improvement - you've set the bar high for future projects!"
+                "responseValue": "We're thrilled with the final outcome and couldn't ask for better collaboration - you exceeded our expectations in every way, and we appreciate your seamless communication and dedication to ensuring our satisfaction!"
             }
         ],
         "overallSatisfaction": "5.0"
@@ -728,8 +728,8 @@
     {
         "responseID": "67422",
         "projectID": 23,
-        "clientID": 101,
-        "surveyDate": "2015-07-31",
+        "clientID": 278,
+        "surveyDate": "2016-01-21",
         "responses": [
             {
                 "questionID": "Q1",
@@ -747,13 +747,13 @@
                 "questionID": "Q3",
                 "questionText": "What did you like best about working with us?",
                 "responseType": "text",
-                "responseValue": "I suppose the project's outcome was satisfactory, but I'm still left wondering if the final product truly met all of our needs... and I'm not entirely convinced that the communication was as seamless as the scores suggest."
+                "responseValue": "We appreciated the consultant's attention to detail, but we still had some lingering concerns about the overall effectiveness of the solutions presented, despite their thoroughness."
             },
             {
                 "questionID": "Q4",
                 "questionText": "What could we improve on?",
                 "responseType": "text",
-                "responseValue": "While we were generally satisfied with the final outcome, we can't help but wonder if there were a few more proactive steps taken by the consultant to anticipate and address our concerns throughout the project - after all, a score of 4 for communication feels more like a solid 'good' rather than outstanding."
+                "responseValue": "While we're generally pleased with the final outcome, we'd appreciate more clarity on the project timeline and potential roadblocks to ensure a smoother collaboration in the future."
             }
         ],
         "overallSatisfaction": "4.0"
@@ -761,8 +761,8 @@
     {
         "responseID": "39451",
         "projectID": 24,
-        "clientID": 91,
-        "surveyDate": "2015-10-07",
+        "clientID": 122,
+        "surveyDate": "2016-02-08",
         "responses": [
             {
                 "questionID": "Q1",
@@ -780,13 +780,13 @@
                 "questionID": "Q3",
                 "questionText": "What did you like best about working with us?",
                 "responseType": "text",
-                "responseValue": "Hands down, it was the part where we finally figured out how to make your excel spreadsheets less terrifying. Just kidding ( sort of). Seriously, we loved the way your team's expertise helped us tame the beast that was our business strategy. Your recommendations were on point, and we're thrilled with the results!"
+                "responseValue": "We loved how you cracked the code on our wonky financials and saved us from financial disaster... just kidding, sort of! But seriously, your expertise and results were top-notch, and we're thrilled with the final product. If only your communication could've been a smidge more frequent, we'd be 5-star perfectos! Still, 4/5 isn't bad, and we'd totally work with you again!"
             },
             {
                 "questionID": "Q4",
                 "questionText": "What could we improve on?",
                 "responseType": "text",
-                "responseValue": "Well, we're thrilled with the results, but it seems like your team was so focused on solving our problems that they forgot to break out the party hats and cake to celebrate... seriously though, maybe just a slight improvement on the communication front to keep us in the loop (and entertained) would be a win-win!"
+                "responseValue": "We're still talking? Just kidding, you guys rocked the project! Seriously, the only thing we'd change is maybe a few more check-ins to keep us completely entertained... just saying!"
             }
         ],
         "overallSatisfaction": "4.5"
@@ -794,8 +794,8 @@
     {
         "responseID": "40161",
         "projectID": 25,
-        "clientID": 165,
-        "surveyDate": "2016-07-20",
+        "clientID": 118,
+        "surveyDate": "2015-12-07",
         "responses": [
             {
                 "questionID": "Q1",
@@ -813,13 +813,13 @@
                 "questionID": "Q3",
                 "questionText": "What did you like best about working with us?",
                 "responseType": "text",
-                "responseValue": "We really appreciated the thorough and thoughtful approach you took to understanding our needs and delivering high-quality results, despite some occasional communication delays. Your dedication to getting things right is truly impressive, and we're grateful for the expertise you brought to the table."
+                "responseValue": "We appreciated your dedication to understanding our business needs and delivering valuable insights, despite some communication missteps along the way."
             },
             {
                 "questionID": "Q4",
                 "questionText": "What could we improve on?",
                 "responseType": "text",
-                "responseValue": "While we were generally satisfied with the project's outcome, scoring 2 out of 5, we felt that communication could be strengthened to ensure we were better informed and aligned throughout the process, which scored 1 out of 5."
+                "responseValue": "While we appreciate your efforts, we feel that there was room for more open communication throughout the project, and we'd love to see more regular updates and progress reports in the future."
             }
         ],
         "overallSatisfaction": "1.5"
@@ -827,8 +827,8 @@
     {
         "responseID": "40007",
         "projectID": 26,
-        "clientID": 4,
-        "surveyDate": "2016-05-31",
+        "clientID": 204,
+        "surveyDate": "2015-09-04",
         "responses": [
             {
                 "questionID": "Q1",
@@ -846,13 +846,13 @@
                 "questionID": "Q3",
                 "questionText": "What did you like best about working with us?",
                 "responseType": "text",
-                "responseValue": "Honestly, we loved the expertise and value you brought to the table - your recommendations really helped us improve our operations, and we're super happy with the results (4/5 stars!)."
+                "responseValue": "We were really impressed with the expertise and thoughtfulness you brought to the project, and the end result was top-notch - we loved the solutions you developed for us!"
             },
             {
                 "questionID": "Q4",
                 "questionText": "What could we improve on?",
                 "responseType": "text",
-                "responseValue": "Hey, we really loved the work you did for us, but we gotta admit, communication was a bit wonky at times."
+                "responseValue": "We loved the end result, but wished for more frequent updates and open communication throughout the project."
             }
         ],
         "overallSatisfaction": "2.5"
@@ -860,8 +860,8 @@
     {
         "responseID": "19287",
         "projectID": 27,
-        "clientID": 189,
-        "surveyDate": "2015-10-09",
+        "clientID": 61,
+        "surveyDate": "2016-04-29",
         "responses": [
             {
                 "questionID": "Q1",
@@ -879,13 +879,13 @@
                 "questionID": "Q3",
                 "questionText": "What did you like best about working with us?",
                 "responseType": "text",
-                "responseValue": "We really appreciated the enthusiasm and dedication of your team, which helped us achieve our project goals despite some initial hurdles. Your expertise and creative solutions were invaluable in overcoming challenges and delivering a successful outcome!"
+                "responseValue": "We appreciated the proactive approach and fresh insights you brought to the table, which significantly improved our project's overall outcome, despite some minor miscommunications along the way."
             },
             {
                 "questionID": "Q4",
                 "questionText": "What could we improve on?",
                 "responseType": "text",
-                "responseValue": "While we're thrilled with the outcome of the project, we do feel that there's room for growth in terms of communication, specifically. If we could have received more regular updates and progress reports, it would have given us a sense of security and allowed us to better plan our internal workflows. However, we're confident that with some tweaks, you'll be able to take our feedback and continue to exceed our expectations in the future!"
+                "responseValue": "We appreciated the consultants' dedication and expertise, but we could benefit from more proactive communication and regular updates to ensure seamless collaboration."
             }
         ],
         "overallSatisfaction": "1.5"
@@ -893,8 +893,8 @@
     {
         "responseID": "38080",
         "projectID": 28,
-        "clientID": 87,
-        "surveyDate": "2016-08-03",
+        "clientID": 347,
+        "surveyDate": "2016-02-10",
         "responses": [
             {
                 "questionID": "Q1",
@@ -912,13 +912,13 @@
                 "questionID": "Q3",
                 "questionText": "What did you like best about working with us?",
                 "responseType": "text",
-                "responseValue": "We were extremely pleased with the exceptional quality of work delivered by the team, which exceeded our expectations and met all our project requirements with great accuracy."
+                "responseValue": "We were thoroughly impressed with the expert insights and thoughtful solutions your team provided, which greatly exceeded our expectations and ultimately led to significant improvements for our business."
             },
             {
                 "questionID": "Q4",
                 "questionText": "What could we improve on?",
                 "responseType": "text",
-                "responseValue": "We truly appreciate the effort and expertise you brought to our project, and while we were generally very satisfied with the outcome, we would have appreciated more proactive communication throughout the process to ensure we were aligned on timelines and expectations."
+                "responseValue": "We appreciate the team's thorough work and insightful recommendations, and while the communication was generally good, we noticed a slight delay in responsiveness at times, which we'd love to see improved in future projects."
             }
         ],
         "overallSatisfaction": "3.5"
@@ -926,8 +926,8 @@
     {
         "responseID": "85525",
         "projectID": 29,
-        "clientID": 135,
-        "surveyDate": "2016-02-03",
+        "clientID": 186,
+        "surveyDate": "2016-01-11",
         "responses": [
             {
                 "questionID": "Q1",
@@ -945,13 +945,13 @@
                 "questionID": "Q3",
                 "questionText": "What did you like best about working with us?",
                 "responseType": "text",
-                "responseValue": "I want to start by saying how sorry we are that we didn't quite meet your expectations. While we're thrilled that you were generally satisfied with the project's outcome, scoring us a 4 out of 5 for satisfaction, we understand that there was still room for improvement. Specifically, we appreciate your feedback that our communication could have been even more effective, earning a 5 out of 5 in that regard. We value your honesty and will take your input to heart as we continue to grow"
+                "responseValue": "We appreciated the expert guidance and tailored solutions you provided, and we apologize that we didn't quite meet your expectations on satisfaction, as we fell short of a perfect score. We're committed to continuous improvement and would be happy to discuss areas where we can improve to better meet your needs in the future."
             },
             {
                 "questionID": "Q4",
                 "questionText": "What could we improve on?",
                 "responseType": "text",
-                "responseValue": "We truly appreciate the hard work and dedication you brought to our project, and we're sorry that our satisfaction with the final outcome wasn't quite met, scoring a 4 out of 5. We'd love to discuss ways to enhance the solution to better align with our goals and expectations in the future. Your communication was exceptional, earning a 5 out of 5, and we're grateful for the transparency and regular updates you provided throughout the project. Let's work together to make improvements and achieve"
+                "responseValue": "I apologize for any areas where we fell short, and we appreciate your feedback. We're glad to hear you were satisfied with the project's outcome, and we'll take your score of 4 for satisfaction and 5 for communication to heart, aiming to improve our services even further moving forward."
             }
         ],
         "overallSatisfaction": "4.5"
@@ -959,8 +959,8 @@
     {
         "responseID": "34957",
         "projectID": 30,
-        "clientID": 264,
-        "surveyDate": "2015-08-13",
+        "clientID": 234,
+        "surveyDate": "2016-01-19",
         "responses": [
             {
                 "questionID": "Q1",
@@ -978,13 +978,13 @@
                 "questionID": "Q3",
                 "questionText": "What did you like best about working with us?",
                 "responseType": "text",
-                "responseValue": "We appreciated the way you took the time to truly understand our unique challenges and tailored your approach to address our specific needs, which resulted in a customized solution that met our goals and exceeded our expectations."
+                "responseValue": "We appreciated the exceptional communication throughout the project, which kept us informed and aligned at every stage, and the outcome exceeded our expectations, addressing our key concerns and goals."
             },
             {
                 "questionID": "Q4",
                 "questionText": "What could we improve on?",
                 "responseType": "text",
-                "responseValue": "We were extremely pleased with the overall outcome of the project, and the clear and proactive communication from the consulting team ensured that we were well-informed and able to provide valuable input throughout the process. One area for potential improvement could be to provide even more detailed and actionable recommendations in the final report to help us fully leverage the insights and opportunities identified."
+                "responseValue": "We appreciate the exceptional communication and outcome, but to further enhance our experience, we would like to see more tailored solutions to address our specific business needs."
             }
         ],
         "overallSatisfaction": "4.5"
@@ -992,8 +992,8 @@
     {
         "responseID": "65519",
         "projectID": 31,
-        "clientID": 75,
-        "surveyDate": "2016-04-05",
+        "clientID": 304,
+        "surveyDate": "2016-04-14",
         "responses": [
             {
                 "questionID": "Q1",
@@ -1011,13 +1011,13 @@
                 "questionID": "Q3",
                 "questionText": "What did you like best about working with us?",
                 "responseType": "text",
-                "responseValue": "Well, I suppose the communication was decent, I mean, we did get updates and responses to our questions, but it was often a bit delayed and not always entirely clear. And as for satisfaction, I'd say it's a mixed bag - we're not entirely unhappy with the final product, but there were definitely some areas that could've been done better. Overall, I'd say it was an okay experience, but not exactly outstanding."
+                "responseValue": "We appreciated the consultant's thoroughness in addressing our issues, but we're still unsure if the recommended solutions will yield the desired results."
             },
             {
                 "questionID": "Q4",
                 "questionText": "What could we improve on?",
                 "responseType": "text",
-                "responseValue": "We're not entirely convinced that the communication channels were as effective as they could have been, and some of our concerns weren't fully addressed, which left us with a sense of uncertainty about the project's outcome."
+                "responseValue": "While the project was completed, we're not entirely convinced that the final product fully met our expectations, and the communication could have been more proactive and transparent throughout the process."
             }
         ],
         "overallSatisfaction": "3.0"
@@ -1025,8 +1025,8 @@
     {
         "responseID": "98259",
         "projectID": 32,
-        "clientID": 225,
-        "surveyDate": "2016-03-14",
+        "clientID": 140,
+        "surveyDate": "2016-02-02",
         "responses": [
             {
                 "questionID": "Q1",
@@ -1044,13 +1044,13 @@
                 "questionID": "Q3",
                 "questionText": "What did you like best about working with us?",
                 "responseType": "text",
-                "responseValue": "Dude, I gotta say, I was really stoked with how easy it was to communicate with you guys - 5/5 for sure! And, of course, the results were top-notch too, we're super happy with the final product and overall experience, that's why we gave a 4/5 for satisfaction. Thanks for the awesome work, we'd totally recommend you to anyone!"
+                "responseValue": "We really appreciated your expertise and the transparent communication throughout the project - it made it a breeze to work with you guys and achieve such great results!"
             },
             {
                 "questionID": "Q4",
                 "questionText": "What could we improve on?",
                 "responseType": "text",
-                "responseValue": "Honestly, we're super happy with the work you did for us - 4 out of 5 stars for satisfaction isn't too shabby! One tiny thing that came to mind was that we wished for a bit more proactive communication from your end, but you guys totally made up for it with those super prompt responses whenever we had questions or concerns. So, minor tweak there and we're all set!"
+                "responseValue": "Overall, we're really happy with the project, but if we're being nitpicky, we wish you'd provided a bit more context around the technical solutions to make the report even more actionable."
             }
         ],
         "overallSatisfaction": "4.5"
@@ -1058,8 +1058,8 @@
     {
         "responseID": "62772",
         "projectID": 33,
-        "clientID": 75,
-        "surveyDate": "2016-09-12",
+        "clientID": 254,
+        "surveyDate": "2016-01-01",
         "responses": [
             {
                 "questionID": "Q1",
@@ -1077,13 +1077,13 @@
                 "questionID": "Q3",
                 "questionText": "What did you like best about working with us?",
                 "responseType": "text",
-                "responseValue": "Dude, I gotta say, we were super impressed with how you guys were able to deliver on all our requirements and still managed to communicate effectively throughout the whole process. The final product exceeded our expectations, and your transparency was top-notch!"
+                "responseValue": "We loved the seamless communication and collaboration throughout the project - it made the whole experience super smooth and stress-free!"
             },
             {
                 "questionID": "Q4",
                 "questionText": "What could we improve on?",
                 "responseType": "text",
-                "responseValue": "To be honest, we were super stoked with the final product and the way the team kept us in the loop throughout the project! The only thing we could see for improvement is maybe providing a clearer timeline for milestones and deadlines, but overall, we were really happy with the collaboration and the end result."
+                "responseValue": "We really appreciated the top-notch communication and prompt responses throughout the project - it was seamless! Maybe exploring new innovative solutions could've taken it to the next level, but overall, we're thrilled with the outcome."
             }
         ],
         "overallSatisfaction": "4.0"
@@ -1091,8 +1091,8 @@
     {
         "responseID": "42591",
         "projectID": 34,
-        "clientID": 196,
-        "surveyDate": "2015-12-28",
+        "clientID": 83,
+        "surveyDate": "2016-03-30",
         "responses": [
             {
                 "questionID": "Q1",
@@ -1110,22 +1110,22 @@
                 "questionID": "Q3",
                 "questionText": "What did you like best about working with us?",
                 "responseType": "text",
-                "responseValue": "We really appreciated the exceptional level of understanding and support you provided throughout the project, which allowed us to feel at ease and confident in the outcome. Your ability to empathize with our concerns and tailor your approach to our unique needs was truly impressive and exceeded our expectations."
+                "responseValue": "We appreciated the excellent understanding you had of our needs and goals, which resulted in a tailored solution that exceeded our expectations."
             },
             {
                 "questionID": "Q4",
                 "questionText": "What could we improve on?",
                 "responseType": "text",
-                "responseValue": "We're thoroughly impressed with the exceptional work you've delivered, and we're grateful for the seamless communication throughout the project. One area where we might consider improvement is in providing more detailed documentation, but honestly, it's a minor quibble in an otherwise outstanding effort."
+                "responseValue": "We're extremely satisfied with the outcome, but one area for potential growth could be providing more visual aids and summaries to support our understanding of the complex data analysis."
             }
         ],
         "overallSatisfaction": "5.0"
     },
     {
         "responseID": "65296",
-        "projectID": 36,
-        "clientID": 193,
-        "surveyDate": "2016-10-04",
+        "projectID": 35,
+        "clientID": 99,
+        "surveyDate": "2015-11-03",
         "responses": [
             {
                 "questionID": "Q1",
@@ -1143,22 +1143,22 @@
                 "questionID": "Q3",
                 "questionText": "What did you like best about working with us?",
                 "responseType": "text",
-                "responseValue": "We appreciated the thoroughness of your analysis and recommendations, which were well-communicated and helped us achieve our project goals."
+                "responseValue": "We appreciated the clear and timely communication, which enabled us to stay informed throughout the project."
             },
             {
                 "questionID": "Q4",
                 "questionText": "What could we improve on?",
                 "responseType": "text",
-                "responseValue": "While we were generally satisfied with the project's outcome, there is room for improvement in the communication aspect, particularly in terms of proactive updates and clear explanations of technical concepts."
+                "responseValue": "We would like to see further enhancements in the project's deliverables to align with our initial expectations, but appreciate the excellent communication and support throughout the project."
             }
         ],
         "overallSatisfaction": "3.5"
     },
     {
         "responseID": "68082",
-        "projectID": 37,
-        "clientID": 29,
-        "surveyDate": "2016-08-04",
+        "projectID": 36,
+        "clientID": 208,
+        "surveyDate": "2015-12-14",
         "responses": [
             {
                 "questionID": "Q1",
@@ -1176,21 +1176,714 @@
                 "questionID": "Q3",
                 "questionText": "What did you like best about working with us?",
                 "responseType": "text",
-                "responseValue": "We absolutely loved the way you tackled our complex project, your professionalism and attention to detail are top-notch! The quality of work was outstanding and exceeded our expectations, which is why we're thrilled to give you a score of 3 out of 3 for satisfaction - you truly went above and beyond to meet our needs. Your communication was seamless, and we appreciated the regular updates and transparent progress reports. Your score of 4 out of 4 for communication is well-deserved, as it kept us"
+                "responseValue": "We absolutely loved the outstanding communication - your proactive updates and transparent approach kept us fully informed and aligned throughout the project!"
             },
             {
                 "questionID": "Q4",
                 "questionText": "What could we improve on?",
                 "responseType": "text",
-                "responseValue": "We're absolutely thrilled with the overall outcome of the project! The consultant's exceptional communication skills (4/5) helped us stay informed every step of the way, and their professionalism and expertise really shone through. The only area where we'd love to see some further development is in the specific deliverables themselves - while they were of high quality, we're always striving for that extra 'wow' factor, and a slight bump up to a 4 or 5 in terms of satisfaction would've"
+                "responseValue": "Wow, we're thrilled with the outstanding work you delivered - the only area for slight improvement is communication, as we'd love to see a more proactive approach to keeping us updated on project milestones, but overall, your exceptional skills and dedication have truly exceeded our expectations!"
             }
         ],
         "overallSatisfaction": "3.5"
     },
     {
         "responseID": "16630",
+        "projectID": 37,
+        "clientID": 175,
+        "surveyDate": "2016-07-04",
+        "responses": [
+            {
+                "questionID": "Q1",
+                "questionText": "How satisfied are you with the project outcome?",
+                "responseType": "scale",
+                "responseValue": "5"
+            },
+            {
+                "questionID": "Q2",
+                "questionText": "Please rate the communication from our team.",
+                "responseType": "scale",
+                "responseValue": "5"
+            },
+            {
+                "questionID": "Q3",
+                "questionText": "What did you like best about working with us?",
+                "responseType": "text",
+                "responseValue": "We appreciated the exceptional service and support we received from your team, which greatly exceeded our expectations, and the seamless communication throughout the project ensured we were always on the same page."
+            },
+            {
+                "questionID": "Q4",
+                "questionText": "What could we improve on?",
+                "responseType": "text",
+                "responseValue": "We truly appreciate your exceptional work, and with a perfect score in satisfaction and communication, it's difficult to pinpoint areas for improvement, but perhaps exploring new tools or approaches to stay ahead of industry trends could be a consideration for future collaborations."
+            }
+        ],
+        "overallSatisfaction": "5.0"
+    },
+    {
+        "responseID": "22224",
         "projectID": 38,
-        "clientID": 4,
+        "clientID": 136,
+        "surveyDate": "2016-03-05",
+        "responses": [
+            {
+                "questionID": "Q1",
+                "questionText": "How satisfied are you with the project outcome?",
+                "responseType": "scale",
+                "responseValue": "4"
+            },
+            {
+                "questionID": "Q2",
+                "questionText": "Please rate the communication from our team.",
+                "responseType": "scale",
+                "responseValue": "4"
+            },
+            {
+                "questionID": "Q3",
+                "questionText": "What did you like best about working with us?",
+                "responseType": "text",
+                "responseValue": "We were particularly impressed with the depth of analysis and expert insights provided by your team, which significantly contributed to the success of our project, aligning perfectly with our expectations and goals."
+            },
+            {
+                "questionID": "Q4",
+                "questionText": "What could we improve on?",
+                "responseType": "text",
+                "responseValue": "Based on our exceptional satisfaction and communication scores of 4, we are extremely pleased with the consulting project's outcome. However, to further optimize our partnership, we suggest refining the implementation plan to ensure seamless project execution and continuous progress updates."
+            }
+        ],
+        "overallSatisfaction": "4.0"
+    },
+    {
+        "responseID": "63269",
+        "projectID": 39,
+        "clientID": 130,
+        "surveyDate": "2016-04-23",
+        "responses": [
+            {
+                "questionID": "Q1",
+                "questionText": "How satisfied are you with the project outcome?",
+                "responseType": "scale",
+                "responseValue": "5"
+            },
+            {
+                "questionID": "Q2",
+                "questionText": "Please rate the communication from our team.",
+                "responseType": "scale",
+                "responseValue": "5"
+            },
+            {
+                "questionID": "Q3",
+                "questionText": "What did you like best about working with us?",
+                "responseType": "text",
+                "responseValue": "We were thoroughly impressed with the team's expertise and the way they actively listened to our needs, could you walk us through your thought process behind the project plan and how it contributed to the successful outcome?"
+            },
+            {
+                "questionID": "Q4",
+                "questionText": "What could we improve on?",
+                "responseType": "text",
+                "responseValue": "What really stood out was the seamless communication - how did you manage to keep us so well-informed throughout the project?"
+            }
+        ],
+        "overallSatisfaction": "5.0"
+    },
+    {
+        "responseID": "17685",
+        "projectID": 40,
+        "clientID": 235,
+        "surveyDate": "2015-11-20",
+        "responses": [
+            {
+                "questionID": "Q1",
+                "questionText": "How satisfied are you with the project outcome?",
+                "responseType": "scale",
+                "responseValue": "4"
+            },
+            {
+                "questionID": "Q2",
+                "questionText": "Please rate the communication from our team.",
+                "responseType": "scale",
+                "responseValue": "3"
+            },
+            {
+                "questionID": "Q3",
+                "questionText": "What did you like best about working with us?",
+                "responseType": "text",
+                "responseValue": "We were impressed with the thoroughness and expertise of your team's analysis, which provided significant insights that greatly improved our business operations."
+            },
+            {
+                "questionID": "Q4",
+                "questionText": "What could we improve on?",
+                "responseType": "text",
+                "responseValue": "Although we were highly satisfied with the project outcome, we'd appreciate more regular updates and proactive communication throughout the project to better manage our expectations."
+            }
+        ],
+        "overallSatisfaction": "3.5"
+    },
+    {
+        "responseID": "44760",
+        "projectID": 41,
+        "clientID": 337,
+        "surveyDate": "2016-05-12",
+        "responses": [
+            {
+                "questionID": "Q1",
+                "questionText": "How satisfied are you with the project outcome?",
+                "responseType": "scale",
+                "responseValue": "3"
+            },
+            {
+                "questionID": "Q2",
+                "questionText": "Please rate the communication from our team.",
+                "responseType": "scale",
+                "responseValue": "1"
+            },
+            {
+                "questionID": "Q3",
+                "questionText": "What did you like best about working with us?",
+                "responseType": "text",
+                "responseValue": "We appreciated the depth of expertise and insightful recommendations provided by the team, which greatly contributed to the success of our project."
+            },
+            {
+                "questionID": "Q4",
+                "questionText": "What could we improve on?",
+                "responseType": "text",
+                "responseValue": "While we were pleased with the results, we felt that the communication could have been more proactive and transparent throughout the project, leading to a slightly delayed understanding of project timelines and expectations."
+            }
+        ],
+        "overallSatisfaction": "2.0"
+    },
+    {
+        "responseID": "65444",
+        "projectID": 42,
+        "clientID": 177,
+        "surveyDate": "2016-03-17",
+        "responses": [
+            {
+                "questionID": "Q1",
+                "questionText": "How satisfied are you with the project outcome?",
+                "responseType": "scale",
+                "responseValue": "5"
+            },
+            {
+                "questionID": "Q2",
+                "questionText": "Please rate the communication from our team.",
+                "responseType": "scale",
+                "responseValue": "5"
+            },
+            {
+                "questionID": "Q3",
+                "questionText": "What did you like best about working with us?",
+                "responseType": "text",
+                "responseValue": "I was thoroughly impressed with the exceptional professionalism and understanding of our unique needs - the team's dedication to delivering a tailored solution made all the difference in our project's success."
+            },
+            {
+                "questionID": "Q4",
+                "questionText": "What could we improve on?",
+                "responseType": "text",
+                "responseValue": "We're thrilled with the outcome and the seamless communication throughout the project, but perhaps we could explore more creative solutions to exceed our expectations even further in future collaborations."
+            }
+        ],
+        "overallSatisfaction": "5.0"
+    },
+    {
+        "responseID": "96752",
+        "projectID": 43,
+        "clientID": 307,
+        "surveyDate": "2016-02-11",
+        "responses": [
+            {
+                "questionID": "Q1",
+                "questionText": "How satisfied are you with the project outcome?",
+                "responseType": "scale",
+                "responseValue": "4"
+            },
+            {
+                "questionID": "Q2",
+                "questionText": "Please rate the communication from our team.",
+                "responseType": "scale",
+                "responseValue": "5"
+            },
+            {
+                "questionID": "Q3",
+                "questionText": "What did you like best about working with us?",
+                "responseType": "text",
+                "responseValue": "We really appreciated the exceptional communication throughout the project, which kept us informed and involved every step of the way. Your dedication to understanding our needs and exceeding our expectations was truly impressive, and we're thrilled with the outstanding results!"
+            },
+            {
+                "questionID": "Q4",
+                "questionText": "What could we improve on?",
+                "responseType": "text",
+                "responseValue": "We're extremely pleased with the exceptional quality of your work and seamless communication throughout the project - keep up the outstanding efforts!"
+            }
+        ],
+        "overallSatisfaction": "4.5"
+    },
+    {
+        "responseID": "38534",
+        "projectID": 44,
+        "clientID": 79,
+        "surveyDate": "2016-03-11",
+        "responses": [
+            {
+                "questionID": "Q1",
+                "questionText": "How satisfied are you with the project outcome?",
+                "responseType": "scale",
+                "responseValue": "5"
+            },
+            {
+                "questionID": "Q2",
+                "questionText": "Please rate the communication from our team.",
+                "responseType": "scale",
+                "responseValue": "3"
+            },
+            {
+                "questionID": "Q3",
+                "questionText": "What did you like best about working with us?",
+                "responseType": "text",
+                "responseValue": "We really appreciated the expertise and personalized approach you brought to our project, which ultimately helped us achieve our goals. Your dedication and thoroughness were evident throughout the process."
+            },
+            {
+                "questionID": "Q4",
+                "questionText": "What could we improve on?",
+                "responseType": "text",
+                "responseValue": "We appreciated the expertise and quality of work you brought to the project, but we would have liked clearer communication throughout the process to ensure we were aligned and informed at every step."
+            }
+        ],
+        "overallSatisfaction": "4.0"
+    },
+    {
+        "responseID": "17989",
+        "projectID": 45,
+        "clientID": 10,
+        "surveyDate": "2016-08-18",
+        "responses": [
+            {
+                "questionID": "Q1",
+                "questionText": "How satisfied are you with the project outcome?",
+                "responseType": "scale",
+                "responseValue": "5"
+            },
+            {
+                "questionID": "Q2",
+                "questionText": "Please rate the communication from our team.",
+                "responseType": "scale",
+                "responseValue": "4"
+            },
+            {
+                "questionID": "Q3",
+                "questionText": "What did you like best about working with us?",
+                "responseType": "text",
+                "responseValue": "We were incredibly impressed with the outstanding quality of work you delivered, and your dedication to our project's success was truly evident. Your expertise and guidance helped us achieve our goals, and we're thrilled with the final outcome!"
+            },
+            {
+                "questionID": "Q4",
+                "questionText": "What could we improve on?",
+                "responseType": "text",
+                "responseValue": "We're thrilled with the outstanding results and would love to see even more regular check-ins to maintain that level of transparency throughout the project, which would have earned a perfect score on communication!"
+            }
+        ],
+        "overallSatisfaction": "4.5"
+    },
+    {
+        "responseID": "72493",
+        "projectID": 46,
+        "clientID": 134,
+        "surveyDate": "2016-08-23",
+        "responses": [
+            {
+                "questionID": "Q1",
+                "questionText": "How satisfied are you with the project outcome?",
+                "responseType": "scale",
+                "responseValue": "5"
+            },
+            {
+                "questionID": "Q2",
+                "questionText": "Please rate the communication from our team.",
+                "responseType": "scale",
+                "responseValue": "2"
+            },
+            {
+                "questionID": "Q3",
+                "questionText": "What did you like best about working with us?",
+                "responseType": "text",
+                "responseValue": "We appreciate your high satisfaction score, and we're thrilled that our team's expertise and solutions met your expectations. However, we're sorry to hear that our communication fell short, resulting in a lower score. We value your feedback and would like to make it right, please let us know how we can improve our communication to better serve you in the future."
+            },
+            {
+                "questionID": "Q4",
+                "questionText": "What could we improve on?",
+                "responseType": "text",
+                "responseValue": "We apologize for any inconvenience our communication fell short, scoring only 2 out of 5. We're willing to revisit the project and provide additional support to ensure we met your expectations."
+            }
+        ],
+        "overallSatisfaction": "3.5"
+    },
+    {
+        "responseID": "17455",
+        "projectID": 47,
+        "clientID": 320,
+        "surveyDate": "2016-03-31",
+        "responses": [
+            {
+                "questionID": "Q1",
+                "questionText": "How satisfied are you with the project outcome?",
+                "responseType": "scale",
+                "responseValue": "4"
+            },
+            {
+                "questionID": "Q2",
+                "questionText": "Please rate the communication from our team.",
+                "responseType": "scale",
+                "responseValue": "5"
+            },
+            {
+                "questionID": "Q3",
+                "questionText": "What did you like best about working with us?",
+                "responseType": "text",
+                "responseValue": "Your team's prompt communication and transparency throughout the project kept us well-informed and allowed us to make informed decisions. What specific strategies did you use to ensure our needs were met and our concerns addressed?"
+            },
+            {
+                "questionID": "Q4",
+                "questionText": "What could we improve on?",
+                "responseType": "text",
+                "responseValue": "How did you manage to deliver such high satisfaction scores, yet we felt like we were in the dark for a few key decisions?"
+            }
+        ],
+        "overallSatisfaction": "4.5"
+    },
+    {
+        "responseID": "18981",
+        "projectID": 48,
+        "clientID": 198,
+        "surveyDate": "2016-12-01",
+        "responses": [
+            {
+                "questionID": "Q1",
+                "questionText": "How satisfied are you with the project outcome?",
+                "responseType": "scale",
+                "responseValue": "5"
+            },
+            {
+                "questionID": "Q2",
+                "questionText": "Please rate the communication from our team.",
+                "responseType": "scale",
+                "responseValue": "2"
+            },
+            {
+                "questionID": "Q3",
+                "questionText": "What did you like best about working with us?",
+                "responseType": "text",
+                "responseValue": "You clearly demonstrated expertise in the field, but I'm still trying to understand why the final product was completed so quickly - did you face any unusual challenges during the project that impacted the timeline?"
+            },
+            {
+                "questionID": "Q4",
+                "questionText": "What could we improve on?",
+                "responseType": "text",
+                "responseValue": "I'm curious to know, how did you find the communication channels used in this project, despite the low score of 2? What specific aspects of communication did you feel were lacking?"
+            }
+        ],
+        "overallSatisfaction": "3.5"
+    },
+    {
+        "responseID": "62923",
+        "projectID": 49,
+        "clientID": 95,
+        "surveyDate": "2016-02-01",
+        "responses": [
+            {
+                "questionID": "Q1",
+                "questionText": "How satisfied are you with the project outcome?",
+                "responseType": "scale",
+                "responseValue": "4"
+            },
+            {
+                "questionID": "Q2",
+                "questionText": "Please rate the communication from our team.",
+                "responseType": "scale",
+                "responseValue": "4"
+            },
+            {
+                "questionID": "Q3",
+                "questionText": "What did you like best about working with us?",
+                "responseType": "text",
+                "responseValue": "We loved how you expertly navigated our chaos and delivered a project that made our stakeholders go from'meh' to 'wow' - all while keeping us entertained with your witty banter and excellent communication skills\" (Score: 4/4 for satisfaction)"
+            },
+            {
+                "questionID": "Q4",
+                "questionText": "What could we improve on?",
+                "responseType": "text",
+                "responseValue": "Other than being absolutely delighted with the results, we're struggling to think of anything... maybe just a side of extra coffee to fuel those brilliant minds?"
+            }
+        ],
+        "overallSatisfaction": "4.0"
+    },
+    {
+        "responseID": "85880",
+        "projectID": 50,
+        "clientID": 334,
+        "surveyDate": "2015-12-03",
+        "responses": [
+            {
+                "questionID": "Q1",
+                "questionText": "How satisfied are you with the project outcome?",
+                "responseType": "scale",
+                "responseValue": "3"
+            },
+            {
+                "questionID": "Q2",
+                "questionText": "Please rate the communication from our team.",
+                "responseType": "scale",
+                "responseValue": "5"
+            },
+            {
+                "questionID": "Q3",
+                "questionText": "What did you like best about working with us?",
+                "responseType": "text",
+                "responseValue": "Wow, we loved the way you made our problems disappear like magic (okay, maybe not magic, but you guys definitely made them disappear quickly and efficiently) and the constant updates we received - it was like having our own personal 'consultant fairy' looking out for us!"
+            },
+            {
+                "questionID": "Q4",
+                "questionText": "What could we improve on?",
+                "responseType": "text",
+                "responseValue": "Well, we loved the results, but it took a few 'creative' detours along the way \u2013 so, communication clarity would be a '5' from us if you could keep us on the straight and narrow next time\" (Score: 5 for Communication)."
+            }
+        ],
+        "overallSatisfaction": "4.0"
+    },
+    {
+        "responseID": "96163",
+        "projectID": 52,
+        "clientID": 103,
+        "surveyDate": "2016-06-30",
+        "responses": [
+            {
+                "questionID": "Q1",
+                "questionText": "How satisfied are you with the project outcome?",
+                "responseType": "scale",
+                "responseValue": "4"
+            },
+            {
+                "questionID": "Q2",
+                "questionText": "Please rate the communication from our team.",
+                "responseType": "scale",
+                "responseValue": "4"
+            },
+            {
+                "questionID": "Q3",
+                "questionText": "What did you like best about working with us?",
+                "responseType": "text",
+                "responseValue": "We appreciated the thoughtful and collaborative approach your team took to understand our business needs, resulting in a tailored solution that truly addressed our challenges."
+            },
+            {
+                "questionID": "Q4",
+                "questionText": "What could we improve on?",
+                "responseType": "text",
+                "responseValue": "We appreciated the high level of expertise and thoroughness in your work, but could benefit from more proactive and timely feedback throughout the project to further enhance our overall experience."
+            }
+        ],
+        "overallSatisfaction": "4.0"
+    },
+    {
+        "responseID": "36772",
+        "projectID": 53,
+        "clientID": 302,
+        "surveyDate": "2016-04-12",
+        "responses": [
+            {
+                "questionID": "Q1",
+                "questionText": "How satisfied are you with the project outcome?",
+                "responseType": "scale",
+                "responseValue": "4"
+            },
+            {
+                "questionID": "Q2",
+                "questionText": "Please rate the communication from our team.",
+                "responseType": "scale",
+                "responseValue": "4"
+            },
+            {
+                "questionID": "Q3",
+                "questionText": "What did you like best about working with us?",
+                "responseType": "text",
+                "responseValue": "We appreciated the professionalism and timeliness of your team, but we're still waiting for some lingering questions to be fully addressed."
+            },
+            {
+                "questionID": "Q4",
+                "questionText": "What could we improve on?",
+                "responseType": "text",
+                "responseValue": "While we're satisfied with the overall outcome, we do feel that a more proactive and detailed communication strategy would have alleviated some of the uncertainty and speculation that arose during the project."
+            }
+        ],
+        "overallSatisfaction": "4.0"
+    },
+    {
+        "responseID": "61876",
+        "projectID": 54,
+        "clientID": 246,
+        "surveyDate": "2016-06-01",
+        "responses": [
+            {
+                "questionID": "Q1",
+                "questionText": "How satisfied are you with the project outcome?",
+                "responseType": "scale",
+                "responseValue": "4"
+            },
+            {
+                "questionID": "Q2",
+                "questionText": "Please rate the communication from our team.",
+                "responseType": "scale",
+                "responseValue": "4"
+            },
+            {
+                "questionID": "Q3",
+                "questionText": "What did you like best about working with us?",
+                "responseType": "text",
+                "responseValue": "While we appreciate the satisfactory outcome, we can't help but wonder if the final product was a direct result of the communication issues we experienced, which were often delayed and unclear. Nevertheless, the end result was decent, so we'll take it."
+            },
+            {
+                "questionID": "Q4",
+                "questionText": "What could we improve on?",
+                "responseType": "text",
+                "responseValue": "While overall we're satisfied with the outcome, we do think some specific recommendations could have been more actionable and concrete, and communication could have been more proactive and timely to ensure our needs were met throughout the project."
+            }
+        ],
+        "overallSatisfaction": "4.0"
+    },
+    {
+        "responseID": "51441",
+        "projectID": 55,
+        "clientID": 345,
+        "surveyDate": "2016-01-13",
+        "responses": [
+            {
+                "questionID": "Q1",
+                "questionText": "How satisfied are you with the project outcome?",
+                "responseType": "scale",
+                "responseValue": "3"
+            },
+            {
+                "questionID": "Q2",
+                "questionText": "Please rate the communication from our team.",
+                "responseType": "scale",
+                "responseValue": "4"
+            },
+            {
+                "questionID": "Q3",
+                "questionText": "What did you like best about working with us?",
+                "responseType": "text",
+                "responseValue": "We truly appreciated the expertise and professionalism you brought to the table, which allowed us to overcome our challenges and achieve our goals. Your guidance and support were a refreshing reminder of the good old days when consulting was truly about partnership and delivering results."
+            },
+            {
+                "questionID": "Q4",
+                "questionText": "What could we improve on?",
+                "responseType": "text",
+                "responseValue": "The good old days! We were thrilled with the project outcome, and your team's dedication to delivering it on time was a highlight. While we were more than satisfied with the final product, we might have benefited from a bit more regular progress updates to keep us fully informed throughout the project."
+            }
+        ],
+        "overallSatisfaction": "3.5"
+    },
+    {
+        "responseID": "70068",
+        "projectID": 56,
+        "clientID": 188,
+        "surveyDate": "2016-10-27",
+        "responses": [
+            {
+                "questionID": "Q1",
+                "questionText": "How satisfied are you with the project outcome?",
+                "responseType": "scale",
+                "responseValue": "5"
+            },
+            {
+                "questionID": "Q2",
+                "questionText": "Please rate the communication from our team.",
+                "responseType": "scale",
+                "responseValue": "5"
+            },
+            {
+                "questionID": "Q3",
+                "questionText": "What did you like best about working with us?",
+                "responseType": "text",
+                "responseValue": "We were extremely pleased with the exceptional quality of work delivered by your team, which exceeded our expectations in every aspect, resulting in a highly satisfactory outcome."
+            },
+            {
+                "questionID": "Q4",
+                "questionText": "What could we improve on?",
+                "responseType": "text",
+                "responseValue": "We are extremely satisfied with the exceptional quality of work and seamless communication, but we would suggest refining the project's deliverables to further align with our specific business requirements."
+            }
+        ],
+        "overallSatisfaction": "5.0"
+    },
+    {
+        "responseID": "19602",
+        "projectID": 57,
+        "clientID": 65,
+        "surveyDate": "2016-02-25",
+        "responses": [
+            {
+                "questionID": "Q1",
+                "questionText": "How satisfied are you with the project outcome?",
+                "responseType": "scale",
+                "responseValue": "4"
+            },
+            {
+                "questionID": "Q2",
+                "questionText": "Please rate the communication from our team.",
+                "responseType": "scale",
+                "responseValue": "4"
+            },
+            {
+                "questionID": "Q3",
+                "questionText": "What did you like best about working with us?",
+                "responseType": "text",
+                "responseValue": "We appreciated the personalized attention and tailored solutions you provided, which significantly impacted our business operations and overall satisfaction with the project."
+            },
+            {
+                "questionID": "Q4",
+                "questionText": "What could we improve on?",
+                "responseType": "text",
+                "responseValue": "We appreciate the excellent work and communication throughout the project, and would love to see even more innovative solutions and regular progress updates to make it truly exceptional."
+            }
+        ],
+        "overallSatisfaction": "4.0"
+    },
+    {
+        "responseID": "55745",
+        "projectID": 58,
+        "clientID": 283,
+        "surveyDate": "2016-08-29",
+        "responses": [
+            {
+                "questionID": "Q1",
+                "questionText": "How satisfied are you with the project outcome?",
+                "responseType": "scale",
+                "responseValue": "4"
+            },
+            {
+                "questionID": "Q2",
+                "questionText": "Please rate the communication from our team.",
+                "responseType": "scale",
+                "responseValue": "4"
+            },
+            {
+                "questionID": "Q3",
+                "questionText": "What did you like best about working with us?",
+                "responseType": "text",
+                "responseValue": "We appreciated the consultant's exceptional communication skills and prompt responses, which ensured a seamless collaboration and ultimately satisfied our project goals."
+            },
+            {
+                "questionID": "Q4",
+                "questionText": "What could we improve on?",
+                "responseType": "text",
+                "responseValue": "We were extremely satisfied with the project outcome and communication, but minor improvements could be made to increase transparency on task progress updates."
+            }
+        ],
+        "overallSatisfaction": "4.0"
+    },
+    {
+        "responseID": "47353",
+        "projectID": 59,
+        "clientID": 31,
         "surveyDate": "2016-04-28",
         "responses": [
             {
@@ -1209,55 +1902,55 @@
                 "questionID": "Q3",
                 "questionText": "What did you like best about working with us?",
                 "responseType": "text",
-                "responseValue": "We really appreciated the way you understood our unique needs and tailored your approach to ensure a seamless implementation, which greatly contributed to our exceptional satisfaction with the project."
+                "responseValue": "While we're satisfied with the final product, it's hard to pinpoint a specific standout aspect, as our concerns about timeline flexibility and project scope were consistently addressed in a satisfactory manner.\" (Satisfaction score: 5, Communication score: 5)"
             },
             {
                 "questionID": "Q4",
                 "questionText": "What could we improve on?",
                 "responseType": "text",
-                "responseValue": "We were thoroughly impressed with the professionalism and expertise shown throughout the entire project, and would only suggest that the team consider providing more detailed, written summaries of their findings and recommendations to complement the verbal presentations, which would have further enhanced our understanding and buy-in."
+                "responseValue": "While we were generally satisfied with the project's outcome and communication, we're still unsure if the proposed solutions were the most effective ones and wonder if there's room for more innovative thinking."
             }
         ],
         "overallSatisfaction": "5.0"
     },
     {
-        "responseID": "22224",
-        "projectID": 40,
-        "clientID": 320,
-        "surveyDate": "2016-11-08",
+        "responseID": "90173",
+        "projectID": 61,
+        "clientID": 151,
+        "surveyDate": "2016-04-12",
         "responses": [
             {
                 "questionID": "Q1",
                 "questionText": "How satisfied are you with the project outcome?",
                 "responseType": "scale",
-                "responseValue": "4"
+                "responseValue": "3"
             },
             {
                 "questionID": "Q2",
                 "questionText": "Please rate the communication from our team.",
                 "responseType": "scale",
-                "responseValue": "4"
+                "responseValue": "5"
             },
             {
                 "questionID": "Q3",
                 "questionText": "What did you like best about working with us?",
                 "responseType": "text",
-                "responseValue": "We appreciated the exceptional professionalism and expertise demonstrated by your team throughout the project, which resulted in a highly satisfactory outcome that exceeded our expectations."
+                "responseValue": "We appreciated the dedication and professionalism you brought to the project, and how you ensured our concerns were heard and addressed in a timely manner."
             },
             {
                 "questionID": "Q4",
                 "questionText": "What could we improve on?",
                 "responseType": "text",
-                "responseValue": "Based on our satisfaction score of 4 out of 5, we are pleased with the overall quality of the consulting project; however, to further elevate the experience, we suggest refining the reporting format to make it more concise and visually appealing, potentially incorporating charts and tables to facilitate easier data analysis and presentation."
+                "responseValue": "While we were satisfied with the overall outcome, we felt that communication could have been more regular and frequent throughout the project to keep us better informed of progress and timelines."
             }
         ],
         "overallSatisfaction": "4.0"
     },
     {
-        "responseID": "63269",
-        "projectID": 41,
-        "clientID": 29,
-        "surveyDate": "2016-05-04",
+        "responseID": "11025",
+        "projectID": 63,
+        "clientID": 15,
+        "surveyDate": "2016-11-10",
         "responses": [
             {
                 "questionID": "Q1",
@@ -1275,22 +1968,220 @@
                 "questionID": "Q3",
                 "questionText": "What did you like best about working with us?",
                 "responseType": "text",
-                "responseValue": "Your team's exceptional communication skills really stood out - how did you manage to keep us so well-informed throughout the project?"
+                "responseValue": "We were thoroughly impressed with the exceptional quality of work and prompt communication throughout the project, which resulted in a seamless and timely delivery that exceeded our expectations!"
             },
             {
                 "questionID": "Q4",
                 "questionText": "What could we improve on?",
                 "responseType": "text",
-                "responseValue": "Wow, your team really delivered on the project's objectives and exceeded our expectations! Can you walk me through what factors contributed to the exceptional satisfaction score? Was it the specific solutions you proposed, the project management approach, or something else entirely?"
+                "responseValue": "We're thrilled with the exceptional service and communication throughout the project, but to take it to the next level, we'd appreciate even more proactive initiative to anticipate and address our needs."
             }
         ],
         "overallSatisfaction": "5.0"
     },
     {
-        "responseID": "17685",
-        "projectID": 43,
-        "clientID": 61,
-        "surveyDate": "2016-03-03",
+        "responseID": "27601",
+        "projectID": 64,
+        "clientID": 154,
+        "surveyDate": "2016-11-03",
+        "responses": [
+            {
+                "questionID": "Q1",
+                "questionText": "How satisfied are you with the project outcome?",
+                "responseType": "scale",
+                "responseValue": "4"
+            },
+            {
+                "questionID": "Q2",
+                "questionText": "Please rate the communication from our team.",
+                "responseType": "scale",
+                "responseValue": "4"
+            },
+            {
+                "questionID": "Q3",
+                "questionText": "What did you like best about working with us?",
+                "responseType": "text",
+                "responseValue": "We truly appreciated your collaborative approach and thoughtful insights, which significantly contributed to the success of our project and exceeded our expectations."
+            },
+            {
+                "questionID": "Q4",
+                "questionText": "What could we improve on?",
+                "responseType": "text",
+                "responseValue": "We're extremely satisfied with the project's outcome and communication throughout, but perhaps exploring more innovative solutions to meet our evolving needs could take the project to the next level."
+            }
+        ],
+        "overallSatisfaction": "4.0"
+    },
+    {
+        "responseID": "30374",
+        "projectID": 66,
+        "clientID": 85,
+        "surveyDate": "2016-07-20",
+        "responses": [
+            {
+                "questionID": "Q1",
+                "questionText": "How satisfied are you with the project outcome?",
+                "responseType": "scale",
+                "responseValue": "3"
+            },
+            {
+                "questionID": "Q2",
+                "questionText": "Please rate the communication from our team.",
+                "responseType": "scale",
+                "responseValue": "5"
+            },
+            {
+                "questionID": "Q3",
+                "questionText": "What did you like best about working with us?",
+                "responseType": "text",
+                "responseValue": "We appreciated the high level of communication throughout the project, which kept us informed and engaged every step of the way. Your consistent updates and proactive approach helped us feel confident and motivated to reach our goals!"
+            },
+            {
+                "questionID": "Q4",
+                "questionText": "What could we improve on?",
+                "responseType": "text",
+                "responseValue": "Your exceptional communication skills and expertise made our project a huge success! However, we'd love to see even more innovative solutions from you to take our project to the next level. Keep up the fantastic work!"
+            }
+        ],
+        "overallSatisfaction": "4.0"
+    },
+    {
+        "responseID": "36685",
+        "projectID": 67,
+        "clientID": 97,
+        "surveyDate": "2016-05-16",
+        "responses": [
+            {
+                "questionID": "Q1",
+                "questionText": "How satisfied are you with the project outcome?",
+                "responseType": "scale",
+                "responseValue": "3"
+            },
+            {
+                "questionID": "Q2",
+                "questionText": "Please rate the communication from our team.",
+                "responseType": "scale",
+                "responseValue": "4"
+            },
+            {
+                "questionID": "Q3",
+                "questionText": "What did you like best about working with us?",
+                "responseType": "text",
+                "responseValue": "We appreciated the proactive communication and regular updates from your team, which helped us stay informed and on the same page throughout the project. The outcome exceeded our expectations, and we're thrilled with the results!"
+            },
+            {
+                "questionID": "Q4",
+                "questionText": "What could we improve on?",
+                "responseType": "text",
+                "responseValue": "We're thrilled with the outcome, and while communication was exceptional, we'd love to see even more transparency and frequent updates to feel even more connected throughout the process."
+            }
+        ],
+        "overallSatisfaction": "3.5"
+    },
+    {
+        "responseID": "74032",
+        "projectID": 70,
+        "clientID": 72,
+        "surveyDate": "2016-12-02",
+        "responses": [
+            {
+                "questionID": "Q1",
+                "questionText": "How satisfied are you with the project outcome?",
+                "responseType": "scale",
+                "responseValue": "4"
+            },
+            {
+                "questionID": "Q2",
+                "questionText": "Please rate the communication from our team.",
+                "responseType": "scale",
+                "responseValue": "5"
+            },
+            {
+                "questionID": "Q3",
+                "questionText": "What did you like best about working with us?",
+                "responseType": "text",
+                "responseValue": "We appreciated your exceptional communication, keeping us informed every step of the way, and your dedication to ensuring our project was completed to a high standard, resulting in an outstanding 5-star communication score - thank you!"
+            },
+            {
+                "questionID": "Q4",
+                "questionText": "What could we improve on?",
+                "responseType": "text",
+                "responseValue": "We're extremely satisfied with the project outcome, but to take it to the next level, we would appreciate more proactive updates and even earlier iteration feedback to further optimize the final product."
+            }
+        ],
+        "overallSatisfaction": "4.5"
+    },
+    {
+        "responseID": "22097",
+        "projectID": 71,
+        "clientID": 332,
+        "surveyDate": "2016-08-26",
+        "responses": [
+            {
+                "questionID": "Q1",
+                "questionText": "How satisfied are you with the project outcome?",
+                "responseType": "scale",
+                "responseValue": "3"
+            },
+            {
+                "questionID": "Q2",
+                "questionText": "Please rate the communication from our team.",
+                "responseType": "scale",
+                "responseValue": "5"
+            },
+            {
+                "questionID": "Q3",
+                "questionText": "What did you like best about working with us?",
+                "responseType": "text",
+                "responseValue": "We really appreciated the great communication throughout the project - it was super helpful to stay informed and feel like our needs were being heard!\" (Satisfaction: 3, Communication: 5)"
+            },
+            {
+                "questionID": "Q4",
+                "questionText": "What could we improve on?",
+                "responseType": "text",
+                "responseValue": "We were really happy with the end result, but maybe a bit more proactive communication from the team would've made the process even smoother!"
+            }
+        ],
+        "overallSatisfaction": "4.0"
+    },
+    {
+        "responseID": "10464",
+        "projectID": 72,
+        "clientID": 151,
+        "surveyDate": "2016-08-27",
+        "responses": [
+            {
+                "questionID": "Q1",
+                "questionText": "How satisfied are you with the project outcome?",
+                "responseType": "scale",
+                "responseValue": "4"
+            },
+            {
+                "questionID": "Q2",
+                "questionText": "Please rate the communication from our team.",
+                "responseType": "scale",
+                "responseValue": "5"
+            },
+            {
+                "questionID": "Q3",
+                "questionText": "What did you like best about working with us?",
+                "responseType": "text",
+                "responseValue": "We really appreciated the seamless communication and the way you kept us informed throughout the project - it made all the difference in getting the job done to our satisfaction!"
+            },
+            {
+                "questionID": "Q4",
+                "questionText": "What could we improve on?",
+                "responseType": "text",
+                "responseValue": "Overall, we're super happy with the project, but maybe one area for improvement could be adding a bit more context to the reports, it would really help us grasp the data better!"
+            }
+        ],
+        "overallSatisfaction": "4.5"
+    },
+    {
+        "responseID": "31178",
+        "projectID": 75,
+        "clientID": 335,
+        "surveyDate": "2016-11-22",
         "responses": [
             {
                 "questionID": "Q1",
@@ -1308,28 +2199,127 @@
                 "questionID": "Q3",
                 "questionText": "What did you like best about working with us?",
                 "responseType": "text",
-                "responseValue": "We were extremely pleased with the expertise and professionalism displayed by the consulting team, which led to a highly satisfactory outcome that met our expectations and delivered tangible results."
+                "responseValue": "While we appreciate the effort, we were expecting more tangible results considering the scope and timeline of the project. Despite some miscommunications, the consultant's expertise and attention to detail were a highlight."
             },
             {
                 "questionID": "Q4",
                 "questionText": "What could we improve on?",
                 "responseType": "text",
-                "responseValue": "Overall, we were pleased with the project's outcome, but we felt that the communication could have been more proactive and transparent at times, which is why we gave it a score of 3. However, the end result was well worth the wait, and we're thrilled with the final product."
+                "responseValue": "While we're generally satisfied with the project's outcome, we'd like to see more proactive communication from your team to address our concerns and ensure a smoother collaboration process."
             }
         ],
         "overallSatisfaction": "3.5"
     },
     {
-        "responseID": "44760",
-        "projectID": 44,
-        "clientID": 349,
-        "surveyDate": "2016-04-08",
+        "responseID": "83519",
+        "projectID": 77,
+        "clientID": 163,
+        "surveyDate": "2016-08-10",
         "responses": [
             {
                 "questionID": "Q1",
                 "questionText": "How satisfied are you with the project outcome?",
                 "responseType": "scale",
-                "responseValue": "3"
+                "responseValue": "5"
+            },
+            {
+                "questionID": "Q2",
+                "questionText": "Please rate the communication from our team.",
+                "responseType": "scale",
+                "responseValue": "4"
+            },
+            {
+                "questionID": "Q3",
+                "questionText": "What did you like best about working with us?",
+                "responseType": "text",
+                "responseValue": "We appreciated the expertise and innovative solutions you brought to our project, which significantly improved our operations and exceeded our expectations."
+            },
+            {
+                "questionID": "Q4",
+                "questionText": "What could we improve on?",
+                "responseType": "text",
+                "responseValue": "We appreciated the expert guidance and recommendations, but would have benefited from more regular progress updates to stay fully informed throughout the project."
+            }
+        ],
+        "overallSatisfaction": "4.5"
+    },
+    {
+        "responseID": "81511",
+        "projectID": 79,
+        "clientID": 199,
+        "surveyDate": "2016-11-24",
+        "responses": [
+            {
+                "questionID": "Q1",
+                "questionText": "How satisfied are you with the project outcome?",
+                "responseType": "scale",
+                "responseValue": "1"
+            },
+            {
+                "questionID": "Q2",
+                "questionText": "Please rate the communication from our team.",
+                "responseType": "scale",
+                "responseValue": "2"
+            },
+            {
+                "questionID": "Q3",
+                "questionText": "What did you like best about working with us?",
+                "responseType": "text",
+                "responseValue": "We appreciated your prompt responses to our queries, which ensured seamless communication throughout the project."
+            },
+            {
+                "questionID": "Q4",
+                "questionText": "What could we improve on?",
+                "responseType": "text",
+                "responseValue": "We were not entirely satisfied with the level of communication, scoring 2 out of 5."
+            }
+        ],
+        "overallSatisfaction": "1.5"
+    },
+    {
+        "responseID": "29410",
+        "projectID": 82,
+        "clientID": 322,
+        "surveyDate": "2016-07-22",
+        "responses": [
+            {
+                "questionID": "Q1",
+                "questionText": "How satisfied are you with the project outcome?",
+                "responseType": "scale",
+                "responseValue": "1"
+            },
+            {
+                "questionID": "Q2",
+                "questionText": "Please rate the communication from our team.",
+                "responseType": "scale",
+                "responseValue": "4"
+            },
+            {
+                "questionID": "Q3",
+                "questionText": "What did you like best about working with us?",
+                "responseType": "text",
+                "responseValue": "We truly appreciated your dedication to our project, and your effective communication throughout the process helped us stay informed and aligned with your progress, ultimately resulting in a successful outcome."
+            },
+            {
+                "questionID": "Q4",
+                "questionText": "What could we improve on?",
+                "responseType": "text",
+                "responseValue": "Wow, we're thrilled with the results! However, to take our collaboration to the next level, we'd love to see even more frequent check-ins and updates, perhaps through regular progress reports, to keep us even better informed throughout the project."
+            }
+        ],
+        "overallSatisfaction": "2.5"
+    },
+    {
+        "responseID": "15229",
+        "projectID": 83,
+        "clientID": 135,
+        "surveyDate": "2016-05-31",
+        "responses": [
+            {
+                "questionID": "Q1",
+                "questionText": "How satisfied are you with the project outcome?",
+                "responseType": "scale",
+                "responseValue": "4"
             },
             {
                 "questionID": "Q2",
@@ -1341,88 +2331,22 @@
                 "questionID": "Q3",
                 "questionText": "What did you like best about working with us?",
                 "responseType": "text",
-                "responseValue": "While we were somewhat pleased with the quality of the deliverables, we were somewhat underwhelmed by the communication aspect of the project, scoring a 1 out of 5, we did appreciate the expertise and professionalism we received in terms of the actual consulting services, which earned a score of 3 out of 5 in terms of overall satisfaction."
+                "responseValue": "While we appreciate the thoroughness of the final report, we can't help but wonder if a more streamlined approach to communication could have reduced the frustration and misunderstandings that arose during the project."
             },
             {
                 "questionID": "Q4",
                 "questionText": "What could we improve on?",
                 "responseType": "text",
-                "responseValue": "While we were largely satisfied with the outcome of the project, we feel that the communication aspect could be enhanced, particularly in regards to timely updates and clear explanations of the reasoning behind certain decisions, which would have likely bumped up our overall satisfaction score."
+                "responseValue": "We appreciate the effort, but we're left wondering if some key expectations were misaligned, and clearer communication would have alleviated some of our concerns."
             }
         ],
-        "overallSatisfaction": "2.0"
+        "overallSatisfaction": "2.5"
     },
     {
-        "responseID": "65444",
-        "projectID": 49,
-        "clientID": 135,
-        "surveyDate": "2016-05-03",
-        "responses": [
-            {
-                "questionID": "Q1",
-                "questionText": "How satisfied are you with the project outcome?",
-                "responseType": "scale",
-                "responseValue": "5"
-            },
-            {
-                "questionID": "Q2",
-                "questionText": "Please rate the communication from our team.",
-                "responseType": "scale",
-                "responseValue": "5"
-            },
-            {
-                "questionID": "Q3",
-                "questionText": "What did you like best about working with us?",
-                "responseType": "text",
-                "responseValue": "I really appreciated how well you understood our needs and concerns from the very beginning, it was a huge relief to work with a team that truly got us and was able to deliver a solution that exceeded our expectations. Your exceptional communication skills kept us informed every step of the way, and your empathetic approach to addressing our concerns made us feel heard and valued throughout the entire process. Your professionalism and expertise resulted in a seamless collaboration that left us feeling confident and satisfied with the outcome."
-            },
-            {
-                "questionID": "Q4",
-                "questionText": "What could we improve on?",
-                "responseType": "text",
-                "responseValue": "To be honest, we were thoroughly impressed with the exceptional quality of work and seamless communication throughout the project. You exceeded our expectations in every way, and we can't think of anything significant to improve upon. Your attention to detail, expertise, and professionalism made the entire experience a true delight.\" (Satisfaction: 5/5, Communication: 5/5)"
-            }
-        ],
-        "overallSatisfaction": "5.0"
-    },
-    {
-        "responseID": "96752",
-        "projectID": 50,
-        "clientID": 72,
-        "surveyDate": "2016-05-26",
-        "responses": [
-            {
-                "questionID": "Q1",
-                "questionText": "How satisfied are you with the project outcome?",
-                "responseType": "scale",
-                "responseValue": "4"
-            },
-            {
-                "questionID": "Q2",
-                "questionText": "Please rate the communication from our team.",
-                "responseType": "scale",
-                "responseValue": "5"
-            },
-            {
-                "questionID": "Q3",
-                "questionText": "What did you like best about working with us?",
-                "responseType": "text",
-                "responseValue": "We really appreciated the excellent communication you provided throughout the project, it made it seamless for us to stay informed and make decisions. Your professionalism and attention to detail also gave us the confidence that our project was in good hands, and the end result exceeded our expectations!"
-            },
-            {
-                "questionID": "Q4",
-                "questionText": "What could we improve on?",
-                "responseType": "text",
-                "responseValue": "We're absolutely thrilled with the outcome of our project and the exceptional communication we received throughout the process - your expertise and transparency were top-notch! As we look to the future, we're excited to see how we can continue to grow and improve together."
-            }
-        ],
-        "overallSatisfaction": "4.5"
-    },
-    {
-        "responseID": "38534",
-        "projectID": 51,
-        "clientID": 196,
-        "surveyDate": "2016-10-27",
+        "responseID": "97416",
+        "projectID": 84,
+        "clientID": 201,
+        "surveyDate": "2016-12-12",
         "responses": [
             {
                 "questionID": "Q1",
@@ -1440,483 +2364,21 @@
                 "questionID": "Q3",
                 "questionText": "What did you like best about working with us?",
                 "responseType": "text",
-                "responseValue": "We really appreciated the exceptional guidance and expertise you provided throughout the project. Your team's attention to detail and ability to understand our needs resulted in a high-quality outcome that exceeded our expectations, which was reflected in our overall satisfaction score of 5."
+                "responseValue": "Hands down, it was the work itself - you guys delivered top-notch results! We're thrilled with the final product and our customers are loving it too. If only your communication had been as seamless as your expertise, we'd have been completely satisfied"
             },
             {
                 "questionID": "Q4",
                 "questionText": "What could we improve on?",
                 "responseType": "text",
-                "responseValue": "We really appreciate the great job you did on our project, and we're thrilled with the final results. One area we think could use some improvement is communication - at times, we felt a bit left in the dark about the progress and timeline. But overall, we're extremely satisfied with the outcome and would love to work with you again in the future."
+                "responseValue": "We loved the work, but it was like watching a movie with subtitles - we just wanted to fast forward to the final scene already! Communication was great, but maybe next time can we get the subtitles (ahem, regular updates)? 5/5 for the work itself, 3/5 for keeping us in the loop"
             }
         ],
         "overallSatisfaction": "4.0"
     },
     {
-        "responseID": "17989",
-        "projectID": 53,
-        "clientID": 251,
-        "surveyDate": "2016-02-24",
-        "responses": [
-            {
-                "questionID": "Q1",
-                "questionText": "How satisfied are you with the project outcome?",
-                "responseType": "scale",
-                "responseValue": "5"
-            },
-            {
-                "questionID": "Q2",
-                "questionText": "Please rate the communication from our team.",
-                "responseType": "scale",
-                "responseValue": "4"
-            },
-            {
-                "questionID": "Q3",
-                "questionText": "What did you like best about working with us?",
-                "responseType": "text",
-                "responseValue": "We were thoroughly impressed with the exceptional expertise and dedication you brought to our project, and the outstanding results you delivered, which exceeded our expectations and met our needs perfectly. Your professionalism and commitment to our success were palpable throughout the collaboration, and we're grateful for the significant value you added to our business."
-            },
-            {
-                "questionID": "Q4",
-                "questionText": "What could we improve on?",
-                "responseType": "text",
-                "responseValue": "I'm thrilled with the overall outcome of the project, and we're delighted with the expertise and dedication you brought to the table. While communication was excellent, there were a few moments where we'd have benefited from even more proactive updates - perhaps a slight adjustment in your communication strategy could take it to the next level!"
-            }
-        ],
-        "overallSatisfaction": "4.5"
-    },
-    {
-        "responseID": "72493",
-        "projectID": 58,
-        "clientID": 109,
-        "surveyDate": "2016-07-08",
-        "responses": [
-            {
-                "questionID": "Q1",
-                "questionText": "How satisfied are you with the project outcome?",
-                "responseType": "scale",
-                "responseValue": "5"
-            },
-            {
-                "questionID": "Q2",
-                "questionText": "Please rate the communication from our team.",
-                "responseType": "scale",
-                "responseValue": "2"
-            },
-            {
-                "questionID": "Q3",
-                "questionText": "What did you like best about working with us?",
-                "responseType": "text",
-                "responseValue": "We're truly sorry that our communication fell short of your expectations, which is reflected in your score of 2. However, we're grateful that you were satisfied with the overall outcome of the project, scoring it a 5. We value your feedback and would like to make amends by offering a follow-up meeting to discuss any concerns you may have had during the project and provide additional support to ensure we can improve our communication processes for future collaborations."
-            },
-            {
-                "questionID": "Q4",
-                "questionText": "What could we improve on?",
-                "responseType": "text",
-                "responseValue": "I want to start by apologizing for the disappointing communication experience we had during the project. While we were thrilled with the final result, we recognize that our communication channels were not as effective as they should have been, and we fell short of your expectations in this area. We would like to make amends by offering additional support and check-ins to ensure better collaboration in the future."
-            }
-        ],
-        "overallSatisfaction": "3.5"
-    },
-    {
-        "responseID": "17455",
-        "projectID": 63,
-        "clientID": 167,
-        "surveyDate": "2016-04-25",
-        "responses": [
-            {
-                "questionID": "Q1",
-                "questionText": "How satisfied are you with the project outcome?",
-                "responseType": "scale",
-                "responseValue": "4"
-            },
-            {
-                "questionID": "Q2",
-                "questionText": "Please rate the communication from our team.",
-                "responseType": "scale",
-                "responseValue": "5"
-            },
-            {
-                "questionID": "Q3",
-                "questionText": "What did you like best about working with us?",
-                "responseType": "text",
-                "responseValue": "We really appreciated the prompt and clear communication throughout the project - can you tell me more about what specific strategies you used to ensure we were always on the same page?"
-            },
-            {
-                "questionID": "Q4",
-                "questionText": "What could we improve on?",
-                "responseType": "text",
-                "responseValue": "I'm really impressed with the final report, but I'm curious - how did you come up with the specific recommendations for our marketing strategy, and could you walk me through the thought process behind each one?"
-            }
-        ],
-        "overallSatisfaction": "4.5"
-    },
-    {
-        "responseID": "18981",
-        "projectID": 64,
-        "clientID": 151,
-        "surveyDate": "2016-06-01",
-        "responses": [
-            {
-                "questionID": "Q1",
-                "questionText": "How satisfied are you with the project outcome?",
-                "responseType": "scale",
-                "responseValue": "5"
-            },
-            {
-                "questionID": "Q2",
-                "questionText": "Please rate the communication from our team.",
-                "responseType": "scale",
-                "responseValue": "2"
-            },
-            {
-                "questionID": "Q3",
-                "questionText": "What did you like best about working with us?",
-                "responseType": "text",
-                "responseValue": "We really appreciated the expertise and guidance you brought to the project, but what I'm curious about is, what did you think was the most valuable outcome or deliverable from our collaboration?"
-            },
-            {
-                "questionID": "Q4",
-                "questionText": "What could we improve on?",
-                "responseType": "text",
-                "responseValue": "I'm impressed with the final results of the project, but I'm a bit curious - what contributed to the communication score being a 2 out of 5? Was it due to a lack of regular updates, or did we not ask the right questions at the right time?"
-            }
-        ],
-        "overallSatisfaction": "3.5"
-    },
-    {
-        "responseID": "62923",
-        "projectID": 65,
-        "clientID": 280,
-        "surveyDate": "2016-11-21",
-        "responses": [
-            {
-                "questionID": "Q1",
-                "questionText": "How satisfied are you with the project outcome?",
-                "responseType": "scale",
-                "responseValue": "4"
-            },
-            {
-                "questionID": "Q2",
-                "questionText": "Please rate the communication from our team.",
-                "responseType": "scale",
-                "responseValue": "4"
-            },
-            {
-                "questionID": "Q3",
-                "questionText": "What did you like best about working with us?",
-                "responseType": "text",
-                "responseValue": "Where do we even start? We loved how you helped us transform our office from a hot mess to a slightly less hot mess, and your communication skills were top-notch - we never had to Google \"What does 'ping' mean in a professional context?\"... although, we did have to Google \"What's a ping?"
-            },
-            {
-                "questionID": "Q4",
-                "questionText": "What could we improve on?",
-                "responseType": "text",
-                "responseValue": "Just kidding, you guys are basically the superheroes of consulting! We're super stoked with the work you did, and we're pretty sure you must have been sipping coffee infused with unicorn tears to get it all done so smoothly. Seriously though, if I had to nitpick, maybe a slightly better use of memes in your reports would make us LOL even harder, but honestly, that's just us being silly. Thanks again for being an absolute dream team!"
-            }
-        ],
-        "overallSatisfaction": "4.0"
-    },
-    {
-        "responseID": "85880",
-        "projectID": 67,
-        "clientID": 262,
-        "surveyDate": "2016-10-03",
-        "responses": [
-            {
-                "questionID": "Q1",
-                "questionText": "How satisfied are you with the project outcome?",
-                "responseType": "scale",
-                "responseValue": "3"
-            },
-            {
-                "questionID": "Q2",
-                "questionText": "Please rate the communication from our team.",
-                "responseType": "scale",
-                "responseValue": "5"
-            },
-            {
-                "questionID": "Q3",
-                "questionText": "What did you like best about working with us?",
-                "responseType": "text",
-                "responseValue": "Wow, we're thrilled you asked! Despite a few minor missteps in communication (it's all about learning to dance to our unique brand of awkward email rhythms), we're stoked you loved working with us - and we're pretty sure it's because our quirky sense of humor and top-notch expertise made the project a wild ride"
-            },
-            {
-                "questionID": "Q4",
-                "questionText": "What could we improve on?",
-                "responseType": "text",
-                "responseValue": "Hey, we loved the results, but it was like trying to get blood from a stone sometimes \u2013 great communication would've been the 'antidote' to our frustration\" (Score: 3/5 for satisfaction, 5/5 for communication)."
-            }
-        ],
-        "overallSatisfaction": "4.0"
-    },
-    {
-        "responseID": "96163",
-        "projectID": 71,
-        "clientID": 253,
-        "surveyDate": "2016-03-11",
-        "responses": [
-            {
-                "questionID": "Q1",
-                "questionText": "How satisfied are you with the project outcome?",
-                "responseType": "scale",
-                "responseValue": "4"
-            },
-            {
-                "questionID": "Q2",
-                "questionText": "Please rate the communication from our team.",
-                "responseType": "scale",
-                "responseValue": "4"
-            },
-            {
-                "questionID": "Q3",
-                "questionText": "What did you like best about working with us?",
-                "responseType": "text",
-                "responseValue": "I was thoroughly impressed with the depth of understanding your team demonstrated about our business, and the thoughtful, actionable recommendations you provided ultimately led to significant improvements in our operations and increased customer satisfaction."
-            },
-            {
-                "questionID": "Q4",
-                "questionText": "What could we improve on?",
-                "responseType": "text",
-                "responseValue": "Overall, we're extremely satisfied with the outcome and the communication was seamless, but perhaps we could have benefited from a more detailed debrief on the project's impact and how we can leverage the findings to inform future strategic decisions."
-            }
-        ],
-        "overallSatisfaction": "4.0"
-    },
-    {
-        "responseID": "36772",
-        "projectID": 75,
-        "clientID": 181,
-        "surveyDate": "2016-11-30",
-        "responses": [
-            {
-                "questionID": "Q1",
-                "questionText": "How satisfied are you with the project outcome?",
-                "responseType": "scale",
-                "responseValue": "4"
-            },
-            {
-                "questionID": "Q2",
-                "questionText": "Please rate the communication from our team.",
-                "responseType": "scale",
-                "responseValue": "4"
-            },
-            {
-                "questionID": "Q3",
-                "questionText": "What did you like best about working with us?",
-                "responseType": "text",
-                "responseValue": "While we appreciate the high scores you've given us, I'm still not entirely convinced that our team's efforts fully met your expectations."
-            },
-            {
-                "questionID": "Q4",
-                "questionText": "What could we improve on?",
-                "responseType": "text",
-                "responseValue": "While we're generally satisfied with the work, we're not entirely convinced that the solutions proposed were the most optimal for our specific needs, and we'd like to see more clarity on the thought process behind the recommendations."
-            }
-        ],
-        "overallSatisfaction": "4.0"
-    },
-    {
-        "responseID": "61876",
-        "projectID": 76,
-        "clientID": 289,
-        "surveyDate": "2016-12-23",
-        "responses": [
-            {
-                "questionID": "Q1",
-                "questionText": "How satisfied are you with the project outcome?",
-                "responseType": "scale",
-                "responseValue": "4"
-            },
-            {
-                "questionID": "Q2",
-                "questionText": "Please rate the communication from our team.",
-                "responseType": "scale",
-                "responseValue": "4"
-            },
-            {
-                "questionID": "Q3",
-                "questionText": "What did you like best about working with us?",
-                "responseType": "text",
-                "responseValue": "I suppose the project's end result was satisfactory, but I'm still not entirely convinced that we received the optimal solution considering the scope and budget allocated."
-            },
-            {
-                "questionID": "Q4",
-                "questionText": "What could we improve on?",
-                "responseType": "text",
-                "responseValue": "While overall we were generally pleased with the project's outcome and the communication was decent, we still feel that some areas of the deliverable could have been more thoroughly vetted and refined before final submission, and perhaps a more proactive approach to addressing our concerns during the project would have been beneficial."
-            }
-        ],
-        "overallSatisfaction": "4.0"
-    },
-    {
-        "responseID": "51441",
-        "projectID": 80,
-        "clientID": 253,
-        "surveyDate": "2016-06-11",
-        "responses": [
-            {
-                "questionID": "Q1",
-                "questionText": "How satisfied are you with the project outcome?",
-                "responseType": "scale",
-                "responseValue": "3"
-            },
-            {
-                "questionID": "Q2",
-                "questionText": "Please rate the communication from our team.",
-                "responseType": "scale",
-                "responseValue": "4"
-            },
-            {
-                "questionID": "Q3",
-                "questionText": "What did you like best about working with us?",
-                "responseType": "text",
-                "responseValue": "We really enjoyed working with your team, and looking back, we're still fond of the way you effortlessly brought our vision to life. Your expert guidance and prompt communication were instrumental in making our project a huge success - we can't thank you enough for that!"
-            },
-            {
-                "questionID": "Q4",
-                "questionText": "What could we improve on?",
-                "responseType": "text",
-                "responseValue": "Wow, it's hard to believe it's been over a year since we worked together on our branding overhaul. I still get a warm fuzzy feeling thinking about how effortlessly you guided us through the process, despite our initial uncertainty. On reflection, I think we could have benefited from a more thorough exploration of our target audience demographics to inform our marketing strategies. Still, your expert advice and prompt communication kept us on track and ensured a fantastic outcome. We're thrilled with the final result and wouldn't hesitate"
-            }
-        ],
-        "overallSatisfaction": "3.5"
-    },
-    {
-        "responseID": "70068",
-        "projectID": 85,
-        "clientID": 24,
-        "surveyDate": "2016-12-22",
-        "responses": [
-            {
-                "questionID": "Q1",
-                "questionText": "How satisfied are you with the project outcome?",
-                "responseType": "scale",
-                "responseValue": "5"
-            },
-            {
-                "questionID": "Q2",
-                "questionText": "Please rate the communication from our team.",
-                "responseType": "scale",
-                "responseValue": "5"
-            },
-            {
-                "questionID": "Q3",
-                "questionText": "What did you like best about working with us?",
-                "responseType": "text",
-                "responseValue": "We were thoroughly impressed with the exceptional expertise and professionalism displayed by the consulting team, which resulted in a highly satisfactory outcome that exceeded our expectations, earning a perfect score of 5 for satisfaction."
-            },
-            {
-                "questionID": "Q4",
-                "questionText": "What could we improve on?",
-                "responseType": "text",
-                "responseValue": "We are extremely pleased with the overall quality of the consulting project and the exceptional communication provided throughout the engagement."
-            }
-        ],
-        "overallSatisfaction": "5.0"
-    },
-    {
-        "responseID": "19602",
-        "projectID": 89,
-        "clientID": 125,
-        "surveyDate": "2016-06-10",
-        "responses": [
-            {
-                "questionID": "Q1",
-                "questionText": "How satisfied are you with the project outcome?",
-                "responseType": "scale",
-                "responseValue": "4"
-            },
-            {
-                "questionID": "Q2",
-                "questionText": "Please rate the communication from our team.",
-                "responseType": "scale",
-                "responseValue": "4"
-            },
-            {
-                "questionID": "Q3",
-                "questionText": "What did you like best about working with us?",
-                "responseType": "text",
-                "responseValue": "We really appreciated the prompt and clear communication throughout the project, which helped us feel confident and informed about the progress and outcomes. Your understanding of our needs and concerns was also exceptional, and we're thrilled with the final results."
-            },
-            {
-                "questionID": "Q4",
-                "questionText": "What could we improve on?",
-                "responseType": "text",
-                "responseValue": "We were very pleased with the final product and the timely updates we received throughout the project, but we feel that a slightly more detailed wrap-up report at the end would have been helpful to ensure we were fully up to speed on all aspects of the project's outcome."
-            }
-        ],
-        "overallSatisfaction": "4.0"
-    },
-    {
-        "responseID": "55745",
-        "projectID": 95,
-        "clientID": 173,
-        "surveyDate": "2016-10-18",
-        "responses": [
-            {
-                "questionID": "Q1",
-                "questionText": "How satisfied are you with the project outcome?",
-                "responseType": "scale",
-                "responseValue": "4"
-            },
-            {
-                "questionID": "Q2",
-                "questionText": "Please rate the communication from our team.",
-                "responseType": "scale",
-                "responseValue": "4"
-            },
-            {
-                "questionID": "Q3",
-                "questionText": "What did you like best about working with us?",
-                "responseType": "text",
-                "responseValue": "We appreciated the consultant's thorough understanding of our business needs and the effective communication throughout the project, which enabled us to achieve our goals with ease."
-            },
-            {
-                "questionID": "Q4",
-                "questionText": "What could we improve on?",
-                "responseType": "text",
-                "responseValue": "We were generally very satisfied with the project, but one area for potential improvement could be providing more detailed progress updates throughout the project timeline."
-            }
-        ],
-        "overallSatisfaction": "4.0"
-    },
-    {
-        "responseID": "47353",
-        "projectID": 96,
-        "clientID": 52,
-        "surveyDate": "2016-12-15",
-        "responses": [
-            {
-                "questionID": "Q1",
-                "questionText": "How satisfied are you with the project outcome?",
-                "responseType": "scale",
-                "responseValue": "5"
-            },
-            {
-                "questionID": "Q2",
-                "questionText": "Please rate the communication from our team.",
-                "responseType": "scale",
-                "responseValue": "5"
-            },
-            {
-                "questionID": "Q3",
-                "questionText": "What did you like best about working with us?",
-                "responseType": "text",
-                "responseValue": "I suppose the project was completed on time, but I'm not entirely convinced that the solutions we implemented were truly tailored to our specific needs."
-            },
-            {
-                "questionID": "Q4",
-                "questionText": "What could we improve on?",
-                "responseType": "text",
-                "responseValue": "While we were thoroughly satisfied with the project's outcome and the consultant's communication was exemplary, we still have some reservations about the scope creep that occurred and wonder if there were more effective ways to manage expectations from the start."
-            }
-        ],
-        "overallSatisfaction": "5.0"
-    },
-    {
-        "responseID": "90173",
-        "projectID": 98,
-        "clientID": 84,
+        "responseID": "91351",
+        "projectID": 87,
+        "clientID": 233,
         "surveyDate": "2016-10-12",
         "responses": [
             {
@@ -1935,22 +2397,22 @@
                 "questionID": "Q3",
                 "questionText": "What did you like best about working with us?",
                 "responseType": "text",
-                "responseValue": "While we didn't quite meet your expectations in terms of satisfaction, we're grateful that our communication throughout the project was effective and transparent, and we appreciate your feedback that helped us identify areas for improvement."
+                "responseValue": "We appreciated the thoughtfulness and attention to detail you brought to the project, which ultimately led to a successful outcome and exceeded our expectations."
             },
             {
                 "questionID": "Q4",
                 "questionText": "What could we improve on?",
                 "responseType": "text",
-                "responseValue": "We appreciate your honest feedback, and it's clear that there were some areas where our communication could have been stronger. We're sorry that we didn't quite meet your expectations in that regard. On the other hand, we're glad to hear that our overall work satisfied you, and we're taking your feedback to heart to improve our communication strategies for future projects."
+                "responseValue": "We appreciate the consultant's expertise, but would have benefited from more proactive communication to better align expectations and stay informed throughout the project."
             }
         ],
         "overallSatisfaction": "4.0"
     },
     {
-        "responseID": "11025",
-        "projectID": 104,
-        "clientID": 300,
-        "surveyDate": "2016-09-15",
+        "responseID": "31299",
+        "projectID": 88,
+        "clientID": 114,
+        "surveyDate": "2016-07-13",
         "responses": [
             {
                 "questionID": "Q1",
@@ -1968,55 +2430,55 @@
                 "questionID": "Q3",
                 "questionText": "What did you like best about working with us?",
                 "responseType": "text",
-                "responseValue": "We were thoroughly impressed with the exceptional expertise and dedication your team brought to our project, resulting in outstanding deliverables that exceeded our expectations, and your seamless communication kept us informed and aligned throughout the entire process!"
+                "responseValue": "Hands down, it was your ability to translate our jargon-filled briefs into actionable solutions without losing your mind (or your sense of humor) - we're grateful for that sanity-saving skill!"
             },
             {
                 "questionID": "Q4",
                 "questionText": "What could we improve on?",
                 "responseType": "text",
-                "responseValue": "Considering the exceptional outcome, I'd like to emphasize the incredible value we derived from your expertise; however, there's one area where we think you could refine your process: providing more detailed, upfront explanations of the methodology and timeline to ensure a seamless alignment of expectations."
+                "responseValue": "Only thing we'd change is the need to invent more coffee breaks to fuel the genius-level brainstorming sessions - other than that, you guys are pure awesomesauce!"
             }
         ],
         "overallSatisfaction": "5.0"
     },
     {
-        "responseID": "27601",
-        "projectID": 106,
-        "clientID": 210,
-        "surveyDate": "2016-12-26",
+        "responseID": "13248",
+        "projectID": 94,
+        "clientID": 285,
+        "surveyDate": "2016-11-02",
         "responses": [
             {
                 "questionID": "Q1",
                 "questionText": "How satisfied are you with the project outcome?",
                 "responseType": "scale",
-                "responseValue": "4"
+                "responseValue": "5"
             },
             {
                 "questionID": "Q2",
                 "questionText": "Please rate the communication from our team.",
                 "responseType": "scale",
-                "responseValue": "4"
+                "responseValue": "5"
             },
             {
                 "questionID": "Q3",
                 "questionText": "What did you like best about working with us?",
                 "responseType": "text",
-                "responseValue": "We truly appreciated the thoughtful and personalized approach you took in understanding our needs, which resulted in a customized solution that exceeded our expectations."
+                "responseValue": "We appreciated the expertise and professionalism brought to the project, as well as the regular updates and transparent communication that ensured we were always informed and aligned throughout the process."
             },
             {
                 "questionID": "Q4",
                 "questionText": "What could we improve on?",
                 "responseType": "text",
-                "responseValue": "Overall, we were extremely pleased with the results of the project, and the communication throughout was seamless and effective. One area where we could potentially improve is in providing more detailed project timelines and milestones, which would have given us even greater clarity on the project's progress and allowed us to better plan our internal resources."
+                "responseValue": "We appreciate the exceptional level of service and communication, but could potentially refine the project scope definition at the outset to ensure we're aligned on all objectives."
             }
         ],
-        "overallSatisfaction": "4.0"
+        "overallSatisfaction": "5.0"
     },
     {
-        "responseID": "30374",
-        "projectID": 116,
-        "clientID": 62,
-        "surveyDate": "2016-12-22",
+        "responseID": "97806",
+        "projectID": 96,
+        "clientID": 82,
+        "surveyDate": "2016-12-26",
         "responses": [
             {
                 "questionID": "Q1",
@@ -2034,13 +2496,79 @@
                 "questionID": "Q3",
                 "questionText": "What did you like best about working with us?",
                 "responseType": "text",
-                "responseValue": "We really appreciated your prompt and clear communication throughout the project, it helped us stay informed and on the same page. Your dedication to delivering high-quality results was impressive, and we're thrilled with the final outcome - thank you for an excellent experience!"
+                "responseValue": "We appreciated the consultant's dedication to understanding our unique needs and providing actionable insights, which greatly contributed to the success of the project, despite some minor communication gaps."
             },
             {
                 "questionID": "Q4",
                 "questionText": "What could we improve on?",
                 "responseType": "text",
-                "responseValue": "We're thrilled with the results of the project and your professionalism, and although there's always room for growth, we're particularly impressed with your exceptional communication skills, which kept us well-informed throughout the process. Your attention to detail and ability to adapt to our needs were truly valued. One area where we'd like to see further improvement is in providing more tailored solutions to our specific concerns, but overall, we're delighted with the outcome and would highly recommend your services to others!"
+                "responseValue": "While we were satisfied with the project's outcome, we feel that there was room for more regular communication updates, which would have helped us stay better informed and engaged throughout the process."
+            }
+        ],
+        "overallSatisfaction": "4.0"
+    },
+    {
+        "responseID": "30866",
+        "projectID": 97,
+        "clientID": 310,
+        "surveyDate": "2016-08-26",
+        "responses": [
+            {
+                "questionID": "Q1",
+                "questionText": "How satisfied are you with the project outcome?",
+                "responseType": "scale",
+                "responseValue": "5"
+            },
+            {
+                "questionID": "Q2",
+                "questionText": "Please rate the communication from our team.",
+                "responseType": "scale",
+                "responseValue": "5"
+            },
+            {
+                "questionID": "Q3",
+                "questionText": "What did you like best about working with us?",
+                "responseType": "text",
+                "responseValue": "We appreciated the consultant's technical expertise, but we're still concerned about the accuracy of the data used in the final report, which was only addressed briefly during our limited communication interactions."
+            },
+            {
+                "questionID": "Q4",
+                "questionText": "What could we improve on?",
+                "responseType": "text",
+                "responseValue": "While we were extremely satisfied with the final product and communication throughout the project, we're not convinced that the methodology and approach were the most effective for our specific needs and could potentially benefit from some iteration and refinement."
+            }
+        ],
+        "overallSatisfaction": "5.0"
+    },
+    {
+        "responseID": "71694",
+        "projectID": 98,
+        "clientID": 319,
+        "surveyDate": "2016-10-18",
+        "responses": [
+            {
+                "questionID": "Q1",
+                "questionText": "How satisfied are you with the project outcome?",
+                "responseType": "scale",
+                "responseValue": "5"
+            },
+            {
+                "questionID": "Q2",
+                "questionText": "Please rate the communication from our team.",
+                "responseType": "scale",
+                "responseValue": "3"
+            },
+            {
+                "questionID": "Q3",
+                "questionText": "What did you like best about working with us?",
+                "responseType": "text",
+                "responseValue": "We were really impressed with the quality of work and expertise your team brought to the project - the final product was top-notch and met our expectations in every way!"
+            },
+            {
+                "questionID": "Q4",
+                "questionText": "What could we improve on?",
+                "responseType": "text",
+                "responseValue": "Thanks for the great work, we're super happy with the results! Communication could be improved with more regular updates and proactive responses to our queries."
             }
         ],
         "overallSatisfaction": "4.0"

@@ -80,11 +80,11 @@ def generate_client_feedback():
         # Generate responses for Q3 and Q4 considering both Q1 and Q2 scores
         q3_prompt = [
             {"role": "system", "content": f"{selected_tone} Assume you are a client (you represent your company so use 'we' sometimes instead of 'I') of a completed consulting project, please generate a short sentence of feedbck based on scores {q1_response} for satisfaction and {q2_response} for communication."},
-            {"role": "user", "content": "What did you like best about working with us?"},
+            {"role": "user", "content": "What did you like best about working with us? (Keep it short and concise)"},
         ]
         q4_prompt = [
             {"role": "system", "content": f"{selected_tone} Assume you are a client (you represent your company so use 'we' sometimes instead of 'I') of a completed consulting project, please generate a short sentence of feedbck based on scores {q1_response} for satisfaction and {q2_response} for communication."},
-            {"role": "user", "content": "What could we improve on?"},
+            {"role": "user", "content": "What could we improve on? (Keep it short and concise)"},
         ]
         q3_response = generate_feedback_response(q3_prompt)
         q4_response = generate_feedback_response(q4_prompt)
