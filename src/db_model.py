@@ -1,6 +1,8 @@
-from sqlalchemy import create_engine, Column, Integer, String, Date, ForeignKey, Float, Boolean
+from sqlalchemy import create_engine, Column, Integer, String, Date, ForeignKey, Float, Boolean, PickleType
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
+from sqlalchemy.ext.mutable import MutableDict
+from sqlalchemy.ext.hybrid import hybrid_property
 from config.path_config import db_file_path
 
 Base = declarative_base()
@@ -26,9 +28,20 @@ class Consultant(Base):
     LastName = Column(String)
     Email = Column(String)
     Contact = Column(String)
+    HireYear = Column(Integer)
+    
     BusinessUnit = relationship("BusinessUnit", back_populates="Consultants")
     TitleHistory = relationship("ConsultantTitleHistory", back_populates="Consultant")
-    HireYear = 0
+    
+    _custom_data = Column(MutableDict.as_mutable(PickleType), default={})
+
+    @property
+    def custom_data(self):
+        return self._custom_data
+
+    @custom_data.setter
+    def custom_data(self, value):
+        self._custom_data = value
 
 class ConsultantTitleHistory(Base):
     __tablename__ = 'Consultant_Title_History'
@@ -77,15 +90,25 @@ class Project(Base):
     PlannedEndDate = Column(Date)
     ActualStartDate = Column(Date)
     ActualEndDate = Column(Date, nullable=True)
-    Price = Column(Float, nullable=True)  # For fixed contract
-    EstimatedBudget = Column(Float, nullable=True)  # For TM contract
-    PlannedHours = Column(Integer, nullable=True)  # For both contracts
+    Price = Column(Float, nullable=True)
+    EstimatedBudget = Column(Float, nullable=True)
+    PlannedHours = Column(Integer, nullable=True)
     ActualHours = Column(Float, nullable=True)
     Progress = Column(Integer, nullable=True)
     Client = relationship("Client")
     BusinessUnit = relationship("BusinessUnit")
     Deliverables = relationship("Deliverable", back_populates="Project")
     Team = relationship("ProjectTeam", back_populates="Project")
+    
+    _custom_data = Column(MutableDict.as_mutable(PickleType), default={})
+
+    @property
+    def custom_data(self):
+        return self._custom_data
+
+    @custom_data.setter
+    def custom_data(self, value):
+        self._custom_data = value
 
 class ProjectTeam(Base):
     __tablename__ = 'ProjectTeam'

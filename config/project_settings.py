@@ -5,14 +5,31 @@ import random
 Adjust a bigger team size and smaller concurrent active project per consultant
 to get less nonbillable time
 '''
-# Project Deliverable Constants
-MIN_DAILY_HOURS = 2.0
-MAX_DAILY_HOURS = 7.0
+# Maximum projects per consultant based on title
+MAX_PROJECTS_PER_CONSULTANT = {
+    1: 2, 2: 3,3: 4, 
+    4: 5, 5: 6, 6: 7 
+}
+
+# Maximum daily working hours based on title
+MAX_DAILY_HOURS_PER_TITLE = {
+    1: 8.0, 2: 8.0, 3: 7.5, 
+    4: 7.0, 5: 6.5, 6: 6.0   
+}
+
+# Minimum daily hours per project based on title
+MIN_DAILY_HOURS_PER_PROJECT = {
+    1: 2.0, 2: 1.5, 3: 1.0,
+    4: 0.5, 5: 0.5, 6: 0.5
+}
+
+# Keep the existing MAX_DAILY_HOURS and MIN_DAILY_HOURS for backward compatibility
+MAX_DAILY_HOURS = 8.0
+MIN_DAILY_HOURS = 0.5
 MAX_DAILY_HOURS_PER_PROJECT = 4.0
 WORK_PROBABILITY = 1.0# 90% chance of working on any given day
 WORKING_DAYES = 21
 AVERAGE_WORKING_HOURS_PER_DAY = 6.0
-MAX_PROJECTS_PER_CONSULTANT = 5
 HIGHER_LEVEL_TITLE_THRESHOLD = 3
 LOWER_LEVEL_TITLE_THRESHOLD = 2
 
@@ -28,12 +45,8 @@ EXPENSE_CATEGORIES = {
 }
 
 HOURLY_RATE_RANGES = {
-    1: (100, 200),  # Junior Consultant
-    2: (150, 300),  # Consultant
-    3: (200, 400),  # Senior Consultant
-    4: (250, 500),  # Lead Consultant
-    5: (300, 600),  # Project Manager
-    6: (400, 800)   # Vice President
+    1: (100, 200), 2: (150, 300), 3: (200, 400), 
+    4: (250, 500), 5: (300, 600), 6: (400, 800)
 }
 
 MAX_TEAM_SIZE = 20

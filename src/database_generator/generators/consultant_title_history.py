@@ -6,7 +6,7 @@ from unidecode import unidecode
 from datetime import timedelta, date
 from sqlalchemy.orm import sessionmaker
 from collections import defaultdict
-from ...db_model import Consultant, Title, BusinessUnit, ConsultantTitleHistory, engine
+from ...db_model import Consultant, BusinessUnit, ConsultantTitleHistory, engine
 from config import consultant_settings
 
 fake = Faker()
@@ -146,8 +146,7 @@ def perform_layoffs(active_consultants, growth_rate, year, title_history_data, c
 
     return num_layoffs, title_history_data, consultant_data
 
-# Main generation logic
-# Main generation logic
+# Main generation logicic
 def generate_consultant_data(initial_num_consultants, start_year, end_year):
     consultant_data = []
     title_history_data = []
