@@ -142,7 +142,10 @@ def start_due_projects(session, current_date):
 
 
 def create_new_projects_if_needed(session, current_date, available_consultants, active_units, simulation_start_date, monthly_targets):
-    project_manager_consultants = [c for c in available_consultants if c.custom_data.get('title_id', 0) >= 4]
+    # Include all consultants, not just those with active projects
+    all_consultants = session.query(Consultant).all()
+    
+    project_manager_consultants = [c for c in all_consultants if c.custom_data.get('title_id', 0) >= 4]
     
     project_manager_consultants.sort(key=lambda c: (c.custom_data.get('active_project_count', 0), -c.custom_data.get('title_id', 0)))
     
@@ -151,9 +154,13 @@ def create_new_projects_if_needed(session, current_date, available_consultants, 
 
     target_for_month = monthly_targets[current_date.month - 1]
     
-    adjusted_target = min(target_for_month, sum(project_settings.MAX_PROJECTS_PER_CONSULTANT.get(c.custom_data.get('title_id', 1), 2) - c.custom_data.get('active_project_count', 0) for c in project_manager_consultants))
+    # Calculate total capacity for new projects
+    total_capacity = sum(max(0, project_settings.MAX_PROJECTS_PER_CONSULTANT.get(c.custom_data.get('title_id', 1), 2) - c.custom_data.get('active_project_count', 0)) for c in project_manager_consultants)
     
-    logging.info(f"Target for month: {target_for_month}, Adjusted target: {adjusted_target}")
+    # Adjust target based on capacity, but ensure it's not negative
+    adjusted_target = max(0, min(target_for_month, total_capacity))
+    
+    logging.info(f"Target for month: {target_for_month}, Adjusted target: {adjusted_target}, Total capacity: {total_capacity}")
 
     if adjusted_target > 0:
         std_dev = max(0.1, adjusted_target * 0.2)
@@ -176,7 +183,7 @@ def create_new_projects_if_needed(session, current_date, available_consultants, 
             continue
 
         logging.info(f"Attempting to create project with PM: {consultant.ConsultantID} (Title: {consultant.custom_data.get('title_id', 0)}, Active Projects: {consultant.custom_data.get('active_project_count', 0)})")
-        project = create_new_project(session, current_date, available_consultants, active_units, simulation_start_date, project_manager=consultant)
+        project = create_new_project(session, current_date, all_consultants, active_units, simulation_start_date, project_manager=consultant)
         if project:
             projects_created += 1
 
@@ -186,7 +193,8 @@ def create_new_projects_if_needed(session, current_date, available_consultants, 
                 consultant.custom_data['active_project_count'] = consultant.custom_data.get('active_project_count', 0) + 1
                 consultant.custom_data['last_project_date'] = current_date
 
-            # Re-sort available_consultants
+            # Update available_consultants list
+            available_consultants = [c for c in all_consultants if c.custom_data.get('active_project_count', 0) < project_settings.MAX_PROJECTS_PER_CONSULTANT.get(c.custom_data.get('title_id', 1), 2)]
             available_consultants.sort(key=lambda c: (c.custom_data.get('active_project_count', 0), -c.custom_data.get('title_id', 0)))
             logging.info(f"Successfully created project: ProjectID {project.ProjectID}")
         else:
@@ -210,7 +218,8 @@ def create_new_project(session, current_date, available_consultants, active_unit
             Status='Not Started',
             Progress=0,
             EstimatedBudget=None,
-            Price=None
+            Price=None,
+            CreatedAt=current_date
         )
 
         session.add(project)

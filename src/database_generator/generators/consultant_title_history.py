@@ -173,6 +173,11 @@ def generate_consultant_data(initial_num_consultants, start_year, end_year):
         phone = faker.phone_number()
         consultant = Consultant(ConsultantID=consultant_id, FirstName=first_name, LastName=last_name, 
                                 Email=email, Contact=phone, BusinessUnitID=unit_id, HireYear=hire_date.year)
+        consultant.custom_data = {
+            'title_id': title_id,
+            'active_project_count': 0,
+            'last_project_date': None
+        }
         consultant_id_counter += 1
 
         salary = get_new_salary(title_id)

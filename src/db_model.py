@@ -1,9 +1,9 @@
-from sqlalchemy import create_engine, Column, Integer, String, Date, ForeignKey, Float, Boolean, PickleType
+from sqlalchemy import create_engine, Column, Integer, String, Date, DateTime, ForeignKey, Float, Boolean, PickleType
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.mutable import MutableDict
-from sqlalchemy.ext.hybrid import hybrid_property
 from config.path_config import db_file_path
+from datetime import datetime
 
 Base = declarative_base()
 
@@ -95,6 +95,7 @@ class Project(Base):
     PlannedHours = Column(Integer, nullable=True)
     ActualHours = Column(Float, nullable=True)
     Progress = Column(Integer, nullable=True)
+    CreatedAt = Column(DateTime, default=datetime.utcnow)
     Client = relationship("Client")
     BusinessUnit = relationship("BusinessUnit")
     Deliverables = relationship("Deliverable", back_populates="Project")
