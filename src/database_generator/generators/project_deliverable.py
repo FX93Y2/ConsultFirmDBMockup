@@ -1,5 +1,6 @@
 import random
 import logging
+import traceback
 from scipy.stats import norm
 from datetime import date, timedelta
 from dateutil.relativedelta import relativedelta
@@ -11,7 +12,7 @@ from ...db_model import *
 from ..utils.project_utils import *
 from ..utils.project_financial_utils import *
 from config import project_settings, consultant_settings
-
+                
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def generate_projects(start_year, end_year, initial_consultants):
@@ -197,35 +198,33 @@ def create_new_projects_if_needed(session, current_date, available_consultants, 
 
 def create_new_project(session, current_date, available_consultants, active_units, simulation_start_date, project_manager):
     logging.info(f"Attempting to create new project with PM: {project_manager.ConsultantID} (Title: {project_manager.custom_data.get('title_id', 'Unknown')})")
-    
+
     try:
         eligible_consultants = [c for c in available_consultants if c.custom_data.get('title_id', 0) <= project_manager.custom_data.get('title_id', 0)]
-        
-        assigned_consultants = assign_consultants_to_project(eligible_consultants, project_manager)
-        logging.info(f"Assigned consultants: {[c.ConsultantID for c in assigned_consultants]}")
 
-        assigned_unit_id = assign_project_to_business_unit(session, assigned_consultants, active_units, current_date.year)
-        
         project = Project(
             ClientID=random.choice(session.query(Client.ClientID).all())[0],
-            UnitID=assigned_unit_id,
-            Name=f"Project_{current_date.year}_{random.randint(1000, 9999)}",
+            UnitID=assign_project_to_business_unit(session, eligible_consultants, active_units, current_date.year),
+            Name=f"Project{current_date.year}{random.randint(1000, 9999)}",
             Type=random.choices(project_settings.PROJECT_TYPES, weights=project_settings.PROJECT_TYPE_WEIGHTS)[0],
             Status='Not Started',
             Progress=0,
             EstimatedBudget=None,
             Price=None
         )
-        
+
         session.add(project)
         session.flush()
         logging.info(f"Created project: ProjectID {project.ProjectID}")
 
-        team_size = set_project_dates(project, current_date, assigned_consultants, session, simulation_start_date)
-        project.PlannedHours = calculate_planned_hours(project, team_size)
+        target_team_size = set_project_dates(project, current_date, project_manager, session, simulation_start_date)
+        project.PlannedHours = calculate_planned_hours(project, target_team_size)
         target_hours = calculate_target_hours(project.PlannedHours)
         project.ActualHours = 0
-        
+
+        # Assign initial team members
+        assigned_consultants, remaining_slots = assign_consultants_to_project(eligible_consultants, project_manager, target_team_size)
+
         deliverables = generate_deliverables(project, target_hours)
         session.add_all(deliverables)
         session.flush()
@@ -234,15 +233,32 @@ def create_new_project(session, current_date, available_consultants, active_unit
         project.custom_data = {
             'team': [c.ConsultantID for c in assigned_consultants],
             'deliverables': {},
-            'target_hours': target_hours
+            'target_hours': target_hours,
+            'target_team_size': target_team_size,
+            'remaining_slots': remaining_slots
         }
 
+        # Set up billing rates for all title levels
+        if project.Type == 'Time and Material':
+            for title_id in range(1, 7):  # Assuming title IDs range from 1 to 6
+                avg_experience = calculate_average_experience(session, title_id, current_date)
+                rate = calculate_billing_rate(title_id, project.Type, avg_experience)
+                billing_rate = ProjectBillingRate(
+                    ProjectID=project.ProjectID,
+                    TitleID=title_id,
+                    Rate=float(rate)
+                )
+                session.add(billing_rate)
+            session.flush()
+
         calculate_project_financials(session, project, assigned_consultants, current_date, deliverables)
-        
+
         assign_project_team(session, project, assigned_consultants)
         session.flush()
 
         update_project_metadata(project, assigned_consultants, deliverables, target_hours)
+
+        logging.info(f"Project {project.ProjectID} created with {len(assigned_consultants)} consultants. Remaining slots: {remaining_slots}")
 
         return project
     except Exception as e:
@@ -261,16 +277,20 @@ def update_existing_projects(session, current_date, available_consultants):
     ).all()
 
     for project in active_projects:
-        if project.Status == 'Not Started' and project.PlannedStartDate <= current_date:
-            project.Status = 'In Progress'
-            project.ActualStartDate = current_date
+        try:
+            if project.Status == 'Not Started' and project.PlannedStartDate <= current_date:
+                project.Status = 'In Progress'
+                project.ActualStartDate = current_date
 
-        # Update project team if needed
-        current_team = project.custom_data.get('team', [])
-        update_project_team(session, project, available_consultants, current_team, current_date)
-        project.custom_data['team'] = current_team
+            # Update project team if needed
+            current_team = project.custom_data.get('team', [])
+            update_project_team(session, project, available_consultants, current_team, current_date)
 
-    session.commit()
+        except Exception as e:
+            logging.error(f"Error updating project {project.ProjectID}: {str(e)}")
+            session.rollback()
+        else:
+            session.commit()
 
 def generate_daily_consultant_deliverables(session, current_date, projects):
     consultant_daily_hours = defaultdict(float)
@@ -281,7 +301,7 @@ def generate_daily_consultant_deliverables(session, current_date, projects):
     for project in active_projects:
         project_actual_hours = Decimal('0.0')
 
-        for deliverable_id, deliverable_meta in project.custom_data['deliverables'].items():
+        for deliverable_id, deliverable_meta in project.custom_data.get('deliverables', {}).items():
             deliverable = session.query(Deliverable).get(deliverable_id)
             if deliverable.Status == 'Completed' or deliverable.PlannedStartDate > current_date:
                 continue
@@ -295,11 +315,11 @@ def generate_daily_consultant_deliverables(session, current_date, projects):
             if remaining_hours <= Decimal('0.0'):
                 continue
 
-            for consultant_id in project.custom_data['team']:
+            for consultant_id in project.custom_data.get('team', []):
                 consultant = session.query(Consultant).get(consultant_id)
-                consultant_title = consultant.custom_data['title_id']
-                max_daily_hours = Decimal(str(project_settings.MAX_DAILY_HOURS_PER_TITLE[consultant_title]))
-                min_daily_hours = Decimal(str(project_settings.MIN_DAILY_HOURS_PER_PROJECT[consultant_title]))
+                consultant_title = consultant.custom_data.get('title_id', 1)  # Default to 1 if not present
+                max_daily_hours = Decimal(str(project_settings.MAX_DAILY_HOURS_PER_TITLE.get(consultant_title, 8.0)))
+                min_daily_hours = Decimal(str(project_settings.MIN_DAILY_HOURS_PER_PROJECT.get(consultant_title, 2.0)))
 
                 if consultant_daily_hours[consultant_id] >= max_daily_hours:
                     continue
@@ -375,16 +395,6 @@ def update_project_statuses(session, current_date, available_consultants):
                 project.Status = 'Completed'
                 project.ActualEndDate = current_date
                 handle_project_completion(session, project, current_date, available_consultants)
-            elif current_date > project.PlannedEndDate:
-                if project.Progress >= 99:  # Allow completion if very close to finish
-                    project.Status = 'Completed'
-                    project.ActualEndDate = current_date
-                    handle_project_completion(session, project, current_date, available_consultants)
-                else:
-                    logging.warning(f"Project {project.ProjectID} has exceeded its planned end date but is only {project.Progress}% complete")
-
-        logging.info(f"Updated status for ProjectID {project.ProjectID}: Status {project.Status}, Progress {project.Progress}%, ActualHours {project.ActualHours}")
-
     session.commit()
 
 

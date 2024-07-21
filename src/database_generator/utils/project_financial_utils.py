@@ -19,6 +19,16 @@ def calculate_hourly_cost(session, consultant_id, year):
     hourly_cost = (avg_salary / 12) / (52 * 40)  # Assuming 52 weeks and 40 hours per week
     return hourly_cost * (1 + project_settings.OVERHEAD_PERCENTAGE)
 
+def calculate_average_experience(session, title_id, current_date):
+    consultants = session.query(Consultant).all()
+    relevant_consultants = [c for c in consultants if c.custom_data.get('title_id') == title_id]
+    
+    if not relevant_consultants:
+        return 5  # Default to 5 years if no consultants found for this title
+    
+    total_experience = sum((current_date.year - c.HireYear) for c in relevant_consultants)
+    return total_experience / len(relevant_consultants)
+
 def calculate_project_financials(session, project, assigned_consultants, current_date, deliverables):
     # Calculate billing rates for each title
     title_billing_rates = {}
@@ -126,12 +136,14 @@ def update_project_financials(session, project):
         for deliverable in project.Deliverables:
             consultant_deliverables = session.query(ConsultantDeliverable).filter_by(DeliverableID=deliverable.DeliverableID).all()
             for cd in consultant_deliverables:
-                consultant = session.query(Consultant).get(cd.ConsultantID)
-                billing_rate = session.query(ProjectBillingRate).filter_by(
+                consultant = session.query(Consultant).get(cd.ConsultantID)        
+                title_id = consultant.custom_data.get('title_id')
+                billing_rate_entry = session.query(ProjectBillingRate).filter_by(
                     ProjectID=project.ProjectID,
-                    TitleID=consultant.custom_data['title_id']
-                ).first().Rate
-                actual_revenue += Decimal(cd.Hours) * Decimal(billing_rate)
+                    TitleID=title_id
+                ).first()
+                
+                actual_revenue += Decimal(cd.Hours) * Decimal(billing_rate_entry.Rate)
 
     # Update project metadata with financial information
     project.custom_data['actual_cost'] = float(actual_cost)
