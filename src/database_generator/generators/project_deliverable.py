@@ -221,7 +221,7 @@ def create_new_project(session, current_date, available_consultants, active_unit
             Progress=0,
             EstimatedBudget=None,
             Price=None,
-            CreatedAt=current_date
+            CreatedAt=created_at
         )
 
         session.add(project)
