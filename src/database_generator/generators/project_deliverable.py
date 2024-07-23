@@ -209,7 +209,9 @@ def create_new_project(session, current_date, available_consultants, active_unit
 
     try:
         eligible_consultants = [c for c in available_consultants if c.custom_data.get('title_id', 0) <= project_manager.custom_data.get('title_id', 0)]
-
+        days_before = random.randint(0, 15)
+        created_at = current_date - timedelta(days=days_before)
+        created_at = max(created_at, simulation_start_date)# Ensure created_at is not before the simulation start date
         project = Project(
             ClientID=random.choice(session.query(Client.ClientID).all())[0],
             UnitID=assign_project_to_business_unit(session, eligible_consultants, active_units, current_date.year),
