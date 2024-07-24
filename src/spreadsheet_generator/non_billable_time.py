@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
 from sqlalchemy.orm import sessionmaker
-from ..db_model import Consultant, ConsultantDeliverable, engine
+from ..db_model import Consultant, ConsultantDeliverable, Payroll, engine
 from config.path_config import non_billable_time_path
 
 def generate_non_billable_time_report(working_hours_per_month=160):
@@ -21,14 +21,23 @@ def generate_non_billable_time_report(working_hours_per_month=160):
     deliverables_df = pd.DataFrame([(d.ConsultantID, d.Date, d.Hours) for d in deliverables],
                                    columns=['ConsultantID', 'Date', 'Hours'])
     
+    # Query Payroll
+    payrolls = session.query(Payroll).all()
+    payrolls_df = pd.DataFrame([(p.ConsultantID, p.EffectiveDate) for p in payrolls],
+                                   columns=['ConsultantID', 'Date'])
+    
     # Ensure 'Date' column is datetime type
     deliverables_df['Date'] = pd.to_datetime(deliverables_df['Date'])
+    payrolls_df['Date'] = pd.to_datetime(payrolls_df['Date'])
     
-    # Calculate year-month for each deliverable
+    # Calculate year-month for each deliverable and payroll
     deliverables_df['YearMonth'] = deliverables_df['Date'].dt.to_period('M')
+    payrolls_df['YearMonth'] = payrolls_df['Date'].dt.to_period('M')
     
     # Summarize project hours per year-month for each consultant
-    project_hours_df = deliverables_df.groupby(['ConsultantID', 'YearMonth']).agg({'Hours': 'sum'}).reset_index()
+    billable_consultant = deliverables_df.groupby(['ConsultantID', 'YearMonth']).agg({'Hours': 'sum'}).reset_index()
+    project_hours_df = payrolls_df.merge(billable_consultant, on=['ConsultantID', 'YearMonth'], how='left')
+    project_hours_df['Hours'] = project_hours_df['Hours'].fillna(0)
     
     # Calculate non-billable hours
     project_hours_df['NonBillableHours'] = project_hours_df.apply(

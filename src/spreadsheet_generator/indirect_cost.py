@@ -21,10 +21,21 @@ def generate_indirect_costs(mean_labor_cost=125000, stddev_labor_cost=5000, mean
 
     # Get the earliest and most recent dates from the Project table
     earliest_date = session.query(Project.PlannedStartDate).order_by(Project.PlannedStartDate).first()[0]
-    most_recent_date = session.query(Project.PlannedEndDate).order_by(Project.PlannedEndDate.desc()).first()[0]
+    most_recent_date = session.query(Project.PlannedStartDate).order_by(Project.PlannedStartDate.desc()).first()[0]
+
+    # Adjust the most recent date to the last day of its month
+    most_recent_date = most_recent_date.replace(day=1) + pd.DateOffset(months=1) - pd.DateOffset(days=1)
 
     # Define the months based on the project dates
     months = pd.date_range(start=earliest_date, end=most_recent_date, freq='M')
+
+    # Define business units and their corresponding multipliers
+    business_units = {
+        1: {"name": "North America", "labor_multiplier": 1.0, "expense_multiplier": 1.0},
+        2: {"name": "Central and South America", "labor_multiplier": 0.7, "expense_multiplier": 0.7},
+        3: {"name": "EMEA", "labor_multiplier": 1.2, "expense_multiplier": 1.2},
+        4: {"name": "Asia Pacific", "labor_multiplier": 0.8, "expense_multiplier": 0.8}
+    }
 
     # Get all business unit IDs and their earliest project start dates
     business_units_start_dates = session.query(Project.UnitID, Project.PlannedStartDate).all()
@@ -48,16 +59,18 @@ def generate_indirect_costs(mean_labor_cost=125000, stddev_labor_cost=5000, mean
         inflation_adjustment = random.uniform(*inflation_fluctuation_range)
         current_inflation_rate += inflation_adjustment
 
-        # Adjust mean costs with current inflation rate
-        adjusted_mean_labor_cost = mean_labor_cost * (1 + current_inflation_rate)
-        adjusted_mean_other_expense = mean_other_expense * (1 + current_inflation_rate)
-
-        # Calculate seasonality factor
-        seasonality_factor = seasonality(i)
-
         for unit, start_date in business_units_start_dates.items():
             if month < start_date:
                 continue  # Skip months before the business unit's start date
+
+            unit_info = business_units.get(unit, {"labor_multiplier": 1.0, "expense_multiplier": 1.0})
+
+            # Adjust mean costs with current inflation rate and unit multipliers
+            adjusted_mean_labor_cost = mean_labor_cost * (1 + current_inflation_rate) * unit_info["labor_multiplier"]
+            adjusted_mean_other_expense = mean_other_expense * (1 + current_inflation_rate) * unit_info["expense_multiplier"]
+
+            # Calculate seasonality factor
+            seasonality_factor = seasonality(i)
 
             labor_costs = np.random.normal(adjusted_mean_labor_cost, stddev_labor_cost)
             other_expenses = np.random.normal(adjusted_mean_other_expense, stddev_other_expense)
@@ -78,6 +91,10 @@ def generate_indirect_costs(mean_labor_cost=125000, stddev_labor_cost=5000, mean
                 labor_costs += dependency_factor * previous_labor_costs[unit]
                 other_expenses += dependency_factor * previous_other_expenses[unit]
 
+            # Update previous costs for next month's dependency
+            previous_labor_costs[unit] = labor_costs
+            previous_other_expenses[unit] = other_expenses
+
             # Apply a chance of an outlier
             if random.random() < outlier_probability:
                 outlier_multiplier = random.uniform(*outlier_multiplier_range)
@@ -89,10 +106,6 @@ def generate_indirect_costs(mean_labor_cost=125000, stddev_labor_cost=5000, mean
             total_costs = labor_costs + other_expenses
 
             data.append([month.strftime("%b-%y"), unit, labor_costs, other_expenses, total_costs])
-
-            # Update previous costs for next month's dependency
-            previous_labor_costs[unit] = labor_costs
-            previous_other_expenses[unit] = other_expenses
 
     # Create DataFrame
     df = pd.DataFrame(data, columns=["Month", "Business Unit ID", "Non-proj Labor Costs", "Other Expense Costs", "Total Indirect Costs"])

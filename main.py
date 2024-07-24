@@ -8,6 +8,7 @@ from src.database_generator.generators.payroll import generate_payroll
 from src.database_generator.generators.project_deliverable import generate_projects
 from src.spreadsheet_generator.indirect_cost import generate_indirect_costs
 from src.spreadsheet_generator.non_billable_time import generate_non_billable_time_report
+from src.json_generator.client_feedback import generate_client_feedback
 
 START_YEAR = 2015
 END_YEAR = 2015
@@ -33,6 +34,7 @@ def main():
     generate_non_billable_time_report()
 
     # Generate json file
+    generate_client_feedback()
 
 if __name__ == "__main__":
     main()
