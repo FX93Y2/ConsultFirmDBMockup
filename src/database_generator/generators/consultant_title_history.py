@@ -6,7 +6,7 @@ from unidecode import unidecode
 from datetime import timedelta, date
 from sqlalchemy.orm import sessionmaker
 from collections import defaultdict
-from ...db_model import Consultant, BusinessUnit, ConsultantTitleHistory, engine
+from models.db_model import Consultant, BusinessUnit, ConsultantTitleHistory, engine
 from config import consultant_settings
 
 fake = Faker()

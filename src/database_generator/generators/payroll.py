@@ -3,7 +3,7 @@ from datetime import date
 from dateutil.relativedelta import relativedelta
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import func
-from ...db_model import Consultant, ConsultantTitleHistory, Payroll, engine
+from models.db_model import Consultant, ConsultantTitleHistory, Payroll, engine
 
 def generate_payroll(end_year):
     print("Generating Payroll Data...")

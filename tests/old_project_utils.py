@@ -17,7 +17,7 @@ def adjust_hours(planned_hours):
     return actual_hours.quantize(Decimal('0.1'), rounding=ROUND_HALF_UP)
 
 def calculate_hourly_cost(session, consultant, year):
-    from ..src.db_model import Payroll
+    from ..src.models.db_model import Payroll
     from sqlalchemy import func
     
     payroll_data = session.query(Payroll).filter(

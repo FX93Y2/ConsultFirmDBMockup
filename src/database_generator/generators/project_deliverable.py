@@ -8,7 +8,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy import func
 from collections import defaultdict
 from decimal import Decimal
-from ...db_model import *
+from models.db_model import *
 from ..utils.project_utils import *
 from ..utils.project_financial_utils import *
 from config import project_settings, consultant_settings

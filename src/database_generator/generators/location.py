@@ -1,5 +1,5 @@
 from sqlalchemy.orm import sessionmaker
-from ...db_model import Location, engine
+from models.db_model import Location, engine
 
 def generate_locations():
     print("Generating Location Data...")

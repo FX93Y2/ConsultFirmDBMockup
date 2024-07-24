@@ -1,7 +1,7 @@
 from decimal import Decimal, ROUND_HALF_UP
 from sqlalchemy import func
 import random
-from ...db_model import *
+from models.db_model import *
 from config import project_settings
 
 def round_to_nearest_thousand(value):

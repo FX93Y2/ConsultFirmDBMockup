@@ -4,7 +4,7 @@ import random
 from datetime import timedelta, date
 from sqlalchemy import func, case
 from collections import Counter
-from ...db_model import *
+from models.db_model import *
 from .project_financial_utils import update_project_financials
 from config import project_settings
 import math
