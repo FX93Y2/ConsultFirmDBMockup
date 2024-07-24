@@ -1,3 +1,6 @@
+import sys
+import os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from models.db_model import main as create_db
 from database_generator.generators.client import generate_clients
 from database_generator.generators.location import generate_locations
@@ -8,7 +11,7 @@ from database_generator.generators.payroll import generate_payroll
 from database_generator.generators.project_deliverable import generate_projects
 from spreadsheet_generator.indirect_cost import generate_indirect_costs
 from spreadsheet_generator.non_billable_time import generate_non_billable_time_report
-from json_generator.client_feedback import generate_client_feedback
+#from json_generator.client_feedback import generate_client_feedback
 
 START_YEAR = 2015
 END_YEAR = 2015
@@ -34,7 +37,7 @@ def main():
     generate_non_billable_time_report()
 
     # Generate json file
-    generate_client_feedback()
+    #generate_client_feedback()
 
 if __name__ == "__main__":
     main()
