@@ -4,6 +4,7 @@ from sqlalchemy.orm import aliased
 import random
 from models.db_model import *
 from config import project_settings
+import logging
 
 def round_to_nearest_thousand(value):
     return Decimal(value).quantize(Decimal('1000'), rounding=ROUND_HALF_UP)
@@ -110,10 +111,12 @@ def calculate_billing_rate(title_id, project_type, years_experience):
 def generate_project_expenses(project, estimated_total_cost, deliverables):
     expenses = []
     total_planned_hours = Decimal(sum(d.PlannedHours for d in deliverables))
+    logging.info(f"Generating expenses for project {project.ProjectID}, estimated total cost: {estimated_total_cost}, total planned hours: {total_planned_hours}")
 
     for deliverable in deliverables:
         deliverable_cost_ratio = Decimal(deliverable.PlannedHours) / total_planned_hours
         deliverable_estimated_cost = Decimal(str(estimated_total_cost)) * deliverable_cost_ratio
+        logging.info(f"Deliverable {deliverable.DeliverableID} estimated cost: {deliverable_estimated_cost}")
 
         for category, percentage in project_settings.EXPENSE_CATEGORIES.items():
             is_billable = random.choice([True, False])
@@ -129,7 +132,9 @@ def generate_project_expenses(project, estimated_total_cost, deliverables):
                     'IsBillable': is_billable
                 }
                 expenses.append(expense)
+                logging.info(f"Generated expense: {expense}")
 
+    logging.info(f"Total expenses generated: {len(expenses)}")
     return expenses
 
 def update_project_financials(session, project):

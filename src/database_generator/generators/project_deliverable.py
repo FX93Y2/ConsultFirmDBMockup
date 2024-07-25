@@ -484,12 +484,14 @@ def handle_project_completion(session, project, completion_date, available_consu
 
 def generate_project_expenses_for_year(session, simulation_end_date):
     projects = session.query(Project).filter(Project.Status.in_(['In Progress', 'Completed'])).all()
+    logging.info(f"Found {len(projects)} projects for expense generation")
     
     for project in projects:
         project_custom_data = session.query(ProjectCustomData).get(project.ProjectID)
         total_consultant_cost = sum(cd.Hours * calculate_hourly_cost(session, cd.ConsultantID, cd.Date.year)
                                     for deliverable_meta in project_custom_data.CustomData.get('deliverables', {}).values()
                                     for cd in deliverable_meta.get('consultant_deliverables', []))
+        logging.info(f"Project {project.ProjectID} total consultant cost: {total_consultant_cost}")
 
         expenses = []
         for deliverable_id, deliverable_meta in project_custom_data.CustomData.get('deliverables', {}).items():
@@ -501,9 +503,11 @@ def generate_project_expenses_for_year(session, simulation_end_date):
                                    simulation_end_date)
 
             if expense_start_date >= expense_end_date:
+                logging.warning(f"Skipping expense generation for deliverable {deliverable_id} due to invalid date range")
                 continue
 
             deliverable_expenses = generate_project_expenses(project, total_consultant_cost, [deliverable])
+            logging.info(f"Generated {len(deliverable_expenses)} expenses for deliverable {deliverable_id}")
             
             for expense_data in deliverable_expenses:
                 consultant_deliverable_dates = [cd.Date for cd in deliverable_meta.get('consultant_deliverables', [])
@@ -525,8 +529,10 @@ def generate_project_expenses_for_year(session, simulation_end_date):
                 )
                 expenses.append(expense)
 
+        logging.info(f"Adding {len(expenses)} expenses for project {project.ProjectID}")
         session.add_all(expenses)
 
     session.commit()
+    logging.info("Expense generation completed")
 
 
