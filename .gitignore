@@ -1,7 +1,3 @@
 __pycache__/
 *.pyc
 /myenv
-output/spreadsheets/indirect_costs.xlsx
-output/database/consulting_firm.db
-output/test.db
-output/spreadsheets/non_billable_time.xlsx
