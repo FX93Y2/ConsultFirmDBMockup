@@ -4,9 +4,9 @@ import os
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 
 # Define paths
-db_path = os.path.join(project_root, 'output', 'database')
-ss_path = os.path.join(project_root, 'output', 'spreadsheets')
-json_path = os.path.join(project_root, 'output', 'json')
+db_path = os.path.join(project_root, 'example_output', 'database')
+ss_path = os.path.join(project_root, 'example_output', 'spreadsheets')
+json_path = os.path.join(project_root, 'example_output', 'json')
 
 # Create directories if they don't exist
 os.makedirs(db_path, exist_ok=True)
