@@ -27,3 +27,10 @@ sphinx-rtd-theme>=1.0.0
 python-dotenv>=0.19.2
 openpyxl>=3.1.5
 
+# ETL
+snowflake-connector-python>=3.12.0
+pandas>=2.2.2
+
+# Environment
+python-dotenv>=1.0.1
+

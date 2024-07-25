@@ -1,3 +1,5 @@
 __pycache__/
 *.pyc
 /myenv
+src/etl_service/config.ini
+src/etl_service/.env

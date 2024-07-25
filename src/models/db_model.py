@@ -11,8 +11,8 @@ engine = create_engine(f'sqlite:///{db_file_path}')
 
 class Title(Base):
     __tablename__ = 'Title'
-    TitleID = Column(Integer, primary_key=True)
-    Title = Column(String)
+    TITLEID = Column(Integer, primary_key=True)
+    TITLE = Column(String)
 
 class BusinessUnit(Base):
     __tablename__ = 'BusinessUnit'
