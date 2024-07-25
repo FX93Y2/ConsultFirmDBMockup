@@ -8,10 +8,13 @@ from src.database_generator.generators.payroll import generate_payroll
 from src.database_generator.generators.project_deliverable import generate_projects
 from src.spreadsheet_generator.indirect_cost import generate_indirect_costs
 from src.spreadsheet_generator.non_billable_time import generate_non_billable_time_report
+from src.review_generator.Review_Generator_GPT import generate_json
+import os
+import time
 
 START_YEAR = 2015
-END_YEAR = 2016
-INITIAL_CONSULTANTS = 100
+END_YEAR = 2015
+INITIAL_CONSULTANTS = 5
 
 def main():
     # Initialize DB
@@ -20,7 +23,7 @@ def main():
     # Generate database
     generate_locations()
     generate_business_units()
-    generate_clients(358)
+    generate_clients(5)
     generate_titles()
     generate_consultant_title_history(INITIAL_CONSULTANTS, start_year=START_YEAR, end_year=END_YEAR)
     generate_payroll(END_YEAR)
@@ -32,7 +35,11 @@ def main():
     # Generate non-billable time report
     generate_non_billable_time_report()
 
-    # Generate json file
+    # Wait for 10 seconds to ensure database creation
+    # time.sleep(10)
+
+    # Generate JSON file with reviews
+    generate_json()  # Call the function to generate the JSON file
 
 if __name__ == "__main__":
     main()

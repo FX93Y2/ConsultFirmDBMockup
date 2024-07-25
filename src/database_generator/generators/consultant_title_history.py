@@ -9,6 +9,7 @@ from collections import defaultdict
 from ...db_model import Consultant, Title, BusinessUnit, ConsultantTitleHistory, engine
 from config import consultant_settings
 
+
 fake = Faker()
 faker_instances = {locale: Faker(locale) for unit_id in consultant_settings.UNIT_LOCALE_MAPPING for locale in consultant_settings.UNIT_LOCALE_MAPPING[unit_id]}
 
@@ -152,9 +153,11 @@ def generate_consultant_data(initial_num_consultants, start_year, end_year):
     consultant_data = []
     title_history_data = []
     consultant_id_counter = 1
-
+    business_units = list(consultant_settings.UNIT_LOCALE_MAPPING.keys())
+    
     def create_consultant(unit_id, title_id, hire_date):
         nonlocal consultant_id_counter
+        unit_id = random.choice(business_units)
         faker = get_faker_for_unit(unit_id)
         consultant_id = f"C{consultant_id_counter:04d}"
         
