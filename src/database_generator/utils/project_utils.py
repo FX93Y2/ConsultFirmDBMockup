@@ -43,15 +43,17 @@ def assign_project_team(session, project, assigned_consultants):
         EndDate=None
     )
     session.add(team_member)
-    logging.info(f"Assigned Project Manager: {project_manager.ConsultantID} (Title: {project_manager.custom_data.get('title_id', 'Unknown')}) to ProjectID: {project.ProjectID}")
+    pm_custom_data = session.query(ConsultantCustomData).get(project_manager.ConsultantID)
+    logging.info(f"Assigned Project Manager: {project_manager.ConsultantID} (Title: {pm_custom_data.CustomData.get('title_id', 'Unknown')}) to ProjectID: {project.ProjectID}")
 
     # Sort remaining consultants by title_id in descending order
-    team_members = sorted(assigned_consultants[1:], key=lambda c: c.custom_data.get('title_id', 1), reverse=True)
+    team_members = sorted(assigned_consultants[1:], key=lambda c: session.query(ConsultantCustomData).get(c.ConsultantID).CustomData.get('title_id', 1), reverse=True)
 
     # Assign Team Leads (up to 3 consultants with title_id >= 3)
     team_leads_count = 0
     for consultant in team_members:
-        if consultant.custom_data.get('title_id', 1) >= 3 and team_leads_count < 3:
+        consultant_custom_data = session.query(ConsultantCustomData).get(consultant.ConsultantID)
+        if consultant_custom_data.CustomData.get('title_id', 1) >= 3 and team_leads_count < 3:
             role = 'Team Lead'
             team_leads_count += 1
         else:
@@ -65,7 +67,7 @@ def assign_project_team(session, project, assigned_consultants):
             EndDate=None
         )
         session.add(team_member)
-        logging.info(f"Assigned {role}: {consultant.ConsultantID} (Title: {consultant.custom_data.get('title_id', 'Unknown')}) to ProjectID: {project.ProjectID}")
+        logging.info(f"Assigned {role}: {consultant.ConsultantID} (Title: {consultant_custom_data.CustomData.get('title_id', 'Unknown')}) to ProjectID: {project.ProjectID}")
 
     session.flush()
 
@@ -79,35 +81,7 @@ def calculate_project_progress(project, deliverables):
     weighted_progress = sum((d.ActualHours / d.PlannedHours) * (d.PlannedHours / total_planned_hours) * 100 for d in deliverables)
     project.Progress = min(100, int(round(weighted_progress)))
 
-def handle_project_completion(session, project, completion_date, available_consultants):
-    # Update project status and end date
-    project.Status = 'Completed'
-    project.ActualEndDate = completion_date
 
-    # Update ProjectTeam records
-    team_members = session.query(ProjectTeam).filter(
-        ProjectTeam.ProjectID == project.ProjectID,
-        ProjectTeam.EndDate.is_(None)
-    ).all()
-
-    for team_member in team_members:
-        team_member.EndDate = completion_date
-
-        # Update consultant metadata
-        consultant = session.query(Consultant).get(team_member.ConsultantID)
-        if consultant:
-            consultant.custom_data['active_project_count'] = max(0, consultant.custom_data.get('active_project_count', 1) - 1)
-
-            # Add consultant back to available pool if not at max projects
-            max_projects = project_settings.MAX_PROJECTS_PER_CONSULTANT.get(consultant.custom_data.get('title_id', 1), 2)
-            if consultant.custom_data.get('active_project_count', 0) < max_projects:
-                if consultant not in available_consultants:
-                    available_consultants.append(consultant)
-
-    # Calculate and update final project metrics
-    update_project_financials(session, project)
-
-    logging.info(f"Project {project.ProjectID} completed on {completion_date}")
 
 def get_available_consultants(session, current_date):
     two_months_ago = current_date - timedelta(days=60)
@@ -147,14 +121,15 @@ def get_available_consultants(session, current_date):
 
     available_consultants = []
     for consultant, title_id, last_project_date, active_project_count in results:
-        # Initialize custom_data if it doesn't exist
-        if not hasattr(consultant, 'custom_data'):
-            consultant.custom_data = {}
+        consultant_custom_data = session.query(ConsultantCustomData).get(consultant.ConsultantID)
+        if not consultant_custom_data:
+            consultant_custom_data = ConsultantCustomData(ConsultantID=consultant.ConsultantID, CustomData={})
+            session.add(consultant_custom_data)
         
         # Update consultant metadata
-        consultant.custom_data.update({
+        consultant_custom_data.CustomData.update({
             'title_id': title_id,
-            'last_project_date': last_project_date,
+            'last_project_date': last_project_date.isoformat() if last_project_date else None,
             'active_project_count': int(active_project_count) if active_project_count is not None else 0
         })
         available_consultants.append(consultant)
@@ -187,7 +162,7 @@ def assign_project_to_business_unit(session, assigned_consultants, active_units,
                                for unit_id in project_counts.keys()}
     return max(distribution_difference, key=distribution_difference.get)
 
-def assign_consultants_to_project(available_consultants, project_manager, target_team_size):
+def assign_consultants_to_project(session, available_consultants, project_manager, target_team_size):
     '''
     main function to select which consultants will be on the project team.
     '''
@@ -197,14 +172,15 @@ def assign_consultants_to_project(available_consultants, project_manager, target
     consultants_by_title = {title: [] for title in range(1, 7)}
     for c in available_consultants:
         if c != project_manager:
-            title = c.custom_data.get('title_id', 1)
+            consultant_custom_data = session.query(ConsultantCustomData).get(c.ConsultantID)
+            title = consultant_custom_data.CustomData.get('title_id', 1)
             consultants_by_title[title].append(c)
 
     # Sort consultants in each title group
     for title in consultants_by_title:
-        consultants_by_title[title].sort(key=lambda c: c.custom_data.get('active_project_count', 0))
+        consultants_by_title[title].sort(key=lambda c: session.query(ConsultantCustomData).get(c.ConsultantID).CustomData.get('active_project_count', 0))
 
-    remaining_slots = target_team_size - 1  # Subtract 1 for the project manager
+    remaining_slots = max(0, target_team_size - 1)  # Subtract 1 for the project manager
 
     # Calculate target counts for each title
     target_counts = {title: max(1, round(remaining_slots * project_settings.TITLE_DISTRIBUTION_TARGETS[title])) 
@@ -229,7 +205,7 @@ def assign_consultants_to_project(available_consultants, project_manager, target
                 break
 
     logging.info(f"Assigned team: PM={project_manager.ConsultantID}, "
-                 f"Team composition: {Counter(c.custom_data.get('title_id', 1) for c in assigned_consultants)}")
+                 f"Team composition: {Counter(session.query(ConsultantCustomData).get(c.ConsultantID).CustomData.get('title_id', 1) for c in assigned_consultants)}")
 
     return assigned_consultants, remaining_slots
 
@@ -312,18 +288,20 @@ def round_decimal(value, decimal_places=1):
     return value.quantize(Decimal(10) ** -decimal_places, rounding=ROUND_HALF_UP)
 
 def update_project_team(session, project, available_consultants, current_team, current_date):
-    '''
-    util function for update_existing_projects to update the project team
-    '''
-    target_team_size = project.custom_data.get('target_team_size', project_settings.MIN_TEAM_SIZE)
-    remaining_slots = project.custom_data.get('remaining_slots', target_team_size - len(current_team))
+    project_custom_data = session.query(ProjectCustomData).get(project.ProjectID)
+    if not project_custom_data:
+        project_custom_data = ProjectCustomData(ProjectID=project.ProjectID, CustomData={})
+        session.add(project_custom_data)
+
+    target_team_size = project_custom_data.CustomData.get('target_team_size', project_settings.MIN_TEAM_SIZE)
+    
+    # Recalculate remaining_slots based on current team size and target team size
+    current_team_size = len(current_team)
+    remaining_slots = max(0, target_team_size - current_team_size)
 
     if remaining_slots > 0:
-        # Fetch current team members
-        current_team_members = session.query(Consultant).filter(Consultant.ConsultantID.in_(current_team)).all()
-        
         # Calculate current team composition
-        current_composition = Counter(c.custom_data.get('title_id', 1) for c in current_team_members)
+        current_composition = Counter(session.query(ConsultantCustomData).get(c).CustomData.get('title_id', 1) for c in current_team)
         
         # Calculate target counts for remaining slots
         target_counts = {title: max(1, round(remaining_slots * project_settings.TITLE_DISTRIBUTION_TARGETS[title])) 
@@ -334,16 +312,20 @@ def update_project_team(session, project, available_consultants, current_team, c
             target_counts[title] = max(0, target_counts[title] - current_composition[title])
 
         # Sort available consultants
-        available_consultants.sort(key=lambda c: (c.custom_data.get('active_project_count', 0), -c.custom_data.get('title_id', 1)))
+        available_consultants.sort(key=lambda c: (
+            session.query(ConsultantCustomData).get(c.ConsultantID).CustomData.get('active_project_count', 0),
+            -session.query(ConsultantCustomData).get(c.ConsultantID).CustomData.get('title_id', 1)
+        ))
 
         for consultant in available_consultants:
             if remaining_slots <= 0:
                 break
 
-            consultant_title = consultant.custom_data.get('title_id', 1)
+            consultant_custom_data = session.query(ConsultantCustomData).get(consultant.ConsultantID)
+            consultant_title = consultant_custom_data.CustomData.get('title_id', 1)
             if (consultant.ConsultantID not in current_team and 
                 target_counts[consultant_title] > 0 and
-                consultant.custom_data.get('active_project_count', 0) < project_settings.MAX_PROJECTS_PER_CONSULTANT.get(consultant_title, 2)):
+                consultant_custom_data.CustomData.get('active_project_count', 0) < project_settings.MAX_PROJECTS_PER_CONSULTANT.get(consultant_title, 2)):
 
                 team_member = ProjectTeam(
                     ProjectID=project.ProjectID,
@@ -353,22 +335,14 @@ def update_project_team(session, project, available_consultants, current_team, c
                 )
                 session.add(team_member)
                 current_team.append(consultant.ConsultantID)
-                consultant.custom_data['active_project_count'] = consultant.custom_data.get('active_project_count', 0) + 1
+                consultant_custom_data.CustomData['active_project_count'] = consultant_custom_data.CustomData.get('active_project_count', 0) + 1
                 target_counts[consultant_title] -= 1
                 remaining_slots -= 1
                 logging.info(f"Added consultant {consultant.ConsultantID} (Title: {consultant_title}) to project {project.ProjectID} team")
 
-    project.custom_data['team'] = current_team
-    project.custom_data['remaining_slots'] = remaining_slots
+    # Update CustomData with recalculated values
+    project_custom_data.CustomData['team'] = current_team
+    project_custom_data.CustomData['remaining_slots'] = remaining_slots
+    project_custom_data.CustomData['target_team_size'] = target_team_size
     logging.info(f"Updated team size for project {project.ProjectID}: {len(current_team)} members, Remaining slots: {remaining_slots}")
-
-def log_consultant_projects(session, current_date):
-    consultants = session.query(Consultant).all()
-    for consultant in consultants:
-        active_projects = session.query(Project).join(ProjectTeam).filter(
-            ProjectTeam.ConsultantID == consultant.ConsultantID,
-            ProjectTeam.StartDate <= current_date,
-            (ProjectTeam.EndDate.is_(None) | (ProjectTeam.EndDate >= current_date)),
-            Project.Status.in_(['Not Started', 'In Progress'])
-        ).all()
 

@@ -31,7 +31,7 @@ def generate_projects(start_year, end_year, initial_consultants):
             # Update available consultants at the start of each year
             available_consultants = get_available_consultants(session, date(current_year, 1, 1))
             
-            for current_month in range(1, 13):
+            for current_month in range(1, 12):
                 month_start = date(current_year, current_month, 1)
                 if month_start > simulation_end_date:
                     break
@@ -54,7 +54,6 @@ def generate_projects(start_year, end_year, initial_consultants):
                 # End of month operations
                 month_end = current_date - timedelta(days=1)
                 update_existing_projects(session, month_end, available_consultants)
-                log_consultant_projects(session, month_end)
 
                 session.commit()
 
@@ -64,27 +63,43 @@ def generate_projects(start_year, end_year, initial_consultants):
 
     except Exception as e:
         print(f"An error occurred while processing projects: {str(e)}")
-        import traceback
         print(traceback.format_exc())
         session.rollback()
     finally:
         session.close()
 
+def update_consultant_custom_data(session, consultant_id, project_id, action, current_date):
+    consultant_custom_data = session.query(ConsultantCustomData).get(consultant_id)
+    if not consultant_custom_data:
+        consultant_custom_data = ConsultantCustomData(ConsultantID=consultant_id, CustomData={})
+        session.add(consultant_custom_data)
 
-def update_consultant_metadata(consultant, title_id, last_project_date, active_project_count):
-    consultant.custom_data['title_id'] = title_id
-    consultant.custom_data['last_project_date'] = last_project_date
-    consultant.custom_data['active_project_count'] = active_project_count
+    if action == 'add':
+        consultant_custom_data.CustomData['active_project_count'] = consultant_custom_data.CustomData.get('active_project_count', 0) + 1
+        consultant_custom_data.CustomData['last_project_date'] = current_date.isoformat()
+    elif action == 'remove':
+        consultant_custom_data.CustomData['active_project_count'] = max(0, consultant_custom_data.CustomData.get('active_project_count', 1) - 1)
+        consultant_custom_data.CustomData['last_project_date'] = current_date.isoformat()
 
-def update_project_metadata(project, team, deliverables, target_hours):
-    project.custom_data['team'] = [c.ConsultantID for c in team]
-    project.custom_data['deliverables'] = {
-        d.DeliverableID: {
-            'target_hours': target_hours / len(deliverables),
-            'consultant_deliverables': []
-        } for d in deliverables
+    session.flush()
+
+def update_project_metadata(session, project, team, deliverables, target_hours):
+    project_custom_data = session.query(ProjectCustomData).filter_by(ProjectID=project.ProjectID).first()
+    if not project_custom_data:
+        project_custom_data = ProjectCustomData(ProjectID=project.ProjectID, CustomData={})
+        session.add(project_custom_data)
+    
+    project_custom_data.CustomData = {
+        'team': [c.ConsultantID for c in team],
+        'deliverables': {
+            d.DeliverableID: {
+                'target_hours': target_hours / len(deliverables),
+                'consultant_deliverables': []
+            } for d in deliverables
+        },
+        'target_hours': target_hours
     }
-    project.custom_data['target_hours'] = target_hours
+    session.flush()
 
 def calculate_yearly_project_targets(start_year, end_year, initial_consultants):
     yearly_targets = {}
@@ -121,7 +136,8 @@ def start_due_projects(session, current_date):
         project.Status = 'In Progress'
         logging.info(f"Starting project {project.ProjectID} on {current_date}")
 
-        team_member_ids = project.custom_data.get('team', [])
+        project_custom_data = session.query(ProjectCustomData).get(project.ProjectID)
+        team_member_ids = project_custom_data.CustomData.get('team', [])
         for consultant_id in team_member_ids:
             existing_assignment = session.query(ProjectTeam).filter(
                 ProjectTeam.ProjectID == project.ProjectID,
@@ -136,28 +152,32 @@ def start_due_projects(session, current_date):
                     StartDate=current_date
                 )
                 session.add(team_member)
+                update_consultant_custom_data(session, consultant_id, project.ProjectID, 'add', current_date)
                 logging.info(f"Assigned consultant {consultant_id} to project {project.ProjectID}")
 
     session.commit()     
 
 
 def create_new_projects_if_needed(session, current_date, available_consultants, active_units, simulation_start_date, monthly_targets):
-    # Include all consultants, not just those with active projects
     all_consultants = session.query(Consultant).all()
     
-    project_manager_consultants = [c for c in all_consultants if c.custom_data.get('title_id', 0) >= 4]
+    project_manager_consultants = [c for c in all_consultants if session.query(ConsultantCustomData).get(c.ConsultantID).CustomData.get('title_id', 0) >= 4]
     
-    project_manager_consultants.sort(key=lambda c: (c.custom_data.get('active_project_count', 0), -c.custom_data.get('title_id', 0)))
+    project_manager_consultants.sort(key=lambda c: (
+        session.query(ConsultantCustomData).get(c.ConsultantID).CustomData.get('active_project_count', 0),
+        -session.query(ConsultantCustomData).get(c.ConsultantID).CustomData.get('title_id', 0)
+    ))
     
     logging.info(f"Available project managers: {len(project_manager_consultants)}")
-    logging.info(f"Top 5 PM candidates: {[(c.ConsultantID, c.custom_data.get('title_id', 0), c.custom_data.get('active_project_count', 0)) for c in project_manager_consultants[:5]]}")
+    logging.info(f"Top 5 PM candidates: {[(c.ConsultantID, session.query(ConsultantCustomData).get(c.ConsultantID).CustomData.get('title_id', 0), session.query(ConsultantCustomData).get(c.ConsultantID).CustomData.get('active_project_count', 0)) for c in project_manager_consultants[:5]]}")
 
     target_for_month = monthly_targets[current_date.month - 1]
     
-    # Calculate total capacity for new projects
-    total_capacity = sum(max(0, project_settings.MAX_PROJECTS_PER_CONSULTANT.get(c.custom_data.get('title_id', 1), 2) - c.custom_data.get('active_project_count', 0)) for c in project_manager_consultants)
+    total_capacity = sum(max(0, project_settings.MAX_PROJECTS_PER_CONSULTANT.get(
+        session.query(ConsultantCustomData).get(c.ConsultantID).CustomData.get('title_id', 1), 2) - 
+        session.query(ConsultantCustomData).get(c.ConsultantID).CustomData.get('active_project_count', 0)
+    ) for c in project_manager_consultants)
     
-    # Adjust target based on capacity, but ensure it's not negative
     adjusted_target = max(0, min(target_for_month, total_capacity))
     
     logging.info(f"Target for month: {target_for_month}, Adjusted target: {adjusted_target}, Total capacity: {total_capacity}")
@@ -168,7 +188,10 @@ def create_new_projects_if_needed(session, current_date, available_consultants, 
     else:
         projects_to_create = 0
 
-    projects_this_month = len([p for p in session.query(Project).all() if p.custom_data.get('start_date', date.min).month == current_date.month and p.custom_data.get('start_date', date.min).year == current_date.year])
+    projects_this_month = len([p for p in session.query(Project).all() if 
+        session.query(ProjectCustomData).get(p.ProjectID).CustomData.get('start_date', date.min).month == current_date.month and 
+        session.query(ProjectCustomData).get(p.ProjectID).CustomData.get('start_date', date.min).year == current_date.year
+    ])
     projects_to_create = max(0, projects_to_create - projects_this_month)
 
     logging.info(f"Target projects to create: {projects_to_create}")
@@ -178,24 +201,28 @@ def create_new_projects_if_needed(session, current_date, available_consultants, 
         if projects_created >= projects_to_create:
             break
         
-        max_projects = project_settings.MAX_PROJECTS_PER_CONSULTANT.get(consultant.custom_data.get('title_id', 1), 2)
-        if consultant.custom_data.get('active_project_count', 0) >= max_projects:
+        consultant_custom_data = session.query(ConsultantCustomData).get(consultant.ConsultantID)
+        max_projects = project_settings.MAX_PROJECTS_PER_CONSULTANT.get(consultant_custom_data.CustomData.get('title_id', 1), 2)
+        if consultant_custom_data.CustomData.get('active_project_count', 0) >= max_projects:
             continue
 
-        logging.info(f"Attempting to create project with PM: {consultant.ConsultantID} (Title: {consultant.custom_data.get('title_id', 0)}, Active Projects: {consultant.custom_data.get('active_project_count', 0)})")
+        logging.info(f"Attempting to create project with PM: {consultant.ConsultantID} (Title: {consultant_custom_data.CustomData.get('title_id', 0)}, Active Projects: {consultant_custom_data.CustomData.get('active_project_count', 0)})")
         project = create_new_project(session, current_date, all_consultants, active_units, simulation_start_date, project_manager=consultant)
         if project:
             projects_created += 1
 
-            # Update consultant project counts
-            for consultant_id in project.custom_data['team']:
-                consultant = session.query(Consultant).get(consultant_id)
-                consultant.custom_data['active_project_count'] = consultant.custom_data.get('active_project_count', 0) + 1
-                consultant.custom_data['last_project_date'] = current_date
+            project_custom_data = session.query(ProjectCustomData).get(project.ProjectID)
+            for consultant_id in project_custom_data.CustomData['team']:
+                update_consultant_custom_data(session, consultant_id, project.ProjectID, 'add', current_date)
 
-            # Update available_consultants list
-            available_consultants = [c for c in all_consultants if c.custom_data.get('active_project_count', 0) < project_settings.MAX_PROJECTS_PER_CONSULTANT.get(c.custom_data.get('title_id', 1), 2)]
-            available_consultants.sort(key=lambda c: (c.custom_data.get('active_project_count', 0), -c.custom_data.get('title_id', 0)))
+            available_consultants = [c for c in all_consultants if 
+                session.query(ConsultantCustomData).get(c.ConsultantID).CustomData.get('active_project_count', 0) < 
+                project_settings.MAX_PROJECTS_PER_CONSULTANT.get(session.query(ConsultantCustomData).get(c.ConsultantID).CustomData.get('title_id', 1), 2)
+            ]
+            available_consultants.sort(key=lambda c: (
+                session.query(ConsultantCustomData).get(c.ConsultantID).CustomData.get('active_project_count', 0),
+                -session.query(ConsultantCustomData).get(c.ConsultantID).CustomData.get('title_id', 0)
+            ))
             logging.info(f"Successfully created project: ProjectID {project.ProjectID}")
         else:
             logging.warning(f"Failed to create new project with Project Manager: {consultant.ConsultantID}")
@@ -205,13 +232,13 @@ def create_new_projects_if_needed(session, current_date, available_consultants, 
 
 
 def create_new_project(session, current_date, available_consultants, active_units, simulation_start_date, project_manager):
-    logging.info(f"Attempting to create new project with PM: {project_manager.ConsultantID} (Title: {project_manager.custom_data.get('title_id', 'Unknown')})")
+    logging.info(f"Attempting to create new project with PM: {project_manager.ConsultantID} (Title: {project_manager.CustomData.CustomData.get('title_id', 'Unknown')})")
 
     try:
-        eligible_consultants = [c for c in available_consultants if c.custom_data.get('title_id', 0) <= project_manager.custom_data.get('title_id', 0)]
+        eligible_consultants = [c for c in available_consultants if c.CustomData.CustomData.get('title_id', 0) <= project_manager.CustomData.CustomData.get('title_id', 0)]
         days_before = random.randint(0, 15)
         created_at = current_date - timedelta(days=days_before)
-        created_at = max(created_at, simulation_start_date)# Ensure created_at is not before the simulation start date
+        created_at = max(created_at, simulation_start_date)
         project = Project(
             ClientID=random.choice(session.query(Client.ClientID).all())[0],
             UnitID=assign_project_to_business_unit(session, eligible_consultants, active_units, current_date.year),
@@ -234,20 +261,24 @@ def create_new_project(session, current_date, available_consultants, active_unit
         project.ActualHours = 0
 
         # Assign initial team members
-        assigned_consultants, remaining_slots = assign_consultants_to_project(eligible_consultants, project_manager, target_team_size)
+        assigned_consultants, remaining_slots = assign_consultants_to_project(session, eligible_consultants, project_manager, target_team_size)
 
         deliverables = generate_deliverables(project, target_hours)
         session.add_all(deliverables)
         session.flush()
 
         # Initialize project custom_data
-        project.custom_data = {
-            'team': [c.ConsultantID for c in assigned_consultants],
-            'deliverables': {},
-            'target_hours': target_hours,
-            'target_team_size': target_team_size,
-            'remaining_slots': remaining_slots
-        }
+        project_custom_data = ProjectCustomData(
+            ProjectID=project.ProjectID,
+            CustomData={
+                'team': [c.ConsultantID for c in assigned_consultants],
+                'deliverables': {},
+                'target_hours': target_hours,
+                'target_team_size': target_team_size,
+                'remaining_slots': remaining_slots
+            }
+        )
+        session.add(project_custom_data)
 
         # Set up billing rates for all title levels
         if project.Type == 'Time and Material':
@@ -267,14 +298,13 @@ def create_new_project(session, current_date, available_consultants, active_unit
         assign_project_team(session, project, assigned_consultants)
         session.flush()
 
-        update_project_metadata(project, assigned_consultants, deliverables, target_hours)
+        update_project_metadata(session, project, assigned_consultants, deliverables, target_hours)
 
         logging.info(f"Project {project.ProjectID} created with {len(assigned_consultants)} consultants. Remaining slots: {remaining_slots}")
 
         return project
     except Exception as e:
         logging.error(f"Error creating new project: {str(e)}")
-        import traceback
         print(traceback.format_exc())
         session.rollback()
         return None
@@ -293,9 +323,19 @@ def update_existing_projects(session, current_date, available_consultants):
                 project.Status = 'In Progress'
                 project.ActualStartDate = current_date
 
+            # Get project custom data
+            project_custom_data = session.query(ProjectCustomData).get(project.ProjectID)
+            if not project_custom_data:
+                project_custom_data = ProjectCustomData(ProjectID=project.ProjectID, CustomData={})
+                session.add(project_custom_data)
+
             # Update project team if needed
-            current_team = project.custom_data.get('team', [])
+            current_team = project_custom_data.CustomData.get('team', [])
             update_project_team(session, project, available_consultants, current_team, current_date)
+
+            # Update the project custom data
+            project_custom_data.CustomData['team'] = current_team
+            session.flush()
 
         except Exception as e:
             logging.error(f"Error updating project {project.ProjectID}: {str(e)}")
@@ -311,8 +351,11 @@ def generate_daily_consultant_deliverables(session, current_date, projects):
     
     for project in active_projects:
         project_actual_hours = Decimal('0.0')
+        project_custom_data = session.query(ProjectCustomData).filter_by(ProjectID=project.ProjectID).first()
+        if not project_custom_data:
+            continue
 
-        for deliverable_id, deliverable_meta in project.custom_data.get('deliverables', {}).items():
+        for deliverable_id, deliverable_meta in project_custom_data.CustomData.get('deliverables', {}).items():
             deliverable = session.query(Deliverable).get(deliverable_id)
             if deliverable.Status == 'Completed' or deliverable.PlannedStartDate > current_date:
                 continue
@@ -326,9 +369,11 @@ def generate_daily_consultant_deliverables(session, current_date, projects):
             if remaining_hours <= Decimal('0.0'):
                 continue
 
-            for consultant_id in project.custom_data.get('team', []):
-                consultant = session.query(Consultant).get(consultant_id)
-                consultant_title = consultant.custom_data.get('title_id', 1)  # Default to 1 if not present
+            for consultant_id in project_custom_data.CustomData.get('team', []):
+                consultant_custom_data = session.query(ConsultantCustomData).filter_by(ConsultantID=consultant_id).first()
+                if not consultant_custom_data:
+                    continue
+                consultant_title = consultant_custom_data.CustomData.get('title_id', 1)
                 max_daily_hours = Decimal(str(project_settings.MAX_DAILY_HOURS_PER_TITLE.get(consultant_title, 8.0)))
                 min_daily_hours = Decimal(str(project_settings.MIN_DAILY_HOURS_PER_PROJECT.get(consultant_title, 2.0)))
 
@@ -358,7 +403,7 @@ def generate_daily_consultant_deliverables(session, current_date, projects):
             deliverable.Progress = min(100, int((Decimal(str(deliverable.ActualHours)) / Decimal(str(deliverable_meta['target_hours']))) * 100))
 
         project.ActualHours = float(round_decimal(Decimal(str(project.ActualHours)) + project_actual_hours, 1))
-        project.Progress = min(100, int((Decimal(str(project.ActualHours)) / Decimal(str(project.custom_data['target_hours']))) * 100))
+        project.Progress = min(100, int((Decimal(str(project.ActualHours)) / Decimal(str(project_custom_data.CustomData['target_hours']))) * 100))
 
     session.commit()
 
@@ -374,10 +419,11 @@ def update_project_statuses(session, current_date, available_consultants):
 
         if project.Status == 'In Progress':
             all_deliverables_completed = True
-            total_target_hours = Decimal(project.custom_data.get('target_hours', 0))
+            project_custom_data = session.query(ProjectCustomData).get(project.ProjectID)
+            total_target_hours = Decimal(project_custom_data.CustomData.get('target_hours', 0))
             weighted_progress = Decimal('0.0')
 
-            for deliverable_id, deliverable_meta in project.custom_data.get('deliverables', {}).items():
+            for deliverable_id, deliverable_meta in project_custom_data.CustomData.get('deliverables', {}).items():
                 deliverable = session.query(Deliverable).get(deliverable_id)
 
                 if Decimal(deliverable.ActualHours) >= Decimal(deliverable_meta['target_hours']):
@@ -405,20 +451,48 @@ def update_project_statuses(session, current_date, available_consultants):
             elif all_deliverables_completed:
                 project.Status = 'Completed'
                 project.ActualEndDate = current_date
-                handle_project_completion(session, project, current_date, available_consultants)
+                handle_project_completion(session, project, current_date, available_consultants, current_date)
     session.commit()
 
+def handle_project_completion(session, project, completion_date, available_consultants, current_date):
+    # Update project status and end date
+    project.Status = 'Completed'
+    project.ActualEndDate = completion_date
+
+    # Update ProjectTeam records
+    team_members = session.query(ProjectTeam).filter(
+        ProjectTeam.ProjectID == project.ProjectID,
+        ProjectTeam.EndDate.is_(None)
+    ).all()
+
+    for team_member in team_members:
+        team_member.EndDate = completion_date
+        update_consultant_custom_data(session, team_member.ConsultantID, project.ProjectID, 'remove', completion_date)
+
+        # Add consultant back to available pool if not at max projects
+        consultant_custom_data = session.query(ConsultantCustomData).get(team_member.ConsultantID)
+        max_projects = project_settings.MAX_PROJECTS_PER_CONSULTANT.get(consultant_custom_data.CustomData.get('title_id', 1), 2)
+        if consultant_custom_data.CustomData.get('active_project_count', 0) < max_projects:
+            consultant = session.query(Consultant).get(team_member.ConsultantID)
+            if consultant not in available_consultants:
+                available_consultants.append(consultant)
+
+    # Calculate and update final project metrics
+    update_project_financials(session, project)
+
+    logging.info(f"Project {project.ProjectID} completed on {completion_date}")
 
 def generate_project_expenses_for_year(session, simulation_end_date):
     projects = session.query(Project).filter(Project.Status.in_(['In Progress', 'Completed'])).all()
     
     for project in projects:
+        project_custom_data = session.query(ProjectCustomData).get(project.ProjectID)
         total_consultant_cost = sum(cd.Hours * calculate_hourly_cost(session, cd.ConsultantID, cd.Date.year)
-                                    for deliverable_meta in project.custom_data.get('deliverables', {}).values()
+                                    for deliverable_meta in project_custom_data.CustomData.get('deliverables', {}).values()
                                     for cd in deliverable_meta.get('consultant_deliverables', []))
 
         expenses = []
-        for deliverable_id, deliverable_meta in project.custom_data.get('deliverables', {}).items():
+        for deliverable_id, deliverable_meta in project_custom_data.CustomData.get('deliverables', {}).items():
             deliverable = session.query(Deliverable).get(deliverable_id)
             
             expense_start_date = deliverable.ActualStartDate or deliverable.PlannedStartDate
@@ -438,7 +512,6 @@ def generate_project_expenses_for_year(session, simulation_end_date):
                 if consultant_deliverable_dates:
                     expense_date = random.choice(consultant_deliverable_dates)
                 else:
-                    # Fallback: use the middle date between start and end
                     expense_date = expense_start_date + (expense_end_date - expense_start_date) / 2
                 
                 expense = ProjectExpense(

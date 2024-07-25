@@ -1,5 +1,6 @@
 from decimal import Decimal, ROUND_HALF_UP
-from sqlalchemy import func
+from sqlalchemy import func, cast, Integer
+from sqlalchemy.orm import aliased
 import random
 from models.db_model import *
 from config import project_settings
@@ -20,20 +21,27 @@ def calculate_hourly_cost(session, consultant_id, year):
     return hourly_cost * (1 + project_settings.OVERHEAD_PERCENTAGE)
 
 def calculate_average_experience(session, title_id, current_date):
-    consultants = session.query(Consultant).all()
-    relevant_consultants = [c for c in consultants if c.custom_data.get('title_id') == title_id]
+    ConsultantCustomDataAlias = aliased(ConsultantCustomData)
     
-    if not relevant_consultants:
+    consultants = session.query(Consultant).join(
+        ConsultantCustomDataAlias,
+        Consultant.ConsultantID == ConsultantCustomDataAlias.ConsultantID
+    ).filter(
+        cast(func.json_extract(ConsultantCustomDataAlias.CustomData, '$.title_id'), Integer) == title_id
+    ).all()
+    
+    if not consultants:
         return 5  # Default to 5 years if no consultants found for this title
     
-    total_experience = sum((current_date.year - c.HireYear) for c in relevant_consultants)
-    return total_experience / len(relevant_consultants)
+    total_experience = sum((current_date.year - c.HireYear) for c in consultants)
+    return total_experience / len(consultants)
 
 def calculate_project_financials(session, project, assigned_consultants, current_date, deliverables):
     # Calculate billing rates for each title
     title_billing_rates = {}
     for consultant in assigned_consultants:
-        title_id = consultant.custom_data.get('title_id', 1)  # Default to 1 if title_id is not found
+        consultant_custom_data = session.query(ConsultantCustomData).get(consultant.ConsultantID)
+        title_id = consultant_custom_data.CustomData.get('title_id', 1)  # Default to 1 if title_id is not found
         if title_id not in title_billing_rates:
             title_billing_rates[title_id] = calculate_billing_rate(
                 title_id, 
@@ -47,7 +55,8 @@ def calculate_project_financials(session, project, assigned_consultants, current
     for consultant in assigned_consultants:
         consultant_hours = Decimal(project.PlannedHours) / Decimal(len(assigned_consultants))
         cost_rate = Decimal(str(calculate_hourly_cost(session, consultant.ConsultantID, current_date.year)))
-        billing_rate = title_billing_rates[consultant.custom_data.get('title_id', 1)]
+        consultant_custom_data = session.query(ConsultantCustomData).get(consultant.ConsultantID)
+        billing_rate = title_billing_rates[consultant_custom_data.CustomData.get('title_id', 1)]
         
         estimated_total_cost += cost_rate * consultant_hours
         estimated_total_revenue += billing_rate * consultant_hours
@@ -69,7 +78,11 @@ def calculate_project_financials(session, project, assigned_consultants, current
         session.add_all(billing_rates)
         session.flush()
 
-    project.custom_data['pre_generated_expenses'] = generate_project_expenses(project, float(estimated_total_cost), deliverables)
+    project_custom_data = session.query(ProjectCustomData).get(project.ProjectID)
+    if not project_custom_data:
+        project_custom_data = ProjectCustomData(ProjectID=project.ProjectID, CustomData={})
+        session.add(project_custom_data)
+    project_custom_data.CustomData['pre_generated_expenses'] = generate_project_expenses(project, float(estimated_total_cost), deliverables)
 
     # Distribute price to deliverables for fixed contracts
     if project.Type == 'Fixed':
@@ -136,8 +149,9 @@ def update_project_financials(session, project):
         for deliverable in project.Deliverables:
             consultant_deliverables = session.query(ConsultantDeliverable).filter_by(DeliverableID=deliverable.DeliverableID).all()
             for cd in consultant_deliverables:
-                consultant = session.query(Consultant).get(cd.ConsultantID)        
-                title_id = consultant.custom_data.get('title_id')
+                consultant = session.query(Consultant).get(cd.ConsultantID)
+                consultant_custom_data = session.query(ConsultantCustomData).get(cd.ConsultantID)
+                title_id = consultant_custom_data.CustomData.get('title_id')
                 billing_rate_entry = session.query(ProjectBillingRate).filter_by(
                     ProjectID=project.ProjectID,
                     TitleID=title_id
@@ -146,9 +160,14 @@ def update_project_financials(session, project):
                 actual_revenue += Decimal(cd.Hours) * Decimal(billing_rate_entry.Rate)
 
     # Update project metadata with financial information
-    project.custom_data['actual_cost'] = float(actual_cost)
-    project.custom_data['actual_revenue'] = float(actual_revenue)
-    project.custom_data['profit'] = float(actual_revenue - actual_cost)
-    project.custom_data['profit_margin'] = float((actual_revenue - actual_cost) / actual_revenue) if actual_revenue > 0 else 0
+    project_custom_data = session.query(ProjectCustomData).get(project.ProjectID)
+    if not project_custom_data:
+        project_custom_data = ProjectCustomData(ProjectID=project.ProjectID, CustomData={})
+        session.add(project_custom_data)
+    
+    project_custom_data.CustomData['actual_cost'] = float(actual_cost)
+    project_custom_data.CustomData['actual_revenue'] = float(actual_revenue)
+    project_custom_data.CustomData['profit'] = float(actual_revenue - actual_cost)
+    project_custom_data.CustomData['profit_margin'] = float((actual_revenue - actual_cost) / actual_revenue) if actual_revenue > 0 else 0
 
     session.commit()

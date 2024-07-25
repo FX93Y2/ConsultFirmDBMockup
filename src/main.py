@@ -15,7 +15,7 @@ from spreadsheet_generator.non_billable_time import generate_non_billable_time_r
 
 START_YEAR = 2015
 END_YEAR = 2015
-INITIAL_CONSULTANTS = 50
+INITIAL_CONSULTANTS = 100
 
 def main():
     # Initialize DB

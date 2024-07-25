@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, Integer, String, Date, DateTime, ForeignKey, Float, Boolean, PickleType
+from sqlalchemy import create_engine, Column, Integer, String, Date, DateTime, ForeignKey, Float, Boolean, PickleType, JSON
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.mutable import MutableDict
@@ -32,16 +32,7 @@ class Consultant(Base):
     
     BusinessUnit = relationship("BusinessUnit", back_populates="Consultants")
     TitleHistory = relationship("ConsultantTitleHistory", back_populates="Consultant")
-    
-    _custom_data = Column(MutableDict.as_mutable(PickleType), default={})
-
-    @property
-    def custom_data(self):
-        return self._custom_data
-
-    @custom_data.setter
-    def custom_data(self, value):
-        self._custom_data = value
+    CustomData = relationship("ConsultantCustomData", uselist=False, back_populates="Consultant")
 
 class ConsultantTitleHistory(Base):
     __tablename__ = 'Consultant_Title_History'
@@ -95,21 +86,14 @@ class Project(Base):
     PlannedHours = Column(Integer, nullable=True)
     ActualHours = Column(Float, nullable=True)
     Progress = Column(Integer, nullable=True)
-    CreatedAt = Column(DateTime, default=datetime.utcnow)
+    CreatedAt = Column(DateTime, default=datetime.now)
+
     Client = relationship("Client")
     BusinessUnit = relationship("BusinessUnit")
     Deliverables = relationship("Deliverable", back_populates="Project")
     Team = relationship("ProjectTeam", back_populates="Project")
-    
-    _custom_data = Column(MutableDict.as_mutable(PickleType), default={})
+    CustomData = relationship("ProjectCustomData", uselist=False, back_populates="Project")
 
-    @property
-    def custom_data(self):
-        return self._custom_data
-
-    @custom_data.setter
-    def custom_data(self, value):
-        self._custom_data = value
 
 class ProjectTeam(Base):
     __tablename__ = 'ProjectTeam'
@@ -171,6 +155,18 @@ class ProjectExpense(Base):
     IsBillable = Column(Boolean)
     Project = relationship("Project")
     Deliverable = relationship("Deliverable")
+
+class ConsultantCustomData(Base):
+    __tablename__ = 'ConsultantCustomData'
+    ConsultantID = Column(String, ForeignKey('Consultant.ConsultantID'), primary_key=True)
+    CustomData = Column(JSON)
+    Consultant = relationship("Consultant", back_populates="CustomData")
+
+class ProjectCustomData(Base):
+    __tablename__ = 'ProjectCustomData'
+    ProjectID = Column(Integer, ForeignKey('Project.ProjectID'), primary_key=True)
+    CustomData = Column(JSON)
+    Project = relationship("Project", back_populates="CustomData")
 
 def create_database():
     Base.metadata.drop_all(engine)

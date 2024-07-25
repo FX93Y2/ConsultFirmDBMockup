@@ -6,7 +6,7 @@ from unidecode import unidecode
 from datetime import timedelta, date
 from sqlalchemy.orm import sessionmaker
 from collections import defaultdict
-from models.db_model import Consultant, BusinessUnit, ConsultantTitleHistory, engine
+from models.db_model import Consultant, BusinessUnit, ConsultantTitleHistory, ConsultantCustomData, engine
 from config import consultant_settings
 
 fake = Faker()
@@ -60,14 +60,15 @@ def generate_title_slots(num_consultants):
     
     return slots
 
-# Functions for attrition
-
-def should_leave_company(title_id):
+def should_leave_company(consultant):
+    custom_data = consultant.CustomData.CustomData if consultant.CustomData else {}
+    title_id = custom_data.get('title_id', 1)
     return random.random() < consultant_settings.ATTRITION_RATE[title_id]
 
-# Functions for promotion
-
-def should_be_promoted(current_title_id, years_in_role, total_years_in_company):
+def should_be_promoted(consultant, years_in_role, total_years_in_company):
+    custom_data = consultant.CustomData.CustomData if consultant.CustomData else {}
+    current_title_id = custom_data.get('title_id', 1)
+    
     if current_title_id == 6:  # Highest title, can't be promoted
         return False
     
@@ -76,7 +77,6 @@ def should_be_promoted(current_title_id, years_in_role, total_years_in_company):
         return False
     
     base_promotion_chance = consultant_settings.PROMOTION_CHANCE
-    # Increase base promotion chance for higher titles
     base_promotion_chance += (current_title_id - 1) * 0.05
     
     additional_years = years_in_role - min_years
@@ -84,8 +84,7 @@ def should_be_promoted(current_title_id, years_in_role, total_years_in_company):
     tenure_bonus = min(0.2, total_years_in_company * 0.02)
     promotion_chance += tenure_bonus
     
-    result = random.random() < promotion_chance
-    return result
+    return random.random() < promotion_chance
 
 def get_years_in_current_role(consultant_id, current_title_id, current_year, title_history_data):
     relevant_history = [th for th in title_history_data if th.ConsultantID == consultant_id and th.TitleID == current_title_id]
@@ -114,7 +113,7 @@ def should_layoff(year, growth_rate):
 def get_layoff_percentage(growth_rate):
     return min(0.2, abs(growth_rate))
 
-def perform_layoffs(active_consultants, growth_rate, year, title_history_data, consultant_data):
+def perform_layoffs(session, active_consultants, growth_rate, year, title_history_data):
     layoff_percentage = get_layoff_percentage(growth_rate)
     total_consultants = sum(len(consultants) for consultants in active_consultants.values())
     num_layoffs = int(total_consultants * layoff_percentage)
@@ -130,7 +129,7 @@ def perform_layoffs(active_consultants, growth_rate, year, title_history_data, c
         layoffs.extend(consultants[:title_layoffs])
         active_consultants[title] = consultants[title_layoffs:]
 
-    for consultant in layoffs:
+    for consultant, years_in_role, total_years in layoffs:
         current_title_history = next(th for th in reversed(title_history_data) 
                                      if th.ConsultantID == consultant.ConsultantID and th.EndDate is None)
         layoff_date = date(year, random.randint(1, 12), random.randint(1, 28))
@@ -143,49 +142,53 @@ def perform_layoffs(active_consultants, growth_rate, year, title_history_data, c
             EventType='Layoff', 
             Salary=current_title_history.Salary
         ))
+    return num_layoffs, title_history_data
 
-    return num_layoffs, title_history_data, consultant_data
+def create_consultant(session, unit_id, title_id, hire_date):
+    faker = get_faker_for_unit(unit_id)
+    consultant_id = f"C{len(session.query(Consultant).all()) + 1:04d}"
+    
+    first_name = faker.first_name()
+    last_name = faker.last_name()
+    
+    if not is_latin(first_name):
+        first_name = unidecode(first_name)
+    if not is_latin(last_name):
+        last_name = unidecode(last_name)
+    
+    first_name_initial = ''.join([name[0].lower() for name in first_name.split()])       
+    last_name_email = last_name.replace(" ", "").lower()
+    email_suffix = consultant_id[-4:]
+    email = f"{first_name_initial}{last_name_email}{email_suffix}@ise558.com"
 
-# Main generation logicic
-def generate_consultant_data(initial_num_consultants, start_year, end_year):
-    consultant_data = []
-    title_history_data = []
-    consultant_id_counter = 1
-
-    def create_consultant(unit_id, title_id, hire_date):
-        nonlocal consultant_id_counter
-        faker = get_faker_for_unit(unit_id)
-        consultant_id = f"C{consultant_id_counter:04d}"
-        
-        first_name = faker.first_name()
-        last_name = faker.last_name()
-        
-        if not is_latin(first_name):
-            first_name = unidecode(first_name)
-        if not is_latin(last_name):
-            last_name = unidecode(last_name)
-        
-        first_name_initial = ''.join([name[0].lower() for name in first_name.split()])       
-        last_name_email = last_name.replace(" ", "").lower()
-        email_suffix = consultant_id[-4:]
-        email = f"{first_name_initial}{last_name_email}{email_suffix}@ise558.com"
-
-        phone = faker.phone_number()
-        consultant = Consultant(ConsultantID=consultant_id, FirstName=first_name, LastName=last_name, 
-                                Email=email, Contact=phone, BusinessUnitID=unit_id, HireYear=hire_date.year)
-        consultant.custom_data = {
+    phone = faker.phone_number()
+    consultant = Consultant(ConsultantID=consultant_id, FirstName=first_name, LastName=last_name, 
+                            Email=email, Contact=phone, BusinessUnitID=unit_id, HireYear=hire_date.year)
+    
+    consultant_custom_data = ConsultantCustomData(
+        ConsultantID=consultant_id,
+        CustomData={
             'title_id': title_id,
             'active_project_count': 0,
             'last_project_date': None
         }
-        consultant_id_counter += 1
+    )
+    
+    session.add(consultant)
+    session.add(consultant_custom_data)
+    
+    salary = get_new_salary(title_id)
+    title_history = ConsultantTitleHistory(
+        ConsultantID=consultant_id, TitleID=title_id, 
+        StartDate=hire_date, EventType='Hire', Salary=salary
+    )
+    
+    return consultant, title_history
 
-        salary = get_new_salary(title_id)
-        title_history = ConsultantTitleHistory(
-            ConsultantID=consultant_id, TitleID=title_id, 
-            StartDate=hire_date, EventType='Hire', Salary=salary
-        )
-        return consultant, title_history
+# Main generation logicic
+def generate_consultant_data(session, initial_num_consultants, start_year, end_year):
+    consultant_data = []
+    title_history_data = []
 
     # Initialize consultants for the start year
     start_date = date(start_year, 1, 1)
@@ -193,7 +196,7 @@ def generate_consultant_data(initial_num_consultants, start_year, end_year):
     for title_id in sorted(title_slots.keys(), reverse=True):
         num_slots = title_slots[title_id]
         for _ in range(num_slots):
-            consultant, title_history = create_consultant(1, title_id, start_date)  # Start with North America (unit_id 1)
+            consultant, title_history = create_consultant(session, 1, title_id, start_date)  # Start with North America (unit_id 1)
             consultant_data.append(consultant)
             title_history_data.append(title_history)
 
@@ -211,11 +214,12 @@ def generate_consultant_data(initial_num_consultants, start_year, end_year):
             if not current_title_history:
                 continue
 
-            current_title_id = current_title_history.TitleID
+            custom_data = consultant.CustomData.CustomData if consultant.CustomData else {}
+            current_title_id = custom_data.get('title_id', 1)
             years_in_role = get_years_in_current_role(consultant.ConsultantID, current_title_id, year, title_history_data)
             total_years = year - consultant.HireYear
 
-            if should_leave_company(current_title_id):
+            if should_leave_company(consultant):
                 leave_date = date(year, random.randint(1, 12), random.randint(1, 28))
                 current_title_history.EndDate = leave_date
                 title_history_data.append(ConsultantTitleHistory(
@@ -229,16 +233,14 @@ def generate_consultant_data(initial_num_consultants, start_year, end_year):
 
         # Handle layoffs
         if should_layoff(year, growth_rate):
-            num_layoffs, title_history_data, consultant_data = perform_layoffs(
-                active_consultants, growth_rate, year, title_history_data, consultant_data
-            )
+            num_layoffs, title_history_data = perform_layoffs(session, active_consultants, growth_rate, year, title_history_data)
 
         # Process promotions
         promotions = 0
         for title_id in range(1, 6):  # We don't process promotions for title 6
             promotion_candidates = []
             for consultant, years_in_role, total_years in active_consultants[title_id]:
-                if should_be_promoted(title_id, years_in_role, total_years):
+                if should_be_promoted(consultant, years_in_role, total_years):
                     promotion_candidates.append((consultant, years_in_role, total_years))
             
             available_slots = max(0, title_slots[title_id + 1] - len(active_consultants[title_id + 1]))
@@ -257,6 +259,11 @@ def generate_consultant_data(initial_num_consultants, start_year, end_year):
                 active_consultants[title_id + 1].append((candidate, 0, total_years + 1))
                 active_consultants[title_id] = [c for c in active_consultants[title_id] if c[0].ConsultantID != candidate.ConsultantID]
                 promotions += 1
+                
+                # Update CustomData
+                consultant_custom_data = session.query(ConsultantCustomData).get(candidate.ConsultantID)
+                if consultant_custom_data:
+                    consultant_custom_data.CustomData['title_id'] = title_id + 1
 
         # Handle new hires
         new_hires = 0
@@ -265,7 +272,7 @@ def generate_consultant_data(initial_num_consultants, start_year, end_year):
                 region = random.choices(list(consultant_settings.BUSINESS_UNIT_DISTRIBUTION.keys()), 
                                         weights=list(consultant_settings.BUSINESS_UNIT_DISTRIBUTION.values()))[0]
                 hire_date = get_hire_date(year)
-                new_consultant, new_title_history = create_consultant(region, title_id, hire_date)
+                new_consultant, new_title_history = create_consultant(session, region, title_id, hire_date)
                 consultant_data.append(new_consultant)
                 title_history_data.append(new_title_history)
                 active_consultants[title_id].append((new_consultant, 0, 0))
@@ -335,20 +342,20 @@ def simulate_global_expansion(consultant_data, start_year, end_year):
 
 def main(initial_num_consultants, start_year, end_year):
     print("Generating consultant data...")
-    consultant_data, title_history_data = generate_consultant_data(initial_num_consultants, start_year, end_year)
-    
-    print("\nSimulating global expansion...")
-    final_units = simulate_global_expansion(consultant_data, start_year, end_year)
-    print(f"Final active unit IDs at {end_year}: {', '.join(map(str, final_units))}")
-
-    print("\nAssigning business units...")
     Session = sessionmaker(bind=engine)
     session = Session()
 
     try:
+        consultant_data, title_history_data = generate_consultant_data(session, initial_num_consultants, start_year, end_year)
+        
+        print("\nSimulating global expansion...")
+        final_units = simulate_global_expansion(consultant_data, start_year, end_year)
+        print(f"Final active unit IDs at {end_year}: {', '.join(map(str, final_units))}")
+
+        print("\nAssigning business units...")
         consultant_data = assign_business_units(consultant_data, session)
-        session.bulk_save_objects(consultant_data)
-        session.bulk_save_objects(title_history_data)
+        session.add_all(consultant_data)
+        session.add_all(title_history_data)
         session.commit()
     except Exception as e:
         session.rollback()
