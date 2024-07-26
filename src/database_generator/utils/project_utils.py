@@ -9,6 +9,16 @@ from config import project_settings
 import math
 import logging
 
+def serialize_dates(data):
+    if isinstance(data, dict):
+        return {key: serialize_dates(value) for key, value in data.items()}
+    elif isinstance(data, list):
+        return [serialize_dates(item) for item in data]
+    elif isinstance(data, date):
+        return data.isoformat()
+    else:
+        return data
+    
 def calculate_planned_hours(project, team_size):
     duration_days = (project.PlannedEndDate - project.PlannedStartDate).days
     working_days = math.ceil(duration_days * 5 / 7)  # Assuming 5 working days per week

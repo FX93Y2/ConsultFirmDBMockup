@@ -54,9 +54,14 @@ def generate_projects(start_year, end_year, initial_consultants):
                 # End of month operations
                 month_end = current_date - timedelta(days=1)
                 update_existing_projects(session, month_end, available_consultants)
+
+                # Generate monthly expenses for all active projects
+                active_projects = session.query(Project).filter(Project.Status.in_(['Not Started', 'In Progress'])).all()
+                for project in active_projects:
+                    generate_expense_records(session, project, month_end)
+
                 session.commit()
 
-            session.commit()
             print(f"Project generation for year {current_year} completed successfully.")
 
     except Exception as e:
@@ -265,19 +270,35 @@ def create_new_project(session, current_date, available_consultants, active_unit
         session.add_all(deliverables)
         session.flush()
 
+        # Calculate project financials and generate predefined expenses
+        estimated_total_cost, estimated_total_revenue, predefined_expenses = calculate_project_financials(session, project, assigned_consultants, current_date, deliverables)
+
         # Initialize project custom_data
+        custom_data = {
+            'team': [c.ConsultantID for c in assigned_consultants],
+            'deliverables': {
+                d.DeliverableID: {
+                    'target_hours': float(d.PlannedHours),
+                    'consultant_deliverables': []
+                } for d in deliverables
+            },
+            'target_hours': float(target_hours),
+            'target_team_size': target_team_size,
+            'remaining_slots': remaining_slots,
+            'predefined_expenses': predefined_expenses,
+            'estimated_total_cost': float(estimated_total_cost),
+            'estimated_total_revenue': float(estimated_total_revenue)
+        }
+
+        # Serialize dates in custom_data
+        serialized_custom_data = serialize_dates(custom_data)
+
         project_custom_data = ProjectCustomData(
             ProjectID=project.ProjectID,
-            CustomData={
-                'team': [c.ConsultantID for c in assigned_consultants],
-                'deliverables': {},
-                'target_hours': target_hours,
-                'target_team_size': target_team_size,
-                'remaining_slots': remaining_slots
-            }
+            CustomData=serialized_custom_data
         )
         session.add(project_custom_data)
-
+        
         # Set up billing rates for all title levels
         if project.Type == 'Time and Material':
             for title_id in range(1, 7):  # Assuming title IDs range from 1 to 6
@@ -291,14 +312,12 @@ def create_new_project(session, current_date, available_consultants, active_unit
                 session.add(billing_rate)
             session.flush()
 
-        calculate_project_financials(session, project, assigned_consultants, current_date, deliverables)
-
         assign_project_team(session, project, assigned_consultants)
         session.flush()
 
-        update_project_metadata(session, project, assigned_consultants, deliverables, target_hours)
-
-        logging.info(f"Project {project.ProjectID} created with {len(assigned_consultants)} consultants. Remaining slots: {remaining_slots}")
+        logging.info(f"Project {project.ProjectID} created with {len(assigned_consultants)} consultants. "
+                     f"Target team size: {target_team_size}, Remaining slots: {remaining_slots}, "
+                     f"Predefined expenses: {len(predefined_expenses)}")
 
         return project
     except Exception as e:
@@ -394,14 +413,11 @@ def generate_daily_consultant_deliverables(session, current_date, projects):
                     Hours=float(hours)
                 )
                 session.add(consultant_deliverable)
-                deliverable_meta['consultant_deliverables'].append(consultant_deliverable)
                 remaining_hours -= hours
                 deliverable.ActualHours = float(round_decimal(Decimal(str(deliverable.ActualHours)) + hours, 1))
                 project_actual_hours += hours
                 consultant_daily_hours[consultant_id] += float(hours)
 
-                # Generate expense records based on predefined expenses
-                generate_expense_records(session, project, deliverable, predefined_expenses, current_date, hours / Decimal(str(deliverable_meta['target_hours'])))
 
             deliverable.Progress = min(100, int((Decimal(str(deliverable.ActualHours)) / Decimal(str(deliverable_meta['target_hours']))) * 100))
 
