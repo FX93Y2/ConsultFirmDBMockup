@@ -92,3 +92,16 @@ WORKING_HOURS_PER_MONTH = 160
 
 # Estmated Budgets for Time and Material Projects
 ESTIMATED_BUDGET_FACTORS = Decimal(random.uniform(1.1, 1.3))
+
+EXPENSE_CATEGORIES = {
+    'Travel': {'percentage': 0.15, 'billable': True, 'range': (1000, 50000)},
+    'Equipment': {'percentage': 0.10, 'billable': False, 'range': (2000, 100000)},
+    'Software Licenses': {'percentage': 0.08, 'billable': True, 'range': (1000, 75000)},
+    'Training': {'percentage': 0.05, 'billable': True, 'range': (500, 25000)},
+    'Subcontractor Fees': {'percentage': 0.20, 'billable': True, 'range': (5000, 200000)},
+    'Client Entertainment': {'percentage': 0.03, 'billable': False, 'range': (200, 10000)},
+    'Office Supplies': {'percentage': 0.02, 'billable': False, 'range': (100, 5000)},
+    'Telecommunication': {'percentage': 0.04, 'billable': True, 'range': (500, 15000)},
+    'Legal and Professional Fees': {'percentage': 0.05, 'billable': False, 'range': (1000, 50000)},
+    'Miscellaneous': {'percentage': 0.03, 'billable': False, 'range': (200, 10000)}
+}

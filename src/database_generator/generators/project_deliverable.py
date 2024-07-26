@@ -298,7 +298,7 @@ def create_new_project(session, current_date, available_consultants, active_unit
             CustomData=serialized_custom_data
         )
         session.add(project_custom_data)
-        
+
         # Set up billing rates for all title levels
         if project.Type == 'Time and Material':
             for title_id in range(1, 7):  # Assuming title IDs range from 1 to 6

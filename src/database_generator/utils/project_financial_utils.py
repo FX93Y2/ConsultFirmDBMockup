@@ -1,7 +1,7 @@
 import random
 import logging
 from decimal import Decimal, ROUND_HALF_UP
-from dateutil.relativedelta import relativedelta
+from datetime import timedelta
 from sqlalchemy import func, cast, Integer
 from sqlalchemy.orm import aliased
 from models.db_model import *
@@ -63,10 +63,15 @@ def calculate_project_financials(session, project, assigned_consultants, current
     predefined_expenses = generate_predefined_expenses(project, float(estimated_total_cost), deliverables)
 
     # Update estimated total cost and revenue with predefined expenses
+    expense_total_cost = Decimal('0')
+    expense_total_revenue = Decimal('0')
     for expense in predefined_expenses:
-        estimated_total_cost += Decimal(str(expense['Amount']))
+        expense_total_cost += Decimal(str(expense['Amount']))
         if expense['IsBillable']:
-            estimated_total_revenue += Decimal(str(expense['Amount']))
+            expense_total_revenue += Decimal(str(expense['Amount']))
+
+    estimated_total_cost += expense_total_cost
+    estimated_total_revenue += expense_total_revenue
 
     if project.Type == 'Fixed':
         project.Price = float(round_to_nearest_thousand(estimated_total_revenue))
@@ -116,30 +121,49 @@ def calculate_billing_rate(title_id, project_type, years_experience):
 def generate_predefined_expenses(project, estimated_total_cost, deliverables):
     expenses = []
     total_planned_hours = sum(d.PlannedHours for d in deliverables)
-    project_duration_months = (project.PlannedEndDate.year - project.PlannedStartDate.year) * 12 + project.PlannedEndDate.month - project.PlannedStartDate.month + 1
-
+    project_duration = (project.PlannedEndDate - project.PlannedStartDate).days
+    
     for deliverable in deliverables:
         deliverable_cost_ratio = deliverable.PlannedHours / total_planned_hours
         deliverable_estimated_cost = Decimal(str(estimated_total_cost)) * Decimal(str(deliverable_cost_ratio))
 
-        for category, percentage in project_settings.EXPENSE_CATEGORIES.items():
-            is_billable = random.choice([True, False])
-            base_amount = deliverable_estimated_cost * Decimal(str(percentage))
+        for category, details in project_settings.EXPENSE_CATEGORIES.items():
+            min_range, max_range = details['range']
             
-            # Distribute the base amount across the project months
-            for month in range(project_duration_months):
-                expense_date = project.PlannedStartDate + relativedelta(months=month)
-                monthly_amount = base_amount / Decimal(str(project_duration_months))
-                monthly_amount *= Decimal(str(random.uniform(0.8, 1.2)))  # Add some randomness
-                monthly_amount = monthly_amount.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+            # Calculate the target total for this category based on the percentage
+            target_total = deliverable_estimated_cost * Decimal(str(details['percentage']))
+            
+            # Ensure the target total is within the specified range
+            category_total = Decimal(str(max(min_range, min(float(target_total), max_range))))
+            
+            # Determine the number of expense entries for this category
+            num_entries = random.randint(1, 5)  # Generate between 1 to 5 entries per category
+            
+            remaining_total = category_total
+            for i in range(num_entries):
+                # Generate a random date within the project timeline
+                days_offset = random.randint(0, project_duration)
+                expense_date = project.PlannedStartDate + timedelta(days=days_offset)
                 
-                if monthly_amount > Decimal('0'):
+                # Ensure the expense date doesn't exceed the project's actual end date
+                if project.ActualEndDate and expense_date > project.ActualEndDate:
+                    expense_date = project.ActualEndDate
+                
+                # Calculate the amount for this entry
+                if i == num_entries - 1:  # Last entry
+                    amount = remaining_total
+                else:
+                    amount = remaining_total * Decimal(str(random.uniform(0.1, 0.5)))
+                amount = amount.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+                remaining_total -= amount
+                
+                if amount > Decimal('0'):
                     expense = {
                         'DeliverableID': deliverable.DeliverableID,
-                        'Amount': float(monthly_amount),
+                        'Amount': float(amount),
                         'Description': f"{category} expense for {deliverable.Name}",
                         'Category': category,
-                        'IsBillable': is_billable,
+                        'IsBillable': details['billable'],
                         'Date': expense_date.isoformat()  # Convert date to string
                     }
                     expenses.append(expense)
@@ -158,18 +182,17 @@ def generate_expense_records(session, project, current_date):
         logging.warning(f"No predefined expenses found for project {project.ProjectID}")
         return
 
-    # Filter expenses for the current month
-    current_month_expenses = [
+    # Filter expenses for the current date
+    current_expenses = [
         e for e in predefined_expenses 
-        if datetime.strptime(e['Date'], '%Y-%m-%d').year == current_date.year 
-        and datetime.strptime(e['Date'], '%Y-%m-%d').month == current_date.month
+        if datetime.strptime(e['Date'], '%Y-%m-%d').date() == current_date
     ]
 
-    for expense in current_month_expenses:
+    for expense in current_expenses:
         expense_record = ProjectExpense(
             ProjectID=project.ProjectID,
             DeliverableID=expense['DeliverableID'],
-            Date=datetime.strptime(expense['Date'], '%Y-%m-%d').date(),
+            Date=current_date,
             Amount=float(expense['Amount']),
             Description=expense['Description'],
             Category=expense['Category'],
@@ -179,4 +202,4 @@ def generate_expense_records(session, project, current_date):
         logging.info(f"Generated expense record for project {project.ProjectID}, deliverable {expense['DeliverableID']}: Amount={expense_record.Amount}, Category={expense_record.Category}")
 
     session.flush()
-    logging.info(f"Generated {len(current_month_expenses)} expense records for project {project.ProjectID} in {current_date.strftime('%B %Y')}")
+    logging.info(f"Generated {len(current_expenses)} expense records for project {project.ProjectID} on {current_date}")
