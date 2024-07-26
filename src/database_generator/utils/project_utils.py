@@ -29,10 +29,10 @@ def calculate_planned_hours(project, team_size):
     return round(total_planned_hours)
 
 def calculate_target_hours(planned_hours):
-    if random.random() < 0.1:  # 10% chance of finishing early
-        factor = random.uniform(0.8, 0.95)
-    else:  # 90% chance of overrunning
-        factor = random.uniform(1.05, 1.3)
+    if random.random() < 0.05:  # 10% chance of finishing early
+        factor = random.uniform(0.9, 0.95)
+    else:  # 95% chance of overrunning
+        factor = random.uniform(1.05, 1.1)
     return round(planned_hours * factor)
 
 

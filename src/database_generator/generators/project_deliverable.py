@@ -437,46 +437,80 @@ def update_project_statuses(session, current_date, available_consultants):
             logging.info(f"Starting project {project.ProjectID} on {current_date}")
 
         if project.Status == 'In Progress':
-            all_deliverables_completed = True
             project_custom_data = session.query(ProjectCustomData).get(project.ProjectID)
-            total_target_hours = Decimal(project_custom_data.CustomData.get('target_hours', 0))
+            total_target_hours = Decimal(str(project_custom_data.CustomData.get('target_hours', 0)))
+            total_actual_hours = Decimal('0.0')
+            all_deliverables_completed = True
             weighted_progress = Decimal('0.0')
 
             for deliverable_id, deliverable_meta in project_custom_data.CustomData.get('deliverables', {}).items():
                 deliverable = session.query(Deliverable).get(deliverable_id)
+                deliverable_target_hours = Decimal(str(deliverable_meta['target_hours']))
+                deliverable_actual_hours = Decimal(str(deliverable.ActualHours))
 
-                if Decimal(deliverable.ActualHours) >= Decimal(deliverable_meta['target_hours']):
+                total_actual_hours += deliverable_actual_hours
+
+                if deliverable_actual_hours >= deliverable_target_hours:
                     deliverable.Status = 'Completed'
-                    deliverable.SubmissionDate = current_date
-                    if project.Type == 'Fixed':
+                    deliverable.Progress = 100
+                    if not deliverable.SubmissionDate:
+                        deliverable.SubmissionDate = current_date
+                    if project.Type == 'Fixed' and not deliverable.InvoicedDate:
                         deliverable.InvoicedDate = current_date + timedelta(days=random.randint(1, 7))
-                elif Decimal(deliverable.ActualHours) > Decimal('0.0'):
+                elif deliverable_actual_hours > Decimal('0.0'):
                     deliverable.Status = 'In Progress'
+                    deliverable.Progress = min(99, int((deliverable_actual_hours / deliverable_target_hours) * 100))
                     all_deliverables_completed = False
                 else:
                     deliverable.Status = 'Not Started'
+                    deliverable.Progress = 0
                     all_deliverables_completed = False
 
-                deliverable_progress = (Decimal(deliverable.ActualHours) / Decimal(deliverable_meta['target_hours'])) * 100
-                deliverable_weight = Decimal(deliverable_meta['target_hours']) / total_target_hours
-                weighted_progress += deliverable_progress * deliverable_weight
-                deliverable.Progress = min(100, int(deliverable_progress))
+                deliverable_weight = deliverable_target_hours / total_target_hours
+                weighted_progress += Decimal(str(deliverable.Progress)) * deliverable_weight
 
-            project.Progress = min(100, int(weighted_progress))
+            project.ActualHours = float(total_actual_hours)
+            project.Progress = min(99, int(weighted_progress))
 
-            if Decimal(project.ActualHours) == Decimal('0.0') and current_date > project.ActualStartDate + timedelta(days=120):
+            if total_actual_hours == Decimal('0.0') and current_date > project.ActualStartDate + timedelta(days=120):
                 project.Status = 'Cancelled'
-                logging.warning(f"Project {project.ProjectID} cancelled due to inactivity")
-            elif all_deliverables_completed:
-                project.Status = 'Completed'
                 project.ActualEndDate = current_date
-                handle_project_completion(session, project, current_date, available_consultants, current_date)
+                logging.warning(f"Project {project.ProjectID} cancelled due to inactivity")
+            elif all_deliverables_completed or project.Progress >= 99:
+                project.Status = 'Completed'
+                project.Progress = 100
+                project.ActualEndDate = current_date
+                handle_project_completion(session, project, current_date, available_consultants)
+            elif current_date > project.PlannedEndDate:
+                overdue_days = (current_date - project.PlannedEndDate).days
+                if overdue_days > 30:  # Consider a project significantly overdue after 30 days
+                    completion_chance = random.random()
+                    if completion_chance < 0.1:  # 10% chance to force completion for significantly overdue projects
+                        project.Status = 'Completed'
+                        project.Progress = 100
+                        project.ActualEndDate = current_date
+                        handle_project_completion(session, project, current_date, available_consultants)
+                    else:
+                        # Accelerate progress for overdue projects
+                        project.Progress = min(99, project.Progress + random.randint(1, 5))
+
     session.commit()
 
-def handle_project_completion(session, project, completion_date, available_consultants, current_date):
+def handle_project_completion(session, project, completion_date, available_consultants):
     # Update project status and end date
     project.Status = 'Completed'
     project.ActualEndDate = completion_date
+    project.Progress = 100
+
+    # Ensure all deliverables are marked as completed
+    deliverables = session.query(Deliverable).filter(Deliverable.ProjectID == project.ProjectID).all()
+    for deliverable in deliverables:
+        deliverable.Status = 'Completed'
+        deliverable.Progress = 100
+        if not deliverable.SubmissionDate:
+            deliverable.SubmissionDate = completion_date
+        if project.Type == 'Fixed' and not deliverable.InvoicedDate:
+            deliverable.InvoicedDate = completion_date + timedelta(days=random.randint(1, 7))
 
     # Update ProjectTeam records
     team_members = session.query(ProjectTeam).filter(
