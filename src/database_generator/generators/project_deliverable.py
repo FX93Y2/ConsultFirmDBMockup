@@ -54,10 +54,8 @@ def generate_projects(start_year, end_year, initial_consultants):
                 # End of month operations
                 month_end = current_date - timedelta(days=1)
                 update_existing_projects(session, month_end, available_consultants)
-
                 session.commit()
 
-            generate_project_expenses_for_year(session, simulation_end_date)
             session.commit()
             print(f"Project generation for year {current_year} completed successfully.")
 
@@ -355,6 +353,8 @@ def generate_daily_consultant_deliverables(session, current_date, projects):
         if not project_custom_data:
             continue
 
+        predefined_expenses = project_custom_data.CustomData.get('predefined_expenses', [])
+
         for deliverable_id, deliverable_meta in project_custom_data.CustomData.get('deliverables', {}).items():
             deliverable = session.query(Deliverable).get(deliverable_id)
             if deliverable.Status == 'Completed' or deliverable.PlannedStartDate > current_date:
@@ -399,6 +399,9 @@ def generate_daily_consultant_deliverables(session, current_date, projects):
                 deliverable.ActualHours = float(round_decimal(Decimal(str(deliverable.ActualHours)) + hours, 1))
                 project_actual_hours += hours
                 consultant_daily_hours[consultant_id] += float(hours)
+
+                # Generate expense records based on predefined expenses
+                generate_expense_records(session, project, deliverable, predefined_expenses, current_date, hours / Decimal(str(deliverable_meta['target_hours'])))
 
             deliverable.Progress = min(100, int((Decimal(str(deliverable.ActualHours)) / Decimal(str(deliverable_meta['target_hours']))) * 100))
 
@@ -477,62 +480,4 @@ def handle_project_completion(session, project, completion_date, available_consu
             if consultant not in available_consultants:
                 available_consultants.append(consultant)
 
-    # Calculate and update final project metrics
-    update_project_financials(session, project)
-
     logging.info(f"Project {project.ProjectID} completed on {completion_date}")
-
-def generate_project_expenses_for_year(session, simulation_end_date):
-    projects = session.query(Project).filter(Project.Status.in_(['In Progress', 'Completed'])).all()
-    logging.info(f"Found {len(projects)} projects for expense generation")
-    
-    for project in projects:
-        project_custom_data = session.query(ProjectCustomData).get(project.ProjectID)
-        total_consultant_cost = sum(cd.Hours * calculate_hourly_cost(session, cd.ConsultantID, cd.Date.year)
-                                    for deliverable_meta in project_custom_data.CustomData.get('deliverables', {}).values()
-                                    for cd in deliverable_meta.get('consultant_deliverables', []))
-        logging.info(f"Project {project.ProjectID} total consultant cost: {total_consultant_cost}")
-
-        expenses = []
-        for deliverable_id, deliverable_meta in project_custom_data.CustomData.get('deliverables', {}).items():
-            deliverable = session.query(Deliverable).get(deliverable_id)
-            
-            expense_start_date = deliverable.ActualStartDate or deliverable.PlannedStartDate
-            expense_end_date = min(deliverable.SubmissionDate or simulation_end_date,
-                                   project.ActualEndDate or simulation_end_date,
-                                   simulation_end_date)
-
-            if expense_start_date >= expense_end_date:
-                logging.warning(f"Skipping expense generation for deliverable {deliverable_id} due to invalid date range")
-                continue
-
-            deliverable_expenses = generate_project_expenses(project, total_consultant_cost, [deliverable])
-            logging.info(f"Generated {len(deliverable_expenses)} expenses for deliverable {deliverable_id}")
-            
-            for expense_data in deliverable_expenses:
-                consultant_deliverable_dates = [cd.Date for cd in deliverable_meta.get('consultant_deliverables', [])
-                                                if expense_start_date <= cd.Date <= expense_end_date]
-                
-                if consultant_deliverable_dates:
-                    expense_date = random.choice(consultant_deliverable_dates)
-                else:
-                    expense_date = expense_start_date + (expense_end_date - expense_start_date) / 2
-                
-                expense = ProjectExpense(
-                    ProjectID=project.ProjectID,
-                    DeliverableID=deliverable.DeliverableID,
-                    Date=expense_date,
-                    Amount=expense_data['Amount'],
-                    Description=expense_data['Description'],
-                    Category=expense_data['Category'],
-                    IsBillable=expense_data['IsBillable']
-                )
-                expenses.append(expense)
-
-        logging.info(f"Adding {len(expenses)} expenses for project {project.ProjectID}")
-        session.add_all(expenses)
-
-    session.commit()
-    logging.info("Expense generation completed")
-
-

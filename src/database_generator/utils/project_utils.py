@@ -5,7 +5,6 @@ from datetime import timedelta, date
 from sqlalchemy import func, case
 from collections import Counter
 from models.db_model import *
-from .project_financial_utils import update_project_financials
 from config import project_settings
 import math
 import logging
@@ -44,8 +43,6 @@ def assign_project_team(session, project, assigned_consultants):
     )
     session.add(team_member)
     pm_custom_data = session.query(ConsultantCustomData).get(project_manager.ConsultantID)
-    logging.info(f"Assigned Project Manager: {project_manager.ConsultantID} (Title: {pm_custom_data.CustomData.get('title_id', 'Unknown')}) to ProjectID: {project.ProjectID}")
-
     # Sort remaining consultants by title_id in descending order
     team_members = sorted(assigned_consultants[1:], key=lambda c: session.query(ConsultantCustomData).get(c.ConsultantID).CustomData.get('title_id', 1), reverse=True)
 
@@ -67,8 +64,6 @@ def assign_project_team(session, project, assigned_consultants):
             EndDate=None
         )
         session.add(team_member)
-        logging.info(f"Assigned {role}: {consultant.ConsultantID} (Title: {consultant_custom_data.CustomData.get('title_id', 'Unknown')}) to ProjectID: {project.ProjectID}")
-
     session.flush()
 
 def calculate_project_progress(project, deliverables):
@@ -203,10 +198,6 @@ def assign_consultants_to_project(session, available_consultants, project_manage
                 remaining_slots -= 1
             else:
                 break
-
-    logging.info(f"Assigned team: PM={project_manager.ConsultantID}, "
-                 f"Team composition: {Counter(session.query(ConsultantCustomData).get(c.ConsultantID).CustomData.get('title_id', 1) for c in assigned_consultants)}")
-
     return assigned_consultants, remaining_slots
 
 def set_project_dates(project, current_date, project_manager, session, simulation_start_date):

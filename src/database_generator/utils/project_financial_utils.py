@@ -62,6 +62,15 @@ def calculate_project_financials(session, project, assigned_consultants, current
         estimated_total_cost += cost_rate * consultant_hours
         estimated_total_revenue += billing_rate * consultant_hours
 
+    # Generate predefined expenses
+    predefined_expenses = generate_predefined_expenses(project, float(estimated_total_cost), deliverables)
+
+    # Update estimated total cost and revenue with predefined expenses
+    for expense in predefined_expenses:
+        estimated_total_cost += Decimal(str(expense['Amount']))
+        if expense['IsBillable']:
+            estimated_total_revenue += Decimal(str(expense['Amount']))
+
     if project.Type == 'Fixed':
         project.Price = float(round_to_nearest_thousand(estimated_total_revenue))
     else:  # Time and Material
@@ -83,7 +92,7 @@ def calculate_project_financials(session, project, assigned_consultants, current
     if not project_custom_data:
         project_custom_data = ProjectCustomData(ProjectID=project.ProjectID, CustomData={})
         session.add(project_custom_data)
-    project_custom_data.CustomData['pre_generated_expenses'] = generate_project_expenses(project, float(estimated_total_cost), deliverables)
+    project_custom_data.CustomData['predefined_expenses'] = predefined_expenses
 
     # Distribute price to deliverables for fixed contracts
     if project.Type == 'Fixed':
@@ -108,15 +117,13 @@ def calculate_billing_rate(title_id, project_type, years_experience):
     
     return rate.quantize(Decimal('0.01'))
          
-def generate_project_expenses(project, estimated_total_cost, deliverables):
+def generate_predefined_expenses(project, estimated_total_cost, deliverables):
     expenses = []
     total_planned_hours = Decimal(sum(d.PlannedHours for d in deliverables))
-    logging.info(f"Generating expenses for project {project.ProjectID}, estimated total cost: {estimated_total_cost}, total planned hours: {total_planned_hours}")
 
     for deliverable in deliverables:
         deliverable_cost_ratio = Decimal(deliverable.PlannedHours) / total_planned_hours
         deliverable_estimated_cost = Decimal(str(estimated_total_cost)) * deliverable_cost_ratio
-        logging.info(f"Deliverable {deliverable.DeliverableID} estimated cost: {deliverable_estimated_cost}")
 
         for category, percentage in project_settings.EXPENSE_CATEGORIES.items():
             is_billable = random.choice([True, False])
@@ -132,47 +139,34 @@ def generate_project_expenses(project, estimated_total_cost, deliverables):
                     'IsBillable': is_billable
                 }
                 expenses.append(expense)
-                logging.info(f"Generated expense: {expense}")
 
-    logging.info(f"Total expenses generated: {len(expenses)}")
     return expenses
 
-def update_project_financials(session, project):
-    # Calculate actual cost
-    actual_cost = Decimal('0')
-    for deliverable in project.Deliverables:
-        consultant_deliverables = session.query(ConsultantDeliverable).filter_by(DeliverableID=deliverable.DeliverableID).all()
-        for cd in consultant_deliverables:
-            hourly_cost = calculate_hourly_cost(session, cd.ConsultantID, cd.Date.year)
-            actual_cost += Decimal(cd.Hours) * Decimal(hourly_cost)
-
-    # Calculate actual revenue
-    actual_revenue = Decimal('0')
-    if project.Type == 'Fixed':
-        actual_revenue = Decimal(project.Price)
-    else:  # Time and Material
-        for deliverable in project.Deliverables:
-            consultant_deliverables = session.query(ConsultantDeliverable).filter_by(DeliverableID=deliverable.DeliverableID).all()
-            for cd in consultant_deliverables:
-                consultant = session.query(Consultant).get(cd.ConsultantID)
-                consultant_custom_data = session.query(ConsultantCustomData).get(cd.ConsultantID)
-                title_id = consultant_custom_data.CustomData.get('title_id')
-                billing_rate_entry = session.query(ProjectBillingRate).filter_by(
-                    ProjectID=project.ProjectID,
-                    TitleID=title_id
-                ).first()
-                
-                actual_revenue += Decimal(cd.Hours) * Decimal(billing_rate_entry.Rate)
-
-    # Update project metadata with financial information
-    project_custom_data = session.query(ProjectCustomData).get(project.ProjectID)
-    if not project_custom_data:
-        project_custom_data = ProjectCustomData(ProjectID=project.ProjectID, CustomData={})
-        session.add(project_custom_data)
+def generate_expense_records(session, project, deliverable, predefined_expenses, current_date, work_ratio):
+    deliverable_expenses = [e for e in predefined_expenses if e['DeliverableID'] == deliverable.DeliverableID]
     
-    project_custom_data.CustomData['actual_cost'] = float(actual_cost)
-    project_custom_data.CustomData['actual_revenue'] = float(actual_revenue)
-    project_custom_data.CustomData['profit'] = float(actual_revenue - actual_cost)
-    project_custom_data.CustomData['profit_margin'] = float((actual_revenue - actual_cost) / actual_revenue) if actual_revenue > 0 else 0
+    if not deliverable_expenses:
+        logging.warning(f"No predefined expenses found for deliverable {deliverable.DeliverableID} in project {project.ProjectID}")
+        return
 
-    session.commit()
+    logging.info(f"Generating expenses for project {project.ProjectID}, deliverable {deliverable.DeliverableID}, work ratio: {work_ratio}")
+    
+    for expense in deliverable_expenses:
+        expense_amount = Decimal(str(expense['Amount'])) * Decimal(str(work_ratio))
+        if expense_amount > Decimal('0'):
+            expense_record = ProjectExpense(
+                ProjectID=project.ProjectID,
+                DeliverableID=deliverable.DeliverableID,
+                Date=current_date,
+                Amount=float(expense_amount.quantize(Decimal('0.01'))),
+                Description=expense['Description'],
+                Category=expense['Category'],
+                IsBillable=expense['IsBillable']
+            )
+            session.add(expense_record)
+            logging.info(f"Generated expense record for project {project.ProjectID}, deliverable {deliverable.DeliverableID}: Amount={expense_record.Amount}, Category={expense_record.Category}")
+        else:
+            logging.debug(f"Skipped generating expense for project {project.ProjectID}, deliverable {deliverable.DeliverableID} due to zero amount")
+
+    session.flush()
+    logging.info(f"Completed expense generation for project {project.ProjectID}, deliverable {deliverable.DeliverableID}")
