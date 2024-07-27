@@ -26,8 +26,8 @@ MIN_DAILY_HOURS_PER_PROJECT = {
 
 
 # Team composition
-MAX_TEAM_SIZE = 25
-MIN_TEAM_SIZE = 12
+MAX_TEAM_SIZE = 15
+MIN_TEAM_SIZE = 10
 # Title distribution targets for team composition
 TITLE_DISTRIBUTION_TARGETS = {
     1: 0.25, 2: 0.30, 3: 0.25, 
@@ -75,8 +75,11 @@ PROJECT_TYPES = ['Fixed', 'Time and Material']
 PROJECT_TYPE_WEIGHTS = [0.5, 0.5]  # Equal probability for this example
 
 # Project Duration Ranges (in months)
-FIXED_PROJECT_DURATION_RANGE = (3, 12)
-TIME_MATERIAL_PROJECT_DURATION_RANGE = (1, 12)
+PROJECT_DURATION_RANGE =  [
+        ((1, 3), 0.5), 
+        ((3, 6), 0.3),
+        ((6, 12), 0.2),
+    ]
 
 # Deliverable Count Range
 DELIVERABLE_COUNT_RANGE = (3, 7)

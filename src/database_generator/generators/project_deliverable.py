@@ -481,18 +481,6 @@ def update_project_statuses(session, current_date, available_consultants):
                 project.Progress = 100
                 project.ActualEndDate = current_date
                 handle_project_completion(session, project, current_date, available_consultants)
-            elif current_date > project.PlannedEndDate:
-                overdue_days = (current_date - project.PlannedEndDate).days
-                if overdue_days > 30:  # Consider a project significantly overdue after 30 days
-                    completion_chance = random.random()
-                    if completion_chance < 0.1:  # 10% chance to force completion for significantly overdue projects
-                        project.Status = 'Completed'
-                        project.Progress = 100
-                        project.ActualEndDate = current_date
-                        handle_project_completion(session, project, current_date, available_consultants)
-                    else:
-                        # Accelerate progress for overdue projects
-                        project.Progress = min(99, project.Progress + random.randint(1, 5))
 
     session.commit()
 
@@ -530,4 +518,4 @@ def handle_project_completion(session, project, completion_date, available_consu
             if consultant not in available_consultants:
                 available_consultants.append(consultant)
 
-    logging.info(f"Project {project.ProjectID} completed on {completion_date}")
+    logging.info(f"Project {project.ProjectID} completed on {completion_date}")                                                                                                                                        

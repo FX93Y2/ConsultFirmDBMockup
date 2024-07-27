@@ -211,13 +211,17 @@ def assign_consultants_to_project(session, available_consultants, project_manage
     return assigned_consultants, remaining_slots
 
 def set_project_dates(project, current_date, project_manager, session, simulation_start_date):
-    if project.Type == 'Fixed':
-        duration_months = random.randint(*project_settings.FIXED_PROJECT_DURATION_RANGE)
-    else:  # Time and Material
-        duration_months = random.randint(*project_settings.TIME_MATERIAL_PROJECT_DURATION_RANGE)
-    
+    # Define duration ranges and their probabilities
+    duration_ranges = project_settings.PROJECT_DURATION_RANGE
+
+    # Select a duration range based on the given probabilities
+    selected_range, _ = random.choices(duration_ranges, weights=[p for _, p in duration_ranges])[0]
+
+    # Select a specific duration within the chosen range
+    duration_months = random.randint(*selected_range)
+
     pm_availability = max(get_consultant_availability(session, project_manager.ConsultantID, current_date), simulation_start_date)
-    
+
     # Maintain variance between PlannedStartDate and ActualStartDate
     project.PlannedStartDate = pm_availability + timedelta(days=random.randint(0, 14))
     actual_start_variance = timedelta(days=random.randint(0, 7))
@@ -225,7 +229,7 @@ def set_project_dates(project, current_date, project_manager, session, simulatio
 
     # Set initial status
     project.Status = 'Not Started'
-    
+
     # Calculate end date based on working days
     working_days = duration_months * 21  # Assuming 21 working days per month
     project.PlannedEndDate = project.PlannedStartDate
@@ -235,8 +239,13 @@ def set_project_dates(project, current_date, project_manager, session, simulatio
         if project.PlannedEndDate.weekday() < 5:  # Monday = 0, Friday = 4
             days_added += 1
     
-    target_team_size = random.randint(project_settings.MIN_TEAM_SIZE, project_settings.MAX_TEAM_SIZE)
-    
+    if duration_months <= 3:
+        target_team_size = random.randint(5, 7)  # Small project
+    elif duration_months <= 6:
+        target_team_size = random.randint(10, 12)  # Medium project
+    else:
+        target_team_size = random.randint(12, 15)  # Large project
+
     return target_team_size
 
 def get_consultant_availability(session, consultant_id, current_date):
@@ -345,5 +354,3 @@ def update_project_team(session, project, available_consultants, current_team, c
     project_custom_data.CustomData['team'] = current_team
     project_custom_data.CustomData['remaining_slots'] = remaining_slots
     project_custom_data.CustomData['target_team_size'] = target_team_size
-    logging.info(f"Updated team size for project {project.ProjectID}: {len(current_team)} members, Remaining slots: {remaining_slots}")
-
