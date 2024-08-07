@@ -29,18 +29,18 @@ EXCLUDED_TABLES = ['ConsultantCustomData', 'ProjectCustomData']
 # Mapping of SQLite table names to Snowflake table names
 TABLE_NAME_MAPPING = {
     'Title': 'TITLE',
-    'BusinessUnit': 'BUSINESSUNIT',
+    'BusinessUnit': 'BUSINESS_UNIT',
     'Consultant': 'CONSULTANT',
     'Consultant_Title_History': 'CONSULTANT_TITLE_HISTORY',
     'Payroll': 'PAYROLL',
     'Location': 'LOCATION',
     'Client': 'CLIENT',
     'Project': 'PROJECT',
-    'ProjectTeam': 'PROJECTTEAM',
+    'ProjectTeam': 'PROJECT_TEAM',
     'Deliverable': 'DELIVERABLE',
-    'ProjectBillingRate': 'PROJECTBILLINGRATE',
+    'ProjectBillingRate': 'PROJECT_BILLING_RATE',
     'Consultant_Deliverable': 'CONSULTANT_DELIVERABLE',
-    'ProjectExpense': 'PROJECTEXPENSE'
+    'ProjectExpense': 'PROJECT_EXPENSE'
 }
 
 COLUMN_NAME_MAPPING = {
