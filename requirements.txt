@@ -1,36 +1,36 @@
 # Data Generation
-faker>=13.3.0
-random_address>=0.1.2
+faker
+random_address
 
 # Database
-SQLAlchemy>=1.4.32
+SQLAlchemy
 
 # Randomizer
-scipy>=1.14.0
+scipy
 
 # Unidecode
-Unidecode>=1.3.8
+Unidecode
 
 # Testing
-pytest>=6.2.5
-pytest-cov>=2.12.1
+pytest
+pytest-cov
 
 # Linting
-flake8>=3.9.2
-pylint>=2.8.3
+flake8
+pylint
 
 # Documentation
-sphinx>=4.2.0
-sphinx-rtd-theme>=1.0.0
+sphinx
+sphinx-rtd-theme
 
 # Miscellaneous
-python-dotenv>=0.19.2
-openpyxl>=3.1.5
+python-dotenv
+openpyxl
 
 # ETL
-snowflake-connector-python>=3.12.0
-pandas>=2.2.2
+snowflake-connector-python
+pandas
 
 # Environment
-python-dotenv>=1.0.1
+python-dotenv
 
