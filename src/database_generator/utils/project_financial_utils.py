@@ -15,6 +15,8 @@ def calculate_hourly_cost(session, consultant_id, year):
         ConsultantTitleHistory.ConsultantID == consultant_id,
         func.extract('year', ConsultantTitleHistory.StartDate) == year
     ).scalar()
+    if avg_salary is None:
+        logging.warning(f"No salary data found for consultant {consultant_id} in year {year}. Using fallback method.")
     hourly_cost = (avg_salary / 12) / (52 * 40)  # Assuming 52 weeks and 40 hours per week
     return hourly_cost * (1 + project_settings.OVERHEAD_PERCENTAGE)
 

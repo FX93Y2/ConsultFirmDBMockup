@@ -30,8 +30,8 @@ MAX_TEAM_SIZE = 15
 MIN_TEAM_SIZE = 10
 # Title distribution targets for team composition
 TITLE_DISTRIBUTION_TARGETS = {
-    1: 0.25, 2: 0.30, 3: 0.25, 
-    4: 0.12, 5: 0.06, 6: 0.02
+    1: 0.4,2: 0.3, 3: 0.15,
+    4: 0.1, 5: 0.04, 6: 0.01
 }
 # Minimum number of consultants per title in a team
 MIN_CONSULTANTS_PER_TITLE = {

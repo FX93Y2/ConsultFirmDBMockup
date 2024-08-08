@@ -164,7 +164,11 @@ def start_due_projects(session, current_date):
 def create_new_projects_if_needed(session, current_date, available_consultants, active_units, simulation_start_date, monthly_targets):
     all_consultants = session.query(Consultant).all()
     
-    project_manager_consultants = [c for c in all_consultants if session.query(ConsultantCustomData).get(c.ConsultantID).CustomData.get('title_id', 0) >= 4]
+    project_manager_consultants = [
+        c for c in all_consultants 
+        if session.query(ConsultantCustomData).get(c.ConsultantID).CustomData.get('title_id', 0) >= 4
+        and c.HireYear <= current_date.year
+    ]
     
     project_manager_consultants.sort(key=lambda c: (
         session.query(ConsultantCustomData).get(c.ConsultantID).CustomData.get('active_project_count', 0),
@@ -264,7 +268,7 @@ def create_new_project(session, current_date, available_consultants, active_unit
         project.ActualHours = 0
 
         # Assign initial team members
-        assigned_consultants, remaining_slots = assign_consultants_to_project(session, eligible_consultants, project_manager, target_team_size)
+        assigned_consultants, remaining_slots = assign_consultants_to_project(session, eligible_consultants, project_manager, target_team_size, current_date)
 
         deliverables = generate_deliverables(project, target_hours)
         session.add_all(deliverables)

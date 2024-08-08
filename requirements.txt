@@ -29,6 +29,7 @@ openpyxl
 
 # ETL
 snowflake-connector-python
+snowflake-connector-python[pandas]
 pandas
 
 # Environment

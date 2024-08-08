@@ -1,7 +1,7 @@
 import os
 import sqlite3
 import pandas as pd
-from snowflake.connector import connect
+from snowflake.connector import connect, SnowflakeConnection
 from snowflake.connector.pandas_tools import write_pandas
 from dotenv import load_dotenv
 import logging
@@ -13,7 +13,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 load_dotenv()
 
 # SQLite Configuration
-SQLITE_DB_PATH = r"C:\Users\putti\Documents\Projects\ConsultFirmDBMockup\example_output\database\consulting_firm.db"
+SQLITE_DB_PATH = os.path.join("example_output", "database", "consulting_firm.db")
 
 # Snowflake Configuration
 SNOWFLAKE_ACCOUNT = os.getenv('SNOWFLAKE_ACCOUNT')
@@ -130,20 +130,37 @@ COLUMN_NAME_MAPPING = {
     'ProjectID': 'PROJECTID'
 }
 
-
+def verify_snowflake_connection(conn: SnowflakeConnection) -> bool:
+    try:
+        cursor = conn.cursor()
+        cursor.execute("SELECT current_version()")
+        version = cursor.fetchone()[0]
+        logging.info(f"Successfully connected to Snowflake. Version: {version}")
+        return True
+    except Exception as e:
+        logging.error(f"Failed to connect to Snowflake: {str(e)}")
+        return False
+    
 def extract_from_sqlite():
     """Extract data from SQLite database."""
+    if not os.path.exists(SQLITE_DB_PATH):
+        raise FileNotFoundError(f"SQLite database not found at {SQLITE_DB_PATH}")
+
     conn = sqlite3.connect(SQLITE_DB_PATH)
     cursor = conn.cursor()
 
-    # Get all table names
     cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
     tables = [table[0] for table in cursor.fetchall() if table[0] not in EXCLUDED_TABLES]
 
     data = {}
     for table in tables:
         logging.info(f"Extracting data from table: {table}")
-        data[table] = pd.read_sql_query(f"SELECT * FROM {table}", conn)
+        df = pd.read_sql_query(f"SELECT * FROM {table}", conn)
+        if df.empty:
+            logging.warning(f"No data found in table: {table}")
+        else:
+            logging.info(f"Extracted {len(df)} rows from table: {table}")
+        data[table] = df
 
     conn.close()
     return data
@@ -166,25 +183,41 @@ def load_to_snowflake(data):
         schema=SNOWFLAKE_SCHEMA
     )
 
+    if not verify_snowflake_connection(conn):
+        return
+
     cursor = conn.cursor()
 
     for table, df in data.items():
         snowflake_table_name = TABLE_NAME_MAPPING.get(table, table.upper())
+        if df.empty:
+            logging.warning(f"Skipping empty table: {snowflake_table_name}")
+            continue
+
         try:
             logging.info(f"Loading data into table: {snowflake_table_name}")
             success, nchunks, nrows, _ = write_pandas(conn, df, snowflake_table_name)
-            logging.info(f"Loaded {nrows} rows into {snowflake_table_name}")
+            if success:
+                logging.info(f"Successfully loaded {nrows} rows into {snowflake_table_name}")
+            else:
+                logging.error(f"Failed to load data into {snowflake_table_name}")
         except Exception as e:
             logging.error(f"Error loading data into {snowflake_table_name}: {str(e)}")
+            raise  # Re-raise the exception to stop the process
 
     conn.close()
 
 def main():
     logging.info("Starting ETL process...")
+    print(f"SQLite DB path: {SQLITE_DB_PATH}")
+    print(f"File exists: {os.path.exists(SQLITE_DB_PATH)}")
 
     try:
         logging.info("Extracting data from SQLite...")
         extracted_data = extract_from_sqlite()
+
+        if not extracted_data:
+            raise ValueError("No data extracted from SQLite")
 
         logging.info("Transforming data...")
         transformed_data = transform_data(extracted_data)
@@ -195,6 +228,7 @@ def main():
         logging.info("ETL process completed successfully.")
     except Exception as e:
         logging.error(f"An error occurred during the ETL process: {str(e)}")
+        raise
 
 if __name__ == "__main__":
     main()

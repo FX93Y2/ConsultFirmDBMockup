@@ -12,11 +12,9 @@ from database_generator.generators.project_deliverable import generate_projects
 from spreadsheet_generator.indirect_cost import generate_indirect_costs
 from spreadsheet_generator.non_billable_time import generate_non_billable_time_report
 #from json_generator.client_feedback import generate_client_feedback
-from etl_service.setup_snowflake_db import setup_snowflake_db
-from etl_service.sqlite_to_snowflake import main as sqlite_to_snowflake
 
 START_YEAR = 2015
-END_YEAR = 2015
+END_YEAR = 2016
 INITIAL_CONSULTANTS = 100
 
 def main():
