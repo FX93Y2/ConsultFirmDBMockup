@@ -1,8 +1,3 @@
-#!/bin/bash
-
-echo "Running main.py..."
-python3 src/main.py
-
 if [ $? -eq 0 ]; then
     echo "main.py completed successfully."
     
